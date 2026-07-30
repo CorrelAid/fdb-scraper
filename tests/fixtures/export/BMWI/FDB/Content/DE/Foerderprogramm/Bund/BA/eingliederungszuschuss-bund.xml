@@ -1,0 +1,386 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document xmlns:xlink="http://www.w3.org/1999/xlink" name="eingliederungszuschuss-bund" path="/BMWI/FDB/Content/DE/Foerderprogramm/Bund/BA" type="gsb:ServiceOffer">
+    <property name="gsb:bodyText" type="RichText">
+        <text>&lt;![CDATA[&lt;div xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;p&gt;&lt;span&gt;Informationen für Arbeitgeber. &lt;/span&gt;&lt;span&gt;Eingliederungszuschuss&amp;#xa0;&lt;/span&gt;&lt;span&gt;? Finanzielle Unterstützungsmöglichkeiten bei Neueinstellungen&lt;/span&gt;&lt;br /&gt;Stand: Januar 2024&lt;br /&gt;Bundesagentur für Arbeit&lt;/p&gt;&lt;p&gt;&lt;a xlink:type="simple" xlink:actuate="onLoad" xlink:href="target:/BMWI/FDB/Content/DE/ExternerLink/R/rgl-eingliederungszuschuss-bund" xlink:show="replace"&gt;Weblink Weblink zur Informationsunterlage der Bundesagentur für Arbeit&lt;/a&gt;&lt;/p&gt;&lt;/div&gt;]]&gt;</text>
+    </property>
+    <property name="gsb:challenge" type="RichText">
+        <text>&lt;![CDATA[&lt;div xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;/div&gt;]]&gt;</text>
+    </property>
+    <property name="gsb:cl2Contacts" type="ClassifiedLinkLists">
+        <classifiedLinkLists>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/Kontakt"/>
+                </classifierLinks>
+                <links>
+                    <link xlink:href="target:/BMWI/FDB/Content/DE/Kontakt/B/bundesagentur-fuer-arbeit-arbeitgeberservice"/>
+                </links>
+            </classifiedLinkList>
+        </classifiedLinkLists>
+    </property>
+    <property name="gsb:cl2CustServices" type="ClassifiedLinkLists">
+        <classifiedLinkLists>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/ExternerLink"/>
+                </classifierLinks>
+                <links>
+                    <link xlink:href="target:/BMWI/FDB/Content/DE/ExternerLink/A/arbeitsagentur-unternehmen-arbeitsaufnahme-8752"/>
+                    <link xlink:href="target:/BMWI/FDB/Content/DE/ExternerLink/Z/zustaendige-agentur-fuer-arbeit-8752"/>
+                </links>
+            </classifiedLinkList>
+        </classifiedLinkLists>
+    </property>
+    <property name="gsb:cl2Location" type="ClassifiedLinkLists">
+        <classifiedLinkLists>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/Foerdertermin"/>
+                </classifierLinks>
+                <links/>
+            </classifiedLinkList>
+        </classifiedLinkLists>
+    </property>
+    <property name="gsb:cl2Processes" type="ClassifiedLinkLists">
+        <classifiedLinkLists>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/Foerderart"/>
+                </classifierLinks>
+                <links>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Categories/FDB/Foerderart/zuschuss"/>
+                </links>
+            </classifiedLinkList>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/Foerdergebiet"/>
+                </classifierLinks>
+                <links>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Categories/FDB/Foerdergebiet/_bundesweit"/>
+                </links>
+            </classifiedLinkList>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/Foerdergeber"/>
+                </classifierLinks>
+                <links>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Categories/FDB/Foerdergeber/bund"/>
+                </links>
+            </classifiedLinkList>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/Foerderberechtigte"/>
+                </classifierLinks>
+                <links>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Categories/FDB/Foerderberechtigte/unternehmen"/>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Categories/FDB/Foerderberechtigte/verband_vereinigung"/>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Categories/FDB/Foerderberechtigte/oeffentliche_einrichtung"/>
+                </links>
+            </classifiedLinkList>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/BranchenExistenzgruenderin"/>
+                </classifierLinks>
+                <links/>
+            </classifiedLinkList>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/BranchenUnternehmen"/>
+                </classifierLinks>
+                <links>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Categories/FDB/Branchen/dienstleistungen"/>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Categories/FDB/Branchen/freie_berufe"/>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Categories/FDB/Branchen/gastgewerbe_tourismus"/>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Categories/FDB/Branchen/handel"/>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Categories/FDB/Branchen/handwerk"/>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Categories/FDB/Branchen/kultur_kreativwirtschaft"/>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Categories/FDB/Branchen/land_forst_fischwirtschaft"/>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Categories/FDB/Branchen/produzierendes_gewerbe"/>
+                </links>
+            </classifiedLinkList>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/Unternehmensgroesse"/>
+                </classifierLinks>
+                <links>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Categories/FDB/Unternehmensgroesse/grosses_unternehmen"/>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Categories/FDB/Unternehmensgroesse/kleines_unternehmen"/>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Categories/FDB/Unternehmensgroesse/kleinstunternehmen"/>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Categories/FDB/Unternehmensgroesse/mittleres_unternehmen"/>
+                </links>
+            </classifiedLinkList>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/Unternehmensalter"/>
+                </classifierLinks>
+                <links>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Categories/FDB/Unternehmensalter/nicht_relevant"/>
+                </links>
+            </classifiedLinkList>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/Foerderbereich"/>
+                </classifierLinks>
+                <links>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Categories/FDB/Foerderbereich/arbeit"/>
+                </links>
+            </classifiedLinkList>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/GRW"/>
+                </classifierLinks>
+                <links>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Categories/FDB/GRW/keine_grw_foerderung"/>
+                </links>
+            </classifiedLinkList>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/Foerderorganisation"/>
+                </classifierLinks>
+                <links>
+                    <link xlink:href="target:/BMWI/FDB/Content/DE/Foerdergeber/B/bundesagentur-fuer-arbeit"/>
+                </links>
+            </classifiedLinkList>
+        </classifiedLinkLists>
+    </property>
+    <property name="gsb:cl2RelatedEnts" type="ClassifiedLinkLists">
+        <classifiedLinkLists>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks/>
+                <links/>
+            </classifiedLinkList>
+        </classifiedLinkLists>
+    </property>
+    <property name="gsb:cl2Satisfaction" type="ClassifiedLinkLists">
+        <classifiedLinkLists>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/UFExistenzgruendung"/>
+                </classifierLinks>
+                <links/>
+            </classifiedLinkList>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/UFUnternehmensfinanzierung"/>
+                </classifierLinks>
+                <links/>
+            </classifiedLinkList>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/UFArbeit"/>
+                </classifierLinks>
+                <links>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Categories/FDB/UF_Arbeit/eingliederung_besonderer_zielgruppen"/>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Categories/FDB/UF_Arbeit/betriebliche_arbeitsplaetze"/>
+                </links>
+            </classifiedLinkList>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/UFAusWeiterbildung"/>
+                </classifierLinks>
+                <links/>
+            </classifiedLinkList>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/UFAussenwirtschaft"/>
+                </classifierLinks>
+                <links/>
+            </classifiedLinkList>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/UFBeratung"/>
+                </classifierLinks>
+                <links/>
+            </classifiedLinkList>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/UFEnergieeffizienz"/>
+                </classifierLinks>
+                <links/>
+            </classifiedLinkList>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/UFForschungOffen"/>
+                </classifierLinks>
+                <links/>
+            </classifiedLinkList>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/UFForschungSpezifisch"/>
+                </classifierLinks>
+                <links/>
+            </classifiedLinkList>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/UFGesundheitSoziales"/>
+                </classifierLinks>
+                <links/>
+            </classifiedLinkList>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/UFInfrastruktur"/>
+                </classifierLinks>
+                <links/>
+            </classifiedLinkList>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/UFKulturMedienSport"/>
+                </classifierLinks>
+                <links/>
+            </classifiedLinkList>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/UFLandwirtschaft"/>
+                </classifierLinks>
+                <links/>
+            </classifiedLinkList>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/UFMessenAusstellungen"/>
+                </classifierLinks>
+                <links/>
+            </classifiedLinkList>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/UFRegionalfoerderung"/>
+                </classifierLinks>
+                <links/>
+            </classifiedLinkList>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/UFStaedtebauStadterneuerung"/>
+                </classifierLinks>
+                <links/>
+            </classifiedLinkList>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/UFUmweltNaturschutz"/>
+                </classifierLinks>
+                <links/>
+            </classifiedLinkList>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/UFWohnungsbau"/>
+                </classifierLinks>
+                <links/>
+            </classifiedLinkList>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/UFFrauenfoerderung"/>
+                </classifierLinks>
+                <links/>
+            </classifiedLinkList>
+        </classifiedLinkLists>
+    </property>
+    <property name="gsb:comment" type="RichText">
+        <text>&lt;![CDATA[&lt;div xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;p&gt;8752&lt;/p&gt;&lt;p&gt;Ticket#865275&lt;/p&gt;&lt;/div&gt;]]&gt;</text>
+    </property>
+    <property name="gsb:competenceDescr" type="RichText">
+        <text>&lt;![CDATA[&lt;div xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;/div&gt;]]&gt;</text>
+    </property>
+    <property name="gsb:customerBenefit" type="RichText">
+        <text>&lt;![CDATA[&lt;div xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;/div&gt;]]&gt;</text>
+    </property>
+    <property name="gsb:dateOfIssue" type="Date">
+        <value>2020-01-15T13:47:20.411+01:00</value>
+    </property>
+    <property name="gsb:functions" type="RichText">
+        <text>&lt;![CDATA[&lt;div xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;/div&gt;]]&gt;</text>
+    </property>
+    <property name="gsb:header" type="RichText">
+        <text>&lt;![CDATA[&lt;div xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;/div&gt;]]&gt;</text>
+    </property>
+    <property name="gsb:keywords" type="String">
+        <value>Eingliederung Behinderte Ältere Förderungsbedürftige Arbeitnehmer Einarbeitungshilfe</value>
+    </property>
+    <property name="gsb:languageInd" type="LinkList">
+        <links>
+            <link xlink:href="target:/BMWI/SiteGlobals/Languages/Deutsch"/>
+        </links>
+    </property>
+    <property name="gsb:procDescription" type="RichText">
+        <text>&lt;![CDATA[&lt;div xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;p&gt;Merkblatt der Bundesagentur für Arbeit, Stand Juli 2022; Sozialgesetzbuch, Drittes Buch (SGB&amp;#xa0;III ? Arbeitsförderung, §§&amp;#xa0;88 ff.).&lt;/p&gt;&lt;/div&gt;]]&gt;</text>
+    </property>
+    <property name="gsb:procInfluence" type="RichText">
+        <text>&lt;![CDATA[&lt;div xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;/div&gt;]]&gt;</text>
+    </property>
+    <property name="gsb:procMethod" type="RichText">
+        <text>&lt;![CDATA[&lt;div xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;/div&gt;]]&gt;</text>
+    </property>
+    <property name="gsb:procQuality" type="RichText">
+        <text>&lt;![CDATA[&lt;div xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;/div&gt;]]&gt;</text>
+    </property>
+    <property name="gsb:progress" type="RichText">
+        <text>&lt;![CDATA[&lt;div xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;/div&gt;]]&gt;</text>
+    </property>
+    <property name="gsb:referenceCustomer" type="RichText">
+        <text>&lt;![CDATA[&lt;div xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;/div&gt;]]&gt;</text>
+    </property>
+    <property name="gsb:regulatoryFWork" type="RichText">
+        <text>&lt;![CDATA[&lt;div xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;p&gt;Antragsberechtigt sind Arbeitgeberinnen und Arbeitgeber, die förderungsbedürftige Arbeitnehmerinnen und Arbeitnehmer sowie behinderte und schwerbehinderte Menschen einstellen.&lt;/p&gt;&lt;p&gt;Die Förderung ist an folgende Bedingungen geknüpft:&lt;/p&gt;&lt;p&gt;Sie müssen die Person über die Förderdauer hinaus weiter beschäftigen. Die sogenannte Nachbeschäftigungszeit entspricht normalerweise der Förderdauer.&lt;/p&gt;&lt;p&gt;Keine Förderung erhalten Sie für&lt;/p&gt;&lt;ul&gt;&lt;li&gt;Arbeitsverhältnisse, die bereits bestanden haben und gekündigt wurden, um einen Eingliederungszuschuss zu erhalten sowie&lt;/li&gt;&lt;li&gt;die Einstellung von Personen, die innerhalb der letzten 4 Jahre bereits mehr als 3 Monate versicherungspflichtig bei Ihnen beschäftigt waren.&lt;/li&gt;&lt;/ul&gt;&lt;/div&gt;]]&gt;</text>
+    </property>
+    <property name="gsb:remark" type="RichText">
+        <text>&lt;![CDATA[&lt;div xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;/div&gt;]]&gt;</text>
+    </property>
+    <property name="gsb:requirements" type="RichText">
+        <text>&lt;![CDATA[&lt;div xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;/div&gt;]]&gt;</text>
+    </property>
+    <property name="gsb:serviceDescription" type="RichText">
+        <text>&lt;![CDATA[&lt;div xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;/div&gt;]]&gt;</text>
+    </property>
+    <property name="gsb:serviceFeeDescr" type="RichText">
+        <text>&lt;![CDATA[&lt;div xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;/div&gt;]]&gt;</text>
+    </property>
+    <property name="gsb:shouldNotBeIndexed" type="Long">
+        <value>0</value>
+    </property>
+    <property name="gsb:subType" type="String">
+        <value>ServiceOffer-FundingProgram</value>
+    </property>
+    <property name="gsb:summary" type="RichText">
+        <text>&lt;![CDATA[&lt;div xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;p&gt;Die Bundesagentur für Arbeit (BA) unterstützt Sie bei der Einstellung von behinderten und schwerbehinderten Menschen sowie von Arbeitnehmerinnen und Arbeitnehmern, die das 50. Lebensjahr vollendet haben und arbeitslos oder von Arbeitslosigkeit bedroht sind. Damit sollen bestimmte Defizite (beispielsweise lange Einarbeitungszeiten) bei neu eingestellten Arbeitskräften ausgeglichen werden.&lt;/p&gt;&lt;p&gt;Sie erhalten die Förderung als Lohnkostenzuschuss.&lt;/p&gt;&lt;p&gt;Die Höhe des Zuschusses beträgt bis zu 50 Prozent des berücksichtigungsfähigen Arbeitsentgelts für maximal 12 Monate. Er richtet sich nach den Bruttoarbeitsentgelten, der Leistungsfähigkeit der Arbeitskraft und den jeweiligen Eingliederungserfordernissen.&lt;/p&gt;&lt;p&gt;Für Arbeitnehmerinnen und Arbeitnehmer, die das 55. Lebensjahr vollendet haben, können Sie die Förderung bis zu 36 Monate lang erhalten.&lt;/p&gt;&lt;p&gt;Für schwerbehinderte oder sonstige behinderte Menschen beträgt der Zuschuss bis zu 70 Prozent des berücksichtigungsfähigen Arbeitsentgelts und die Förderdauer bis zu 24 Monate. Bei besonders betroffenen schwerbehinderten Menschen erhöht sich die Förderdauer auf bis zu 60 Monate und wenn sie das 55. Lebensjahr vollendet haben, auf bis zu 96 Monate.&lt;/p&gt;&lt;p&gt;Der Zuschuss für schwerbehinderte oder sonstige behinderte Menschen vermindert sich nach Ablauf von 12 Monaten jährlich um 10 Prozent. Er unterschreitet 30 Prozent des zu berücksichtigenden Arbeitsentgelts nicht. Für besonders betroffene schwerbehinderte Menschen beginnt die Minderung erst nach Ablauf von 24 Monaten.&lt;/p&gt;&lt;p&gt;Ihr pauschalierter Arbeitgeberanteil am Gesamtsozialversicherungsbeitrag wird in die Berechnung des Zuschusses einbezogen.&lt;/p&gt;&lt;p&gt;Den Antrag auf Eingliederungszuschuss stellen Sie bitte vor Abschluss des Arbeitsvertrages und vor Arbeitsaufnahme bei der für Sie zuständigen Agentur für Arbeit.&lt;/p&gt;&lt;/div&gt;]]&gt;</text>
+    </property>
+    <property name="gsb:teaserText" type="RichText">
+        <text>&lt;![CDATA[&lt;div xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;p&gt;Für die Einstellung von förderungsbedürftigen Arbeitnehmerinnen und Arbeitnehmern können Sie als Arbeitgeberin oder Arbeitgeber unter bestimmten Voraussetzungen einen Zuschuss erhalten.&lt;/p&gt;&lt;/div&gt;]]&gt;</text>
+    </property>
+    <property name="gsb:termsOfPayment" type="RichText">
+        <text>&lt;![CDATA[&lt;div xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;/div&gt;]]&gt;</text>
+    </property>
+    <property name="gsb:title" type="RichText">
+        <text>&lt;![CDATA[&lt;div xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;p&gt;Finanzielle Unterstützungsmöglichkeiten bei Neueinstellungen (Eingliederungszuschüsse)&lt;/p&gt;&lt;/div&gt;]]&gt;</text>
+    </property>
+</document>

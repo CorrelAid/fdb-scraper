@@ -1,0 +1,65 @@
+# Served behind Coolify's proxy, which terminates TLS and routes by Host.
+# Binding :80 keeps this file independent of whatever domain is attached.
+:80 {
+	root * /srv
+	encode zstd gzip
+
+	# One route block so directives run in written order: the rewrites that
+	# resolve an extension-less identifier must happen before the Content-Type
+	# matchers inspect the resolved path.
+	route {
+		header Access-Control-Allow-Origin "*"
+		header Cache-Control "public, max-age=3600"
+
+		# Content negotiation for identifier URIs under /def/ and /id/.
+		# https://.../def/fdb with Accept: text/turtle -> /def/fdb.ttl
+		#
+		# Caddy matches Accept as a substring and cannot read quality values, so
+		# `text/html;q=0.9, text/turtle;q=0.1` would otherwise be served Turtle.
+		# Excluding text/html gives HTML precedence whenever a client asks for
+		# both, which is how every real q-weighted client expresses that
+		# preference. An Accept that ranks Turtle above HTML still loses -- if
+		# that matters, mod_negotiation is the only correct answer.
+		@wants_turtle {
+			path /def/* /id/*
+			header Accept *text/turtle*
+			not path *.ttl *.jsonld *.html *.json
+			not header Accept *text/html*
+		}
+		rewrite @wants_turtle {path}.ttl
+
+		@wants_jsonld {
+			path /def/* /id/*
+			header Accept *application/ld+json*
+			not path *.ttl *.jsonld *.html *.json
+			not header Accept *text/html*
+		}
+		rewrite @wants_jsonld {path}.jsonld
+
+		# Anything else (a browser, curl with no Accept) gets the HTML doc when
+		# one exists, else falls through to the Turtle.
+		@wants_html {
+			path /def/* /id/*
+			not path *.ttl *.jsonld *.html *.json
+		}
+		route @wants_html {
+			try_files {path}.html {path}.ttl
+		}
+
+		# Go's mime package knows none of these.
+		@ttl path *.ttl
+		header @ttl Content-Type "text/turtle; charset=utf-8"
+
+		@jsonld path *.jsonld
+		header @jsonld Content-Type "application/ld+json"
+
+		@csv path *.csv
+		header @csv Content-Type "text/csv; charset=utf-8"
+
+		# Weekly rebuilds change these; don't let a stale copy be served as current.
+		@volatile path /data/*
+		header @volatile Cache-Control "public, max-age=300, must-revalidate"
+
+		file_server browse
+	}
+}

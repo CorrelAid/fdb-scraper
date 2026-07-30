@@ -1,0 +1,63 @@
+[project]
+name = "fdb-scraper"
+version = "0.1.0"
+description = "Extract the Förderdatenbank programme export into a Polars DataFrame"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "dlt[duckdb,postgres]>=1.29.1",
+    "pandera[polars]>=0.32.1",
+    "polars>=1.43.1",
+    "rdflib>=7.6.0",
+    "requests>=2.32.5",
+]
+
+[project.optional-dependencies]
+# Inference for the keyword tagger: runs in process on CPU, no service involved.
+tagger = [
+    "torch>=2.9.0",
+    "transformers>=4.57.1",
+]
+notebook = [
+    "jupyter>=1.1.1",
+    "matplotlib>=3.11.1",
+]
+segmenter = [
+    "modal>=1.5.3",
+    # `modal deploy` imports the service module locally to build the app, and the
+    # endpoint signature evaluates `Header(...)` as a default argument, so fastapi
+    # has to be importable here too -- not only inside the image.
+    "fastapi>=0.120.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.9.7,<0.10.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "aiosmtpd>=1.4.6",
+    "pyshacl>=0.40.1",
+    "pytest>=9.1.1",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+# One long line rather than a multi-line string: the value is valid TOML either
+# way (stdlib tomllib accepts it), but uv's parser rejects a line-ending
+# backslash inside `"""`, and every uv command then fails to read this file.
+markers = [
+    "network: fetches the real export from foerderdatenbank.de. Deselected by default -- 28 MB against a federal server is not something a test run should do incidentally. Run deliberately with `pytest -m network`.",
+    "docker: builds and runs the deployment stack. Deselected by default -- it costs an image build and a Postgres. Run deliberately with `pytest -m docker`.",
+    "model: loads the fine-tuned keyword tagger. Deselected by default -- it needs 437 MB of weights that are not in git. Fetch them per services/keyword_segmenter/README.md, then run with `pytest -m model`.",
+    "smtp: runs the failure notification end to end against a throwaway SMTP server on localhost. Selected by default -- no mail leaves the machine and no network is touched -- but it needs `openssl` on PATH for the STARTTLS cert. Run alone with `pytest -m smtp`.",
+]
+# Deselect the slow, external-dependency tests unless asked for. A `-m` on the
+# command line replaces this, so `pytest -m docker` selects them.
+addopts = "-m 'not network and not docker and not model'"
+filterwarnings = [
+    "error",
+    # Raised inside pandera's polars backend when it assembles failure cases.
+    "default:the default behavior of `how='horizontal'`:DeprecationWarning",
+]

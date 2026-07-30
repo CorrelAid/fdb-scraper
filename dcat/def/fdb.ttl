@@ -1,0 +1,312 @@
+PREFIX dct: <http://purl.org/dc/terms/>
+PREFIX fdb: <https://fdb.correlaid.org/def/fdb#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+fdb:Foerderprogramm
+    a rdfs:Class ;
+    rdfs:label
+        "Förderprogramm"@de ,
+        "funding programme"@en ;
+    rdfs:comment "Ein Förderprogramm der Förderdatenbank des Bundes; eine Zeile der veröffentlichten Tabelle."@de ;
+    rdfs:isDefinedBy <https://fdb.correlaid.org/def/fdb> ;
+.
+
+fdb:applicantSector
+    a rdf:Property ;
+    rdfs:label "applicant_sector" ;
+    rdfs:comment "closed vocabulary, 16 \"parent.child\" paths, where parent is a foerderberechtigte code; one value per pair"@en ;
+    rdfs:domain fdb:Foerderprogramm ;
+    rdfs:isDefinedBy <https://fdb.correlaid.org/def/fdb> ;
+    rdfs:range xsd:string ;
+    fdb:origin "upstream" ;
+.
+
+fdb:applicationLanguage
+    a rdf:Property ;
+    rdfs:label "application_language" ;
+    rdfs:domain fdb:Foerderprogramm ;
+    rdfs:isDefinedBy <https://fdb.correlaid.org/def/fdb> ;
+    rdfs:range xsd:string ;
+    fdb:origin "upstream" ;
+.
+
+fdb:contactIds
+    a rdf:Property ;
+    rdfs:label "contact_ids" ;
+    rdfs:domain fdb:Foerderprogramm ;
+    rdfs:isDefinedBy <https://fdb.correlaid.org/def/fdb> ;
+    rdfs:range xsd:string ;
+    fdb:origin "upstream" ;
+.
+
+fdb:contactInfoBuilding
+    a rdf:Property ;
+    rdfs:label "contact_info_building" ;
+    rdfs:domain fdb:Foerderprogramm ;
+    rdfs:isDefinedBy <https://fdb.correlaid.org/def/fdb> ;
+    rdfs:range xsd:string ;
+    fdb:origin "derived" ;
+.
+
+fdb:contactInfoFax
+    a rdf:Property ;
+    rdfs:label "contact_info_fax" ;
+    rdfs:domain fdb:Foerderprogramm ;
+    rdfs:isDefinedBy <https://fdb.correlaid.org/def/fdb> ;
+    rdfs:range xsd:string ;
+    fdb:origin "derived" ;
+.
+
+fdb:contactInfoHouseId
+    a rdf:Property ;
+    rdfs:label "contact_info_house_id" ;
+    rdfs:domain fdb:Foerderprogramm ;
+    rdfs:isDefinedBy <https://fdb.correlaid.org/def/fdb> ;
+    rdfs:range xsd:string ;
+    fdb:origin "derived" ;
+.
+
+fdb:contactInfoMobile
+    a rdf:Property ;
+    rdfs:label "contact_info_mobile" ;
+    rdfs:domain fdb:Foerderprogramm ;
+    rdfs:isDefinedBy <https://fdb.correlaid.org/def/fdb> ;
+    rdfs:range xsd:string ;
+    fdb:origin "derived" ;
+.
+
+fdb:deadlines
+    a rdf:Property ;
+    rdfs:label "deadlines" ;
+    rdfs:domain fdb:Foerderprogramm ;
+    rdfs:isDefinedBy <https://fdb.correlaid.org/def/fdb> ;
+    rdfs:range xsd:string ;
+    fdb:origin "upstream" ;
+.
+
+fdb:deleted
+    a rdf:Property ;
+    rdfs:label "deleted" ;
+    rdfs:domain fdb:Foerderprogramm ;
+    rdfs:isDefinedBy <https://fdb.correlaid.org/def/fdb> ;
+    rdfs:range xsd:boolean ;
+    fdb:origin "derived" ;
+.
+
+fdb:eligibleApplicants
+    a rdf:Property ;
+    rdfs:label "eligible_applicants" ;
+    rdfs:comment "closed vocabulary, 9 codes; labels in fdb_scraper.generated.vocab.FOERDERBERECHTIGTE"@en ;
+    rdfs:domain fdb:Foerderprogramm ;
+    rdfs:isDefinedBy <https://fdb.correlaid.org/def/fdb> ;
+    rdfs:range xsd:string ;
+    fdb:origin "upstream" ;
+.
+
+fdb:fundingArea
+    a rdf:Property ;
+    rdfs:label "funding_area" ;
+    rdfs:comment "closed vocabulary, 23 codes; labels in fdb_scraper.generated.vocab.FOERDERBEREICH"@en ;
+    rdfs:domain fdb:Foerderprogramm ;
+    rdfs:isDefinedBy <https://fdb.correlaid.org/def/fdb> ;
+    rdfs:range xsd:string ;
+    fdb:origin "upstream" ;
+.
+
+fdb:fundingBody
+    a rdf:Property ;
+    rdfs:label "funding_body" ;
+    rdfs:comment "closed vocabulary, 3 codes; labels in fdb_scraper.generated.vocab.FOERDERGEBER"@en ;
+    rdfs:domain fdb:Foerderprogramm ;
+    rdfs:isDefinedBy <https://fdb.correlaid.org/def/fdb> ;
+    rdfs:range xsd:string ;
+    fdb:origin "upstream" ;
+.
+
+fdb:fundingOrganisation
+    a rdf:Property ;
+    rdfs:label "funding_organisation" ;
+    rdfs:domain fdb:Foerderprogramm ;
+    rdfs:isDefinedBy <https://fdb.correlaid.org/def/fdb> ;
+    rdfs:range xsd:string ;
+    fdb:origin "upstream" ;
+.
+
+fdb:fundingSubarea
+    a rdf:Property ;
+    rdfs:label "funding_subarea" ;
+    rdfs:comment "closed vocabulary, 124 \"parent.child\" paths, where parent is a foerderbereich code; one value per pair"@en ;
+    rdfs:domain fdb:Foerderprogramm ;
+    rdfs:isDefinedBy <https://fdb.correlaid.org/def/fdb> ;
+    rdfs:range xsd:string ;
+    fdb:origin "upstream" ;
+.
+
+fdb:fundingType
+    a rdf:Property ;
+    rdfs:label "funding_type" ;
+    rdfs:comment "closed vocabulary, 6 codes; labels in fdb_scraper.generated.vocab.FOERDERART"@en ;
+    rdfs:domain fdb:Foerderprogramm ;
+    rdfs:isDefinedBy <https://fdb.correlaid.org/def/fdb> ;
+    rdfs:range xsd:string ;
+    fdb:origin "upstream" ;
+.
+
+fdb:grw
+    a rdf:Property ;
+    rdfs:label "grw" ;
+    rdfs:comment "closed vocabulary, 2 codes; labels in fdb_scraper.generated.vocab.GRW"@en ;
+    rdfs:domain fdb:Foerderprogramm ;
+    rdfs:isDefinedBy <https://fdb.correlaid.org/def/fdb> ;
+    rdfs:range xsd:string ;
+    fdb:origin "upstream" ;
+.
+
+fdb:idHash
+    a rdf:Property ;
+    rdfs:label "id_hash" ;
+    rdfs:domain fdb:Foerderprogramm ;
+    rdfs:isDefinedBy <https://fdb.correlaid.org/def/fdb> ;
+    rdfs:range xsd:string ;
+    fdb:origin "derived" ;
+.
+
+fdb:keywords
+    a rdf:Property ;
+    rdfs:label "keywords" ;
+    rdfs:domain fdb:Foerderprogramm ;
+    rdfs:isDefinedBy <https://fdb.correlaid.org/def/fdb> ;
+    rdfs:range xsd:string ;
+    fdb:origin "upstream" ;
+.
+
+fdb:keywordsExtracted
+    a rdf:Property ;
+    rdfs:label "keywords_extracted" ;
+    rdfs:comment "inferred, not stated by the source: the raw keywords string split into single keywords by a fine-tuned German encoder, because upstream joins them with spaces and 87.7% of values carry no separator at all. Every keyword is a contiguous span of the raw string and the spans cover it exactly, which is checked on every publish, so nothing is invented, dropped or reordered; where the boundaries fall is the model's judgement -- exact-span F1 0.967 on a held-out hand-labelled sample, against 0.878 for splitting on nothing. Null where a value has not been segmented. The raw keywords column is published unchanged beside it."@en ;
+    rdfs:domain fdb:Foerderprogramm ;
+    rdfs:isDefinedBy <https://fdb.correlaid.org/def/fdb> ;
+    rdfs:range xsd:string ;
+    fdb:origin "inferred" ;
+.
+
+fdb:legalBasis
+    a rdf:Property ;
+    rdfs:label "legal_basis" ;
+    rdfs:domain fdb:Foerderprogramm ;
+    rdfs:isDefinedBy <https://fdb.correlaid.org/def/fdb> ;
+    rdfs:range xsd:string ;
+    fdb:origin "upstream" ;
+.
+
+fdb:legalRequirements
+    a rdf:Property ;
+    rdfs:label "legal_requirements" ;
+    rdfs:domain fdb:Foerderprogramm ;
+    rdfs:isDefinedBy <https://fdb.correlaid.org/def/fdb> ;
+    rdfs:range xsd:string ;
+    fdb:origin "upstream" ;
+.
+
+fdb:onWebsiteFrom
+    a rdf:Property ;
+    rdfs:label "on_website_from" ;
+    rdfs:domain fdb:Foerderprogramm ;
+    rdfs:isDefinedBy <https://fdb.correlaid.org/def/fdb> ;
+    rdfs:range xsd:dateTime ;
+    fdb:origin "derived" ;
+.
+
+fdb:origin
+    a rdf:Property ;
+    rdfs:label "origin" ;
+    rdfs:comment "Where a column's values come from: \"upstream\" -- stated by the source export and only reshaped; \"derived\" -- computed from upstream values or from the load history by a rule, exactly and reproducibly; \"inferred\" -- produced by a machine-learning model, therefore neither deterministic nor exact. The inferred columns are keywords_extracted; their accuracy is measured against a labelled sample rather than guaranteed."@en ;
+    rdfs:isDefinedBy <https://fdb.correlaid.org/def/fdb> ;
+    rdfs:range xsd:string ;
+.
+
+fdb:previousUpdateDates
+    a rdf:Property ;
+    rdfs:label "previous_update_dates" ;
+    rdfs:domain fdb:Foerderprogramm ;
+    rdfs:isDefinedBy <https://fdb.correlaid.org/def/fdb> ;
+    rdfs:range xsd:dateTime ;
+    fdb:origin "derived" ;
+.
+
+fdb:procedure
+    a rdf:Property ;
+    rdfs:label "procedure" ;
+    rdfs:domain fdb:Foerderprogramm ;
+    rdfs:isDefinedBy <https://fdb.correlaid.org/def/fdb> ;
+    rdfs:range xsd:string ;
+    fdb:origin "upstream" ;
+.
+
+fdb:processingTime
+    a rdf:Property ;
+    rdfs:label "processing_time" ;
+    rdfs:domain fdb:Foerderprogramm ;
+    rdfs:isDefinedBy <https://fdb.correlaid.org/def/fdb> ;
+    rdfs:range xsd:string ;
+    fdb:origin "upstream" ;
+.
+
+fdb:programmeSlug
+    a rdf:Property ;
+    rdfs:label "programme_slug" ;
+    rdfs:domain fdb:Foerderprogramm ;
+    rdfs:isDefinedBy <https://fdb.correlaid.org/def/fdb> ;
+    rdfs:range xsd:string ;
+    fdb:origin "upstream" ;
+.
+
+fdb:requiredDocuments
+    a rdf:Property ;
+    rdfs:label "required_documents" ;
+    rdfs:domain fdb:Foerderprogramm ;
+    rdfs:isDefinedBy <https://fdb.correlaid.org/def/fdb> ;
+    rdfs:range xsd:string ;
+    fdb:origin "upstream" ;
+.
+
+fdb:seoDescription
+    a rdf:Property ;
+    rdfs:label "seo_description" ;
+    rdfs:domain fdb:Foerderprogramm ;
+    rdfs:isDefinedBy <https://fdb.correlaid.org/def/fdb> ;
+    rdfs:range xsd:string ;
+    fdb:origin "upstream" ;
+.
+
+fdb:statusNote
+    a rdf:Property ;
+    rdfs:label "status_note" ;
+    rdfs:domain fdb:Foerderprogramm ;
+    rdfs:isDefinedBy <https://fdb.correlaid.org/def/fdb> ;
+    rdfs:range xsd:string ;
+    fdb:origin "upstream" ;
+.
+
+fdb:unternehmensgroesse
+    a rdf:Property ;
+    rdfs:label "unternehmensgroesse" ;
+    rdfs:comment "closed vocabulary, 4 codes; labels in fdb_scraper.generated.vocab.UNTERNEHMENSGROESSE"@en ;
+    rdfs:domain fdb:Foerderprogramm ;
+    rdfs:isDefinedBy <https://fdb.correlaid.org/def/fdb> ;
+    rdfs:range xsd:string ;
+    fdb:origin "upstream" ;
+.
+
+<https://fdb.correlaid.org/def/fdb>
+    a owl:Ontology ;
+    dct:description "Begriffe für die Spalten der Förderprogramm-Tabelle, für die kein etablierter Begriff passt. Generiert aus fdb_scraper.semantics."@de ;
+    dct:modified "2026-07-30"^^xsd:date ;
+    dct:publisher <https://fdb.correlaid.org/id/agent/correlaid> ;
+    dct:source <https://www.foerderdatenbank.de/> ;
+    dct:title "Förderdatenbank -- geprägte Begriffe"@de ;
+    rdfs:seeAlso <https://fdb.correlaid.org/id/dataset/foerderdatenbank-programme> ;
+.

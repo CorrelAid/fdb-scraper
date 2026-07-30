@@ -1,0 +1,22 @@
+# Overlay for the container smoke test. Not used by the deployment.
+#
+#   docker compose -f docker-compose.yaml -f compose.smoke.yaml up -d --build
+#
+# Two differences from a real run, and only two, so what is exercised stays close to
+# what is deployed:
+#
+#   * the test fixture is mounted, so the pipeline can load an export without
+#     fetching 28 MB from a federal server on every run;
+#   * Caddy's port is published, so the assertions can reach it from the host.
+#
+# Everything else -- the image, the Postgres, the scheduled-task command, the
+# read-only public mount -- is the deployment's own configuration. FDB_DATA points
+# the stack at a temporary directory; see tests/test_compose.py.
+services:
+  pipeline:
+    volumes:
+      - ./tests/fixtures/export:/export:ro
+
+  files:
+    ports:
+      - "${SMOKE_PORT:-18099}:80"

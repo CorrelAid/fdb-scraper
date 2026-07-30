@@ -1,0 +1,370 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document xmlns:xlink="http://www.w3.org/1999/xlink" name="deutsch-franzoesische-kooperationen-film-ffa" path="/BMWI/FDB/Content/DE/Foerderprogramm/Bund/BKM" type="gsb:ServiceOffer">
+    <property name="gsb:bodyText" type="RichText">
+        <text>&lt;![CDATA[&lt;div xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;h5&gt;Rechtsgrundlage&lt;/h5&gt;&lt;p&gt;&lt;span&gt;Gesetz über Maßnahmen zur Förderung des deutschen Films&lt;/span&gt;&lt;span&gt;&amp;#xa0;&lt;/span&gt;(Filmförderungsgesetz ? FFG)&lt;br /&gt;vom: &lt;span&gt;23.12.2024 &lt;br /&gt;&lt;/span&gt;&lt;span&gt;Die Beauftragte der Bundesregierung für Kultur und Medien&lt;/span&gt;&lt;br /&gt;&lt;abbr class="logic--abbr sblogic--true" data-gsb="true"&gt;BGBl.&lt;/abbr&gt; Teil &lt;abbr class="logic--abbr sblogic--true" data-gsb="true"&gt;I&lt;/abbr&gt; &lt;abbr class="logic--abbr sblogic--true" data-gsb="true"&gt;Nr.&lt;/abbr&gt; 451 vom 30.12.2024&lt;/p&gt;&lt;p&gt;&lt;a xlink:type="simple" xlink:actuate="onLoad" xlink:href="target:/BMWI/FDB/Content/DE/ExternerLink/R/rgl-ffa-referenzfilmfoerderung-864679-1" xlink:show="new"&gt;Weblink zum Gesetz&lt;/a&gt;&lt;/p&gt;&lt;p&gt;Filmabkommen zwischen der Regierung der Bundesrepublik Deutschland und der Regierung der Französischen Republik&lt;br /&gt;von: Januar 2011&lt;br /&gt;Regierung der Bundesrepublik Deutschland&lt;/p&gt;&lt;p&gt;&lt;a xlink:type="simple" xlink:actuate="onLoad" xlink:href="target:/BMWI/FDB/Content/DE/ExternerLink/F/filmabkommen-deutschland-frankreich" xlink:show="new"&gt;Weblink zum Abkommen (PDF, nicht barrierefrei)&lt;/a&gt;&lt;/p&gt;&lt;p&gt;Richtlinie für Bürgschaften &lt;br /&gt;(&lt;abbr class="logic--abbr sblogic--true" data-gsb="true"&gt;§&lt;/abbr&gt; 85 Filmförderungsgesetz (FFG)) &lt;br /&gt;vom: 20.03.2025&lt;br /&gt;Filmförderungsanstalt&lt;/p&gt;&lt;p&gt;&lt;a xlink:type="simple" xlink:actuate="onLoad" xlink:href="target:/BMWI/FDB/Content/DE/ExternerLink/F/ffg-buergschaften-ffa-rl" xlink:show="new"&gt;Weblink zur Förderrichtlinie (PDF, nicht barrierefrei)&lt;/a&gt;&lt;/p&gt;&lt;p&gt;Richtlinie für die Projektfilmförderung nach dem Abkommen zwischen der Regierung der Bundesrepublik Deutschland und der Regierung der Französischen Republik über die Förderung von Filmvorhaben in Koproduktion (?Minitraité?) &lt;br /&gt;(&lt;abbr class="logic--abbr sblogic--true" data-gsb="true"&gt;§§&lt;/abbr&gt; 2 und 3 &lt;abbr class="logic--abbr sblogic--true" data-gsb="true"&gt;Abs.&lt;/abbr&gt; 2 Filmförderungsgesetz (FFG) &lt;abbr class="logic--abbr sblogic--true" data-gsb="true"&gt;i.V.m.&lt;/abbr&gt; Minitraité)&lt;br /&gt;vom: 20.03.2025&lt;br /&gt;Filmförderungsanstalt&lt;/p&gt;&lt;p&gt;&lt;span&gt;Das jährliche Fördervolumen aus beiden Ländern beträgt 3,2 Millionen &lt;abbr class="logic--abbr sblogic--true" data-gsb="true"&gt;EUR&lt;/abbr&gt; (3.200.000 &lt;abbr class="logic--abbr sblogic--true" data-gsb="true"&gt;EUR&lt;/abbr&gt;). Davon sind 200.000 &lt;abbr class="logic--abbr sblogic--true" data-gsb="true"&gt;EUR&lt;/abbr&gt; zur Förderung des Produzent*innennachwuchses (Deutsch-Französischer Projektentwicklungsfonds) vorgesehen.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Für das Jahr 2026 können Anträge bis zum &lt;span&gt;20.04.2026 und 15.09.2026 gestellt werden. &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;a xlink:type="simple" xlink:actuate="onLoad" xlink:href="target:/BMWI/FDB/Content/DE/ExternerLink/K/kooperation-film-deutschland-frankreich-minitraite" xlink:show="replace"&gt;Weblink zur Förderrichtlinie (PDF, nicht barrierefrei)&lt;/a&gt;&lt;/p&gt;&lt;/div&gt;]]&gt;</text>
+    </property>
+    <property name="gsb:challenge" type="RichText">
+        <text>&lt;![CDATA[&lt;div xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;/div&gt;]]&gt;</text>
+    </property>
+    <property name="gsb:cl2Contacts" type="ClassifiedLinkLists">
+        <classifiedLinkLists>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/Kontakt"/>
+                </classifierLinks>
+                <links>
+                    <link xlink:href="target:/BMWI/FDB/Content/DE/Kontakt/F/ffa"/>
+                </links>
+            </classifiedLinkList>
+        </classifiedLinkLists>
+    </property>
+    <property name="gsb:cl2CustServices" type="ClassifiedLinkLists">
+        <classifiedLinkLists>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/ExternerLink"/>
+                </classifierLinks>
+                <links>
+                    <link xlink:href="target:/BMWI/FDB/Content/DE/ExternerLink/K/kooperation-film-deutsch-franzoesisch-infos"/>
+                    <link xlink:href="target:/BMWI/FDB/Content/DE/ExternerLink/F/ffa-serviceportal"/>
+                </links>
+            </classifiedLinkList>
+        </classifiedLinkLists>
+    </property>
+    <property name="gsb:cl2Location" type="ClassifiedLinkLists">
+        <classifiedLinkLists>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/Foerdertermin"/>
+                </classifierLinks>
+                <links/>
+            </classifiedLinkList>
+        </classifiedLinkLists>
+    </property>
+    <property name="gsb:cl2Processes" type="ClassifiedLinkLists">
+        <classifiedLinkLists>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/Foerderart"/>
+                </classifierLinks>
+                <links>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Categories/FDB/Foerderart/darlehen"/>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Categories/FDB/Foerderart/buergschaft"/>
+                </links>
+            </classifiedLinkList>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/Foerdergebiet"/>
+                </classifierLinks>
+                <links>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Categories/FDB/Foerdergebiet/bundesweit"/>
+                </links>
+            </classifiedLinkList>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/Foerdergeber"/>
+                </classifierLinks>
+                <links>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Categories/FDB/Foerdergeber/bund"/>
+                </links>
+            </classifiedLinkList>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/Foerderberechtigte"/>
+                </classifierLinks>
+                <links>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Categories/FDB/Foerderberechtigte/unternehmen"/>
+                </links>
+            </classifiedLinkList>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/BranchenExistenzgruenderin"/>
+                </classifierLinks>
+                <links>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Categories/FDB/Branchen/kultur_kreativwirtschaft"/>
+                </links>
+            </classifiedLinkList>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/BranchenUnternehmen"/>
+                </classifierLinks>
+                <links>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Categories/FDB/Branchen/kultur_kreativwirtschaft"/>
+                </links>
+            </classifiedLinkList>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/Unternehmensgroesse"/>
+                </classifierLinks>
+                <links>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Categories/FDB/Unternehmensgroesse/grosses_unternehmen"/>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Categories/FDB/Unternehmensgroesse/kleines_unternehmen"/>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Categories/FDB/Unternehmensgroesse/kleinstunternehmen"/>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Categories/FDB/Unternehmensgroesse/mittleres_unternehmen"/>
+                </links>
+            </classifiedLinkList>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/Unternehmensalter"/>
+                </classifierLinks>
+                <links>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Categories/FDB/Unternehmensalter/nicht_relevant"/>
+                </links>
+            </classifiedLinkList>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/Foerderbereich"/>
+                </classifierLinks>
+                <links>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Categories/FDB/Foerderbereich/kultur_medien_sport"/>
+                </links>
+            </classifiedLinkList>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/GRW"/>
+                </classifierLinks>
+                <links>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Categories/FDB/GRW/keine_grw_foerderung"/>
+                </links>
+            </classifiedLinkList>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/Foerderorganisation"/>
+                </classifierLinks>
+                <links>
+                    <link xlink:href="target:/BMWI/FDB/Content/DE/Foerdergeber/B/bkm"/>
+                </links>
+            </classifiedLinkList>
+        </classifiedLinkLists>
+    </property>
+    <property name="gsb:cl2Satisfaction" type="ClassifiedLinkLists">
+        <classifiedLinkLists>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/UFExistenzgruendung"/>
+                </classifierLinks>
+                <links/>
+            </classifiedLinkList>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/UFUnternehmensfinanzierung"/>
+                </classifierLinks>
+                <links/>
+            </classifiedLinkList>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/UFArbeit"/>
+                </classifierLinks>
+                <links/>
+            </classifiedLinkList>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/UFAusWeiterbildung"/>
+                </classifierLinks>
+                <links/>
+            </classifiedLinkList>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/UFAussenwirtschaft"/>
+                </classifierLinks>
+                <links/>
+            </classifiedLinkList>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/UFBeratung"/>
+                </classifierLinks>
+                <links/>
+            </classifiedLinkList>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/UFEnergieeffizienz"/>
+                </classifierLinks>
+                <links/>
+            </classifiedLinkList>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/UFForschungOffen"/>
+                </classifierLinks>
+                <links/>
+            </classifiedLinkList>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/UFForschungSpezifisch"/>
+                </classifierLinks>
+                <links/>
+            </classifiedLinkList>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/UFGesundheitSoziales"/>
+                </classifierLinks>
+                <links/>
+            </classifiedLinkList>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/UFInfrastruktur"/>
+                </classifierLinks>
+                <links/>
+            </classifiedLinkList>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/UFKulturMedienSport"/>
+                </classifierLinks>
+                <links>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Categories/FDB/UF_KulturMedienSport/film_fernsehen"/>
+                </links>
+            </classifiedLinkList>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/UFLandwirtschaft"/>
+                </classifierLinks>
+                <links/>
+            </classifiedLinkList>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/UFMessenAusstellungen"/>
+                </classifierLinks>
+                <links/>
+            </classifiedLinkList>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/UFRegionalfoerderung"/>
+                </classifierLinks>
+                <links/>
+            </classifiedLinkList>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/UFStaedtebauStadterneuerung"/>
+                </classifierLinks>
+                <links/>
+            </classifiedLinkList>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/UFUmweltNaturschutz"/>
+                </classifierLinks>
+                <links/>
+            </classifiedLinkList>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/UFWohnungsbau"/>
+                </classifierLinks>
+                <links/>
+            </classifiedLinkList>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/UFFrauenfoerderung"/>
+                </classifierLinks>
+                <links/>
+            </classifiedLinkList>
+        </classifiedLinkLists>
+    </property>
+    <property name="gsb:comment" type="RichText">
+        <text>&lt;![CDATA[&lt;div xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;p&gt;Ticket#864718&lt;/p&gt;&lt;/div&gt;]]&gt;</text>
+    </property>
+    <property name="gsb:competenceDescr" type="RichText">
+        <text>&lt;![CDATA[&lt;div xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;/div&gt;]]&gt;</text>
+    </property>
+    <property name="gsb:customerBenefit" type="RichText">
+        <text>&lt;![CDATA[&lt;div xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;/div&gt;]]&gt;</text>
+    </property>
+    <property name="gsb:dateOfIssue" type="Date">
+        <value>2025-05-26T14:00:00.000+02:00</value>
+    </property>
+    <property name="gsb:functions" type="RichText">
+        <text>&lt;![CDATA[&lt;div xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;/div&gt;]]&gt;</text>
+    </property>
+    <property name="gsb:header" type="RichText">
+        <text>&lt;![CDATA[&lt;div xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;/div&gt;]]&gt;</text>
+    </property>
+    <property name="gsb:keywords" type="String">
+        <value>Minitraité deutsch-französisch Kooperation Deutschland Frankreich Abkommen Film FFA Filmförderung Filmförderungsgesetz</value>
+    </property>
+    <property name="gsb:languageInd" type="LinkList">
+        <links>
+            <link xlink:href="target:/BMWI/SiteGlobals/Languages/Deutsch"/>
+        </links>
+    </property>
+    <property name="gsb:procDescription" type="RichText">
+        <text>&lt;![CDATA[&lt;div xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;/div&gt;]]&gt;</text>
+    </property>
+    <property name="gsb:procInfluence" type="RichText">
+        <text>&lt;![CDATA[&lt;div xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;/div&gt;]]&gt;</text>
+    </property>
+    <property name="gsb:procMethod" type="RichText">
+        <text>&lt;![CDATA[&lt;div xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;/div&gt;]]&gt;</text>
+    </property>
+    <property name="gsb:procQuality" type="RichText">
+        <text>&lt;![CDATA[&lt;div xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;/div&gt;]]&gt;</text>
+    </property>
+    <property name="gsb:progress" type="RichText">
+        <text>&lt;![CDATA[&lt;div xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;/div&gt;]]&gt;</text>
+    </property>
+    <property name="gsb:referenceCustomer" type="RichText">
+        <text>&lt;![CDATA[&lt;div xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;/div&gt;]]&gt;</text>
+    </property>
+    <property name="gsb:regulatoryFWork" type="RichText">
+        <text>&lt;![CDATA[&lt;div xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;/div&gt;]]&gt;</text>
+    </property>
+    <property name="gsb:remark" type="RichText">
+        <text>&lt;![CDATA[&lt;div xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;/div&gt;]]&gt;</text>
+    </property>
+    <property name="gsb:requirements" type="RichText">
+        <text>&lt;![CDATA[&lt;div xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;/div&gt;]]&gt;</text>
+    </property>
+    <property name="gsb:serviceDescription" type="RichText">
+        <text>&lt;![CDATA[&lt;div xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;/div&gt;]]&gt;</text>
+    </property>
+    <property name="gsb:serviceFeeDescr" type="RichText">
+        <text>&lt;![CDATA[&lt;div xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;/div&gt;]]&gt;</text>
+    </property>
+    <property name="gsb:shouldNotBeIndexed" type="Long">
+        <value>0</value>
+    </property>
+    <property name="gsb:subType" type="String">
+        <value>ServiceOffer-FundingProgram</value>
+    </property>
+    <property name="gsb:summary" type="RichText">
+        <text>&lt;![CDATA[&lt;div xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;/div&gt;]]&gt;</text>
+    </property>
+    <property name="gsb:teaserText" type="RichText">
+        <text>&lt;![CDATA[&lt;div xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;/div&gt;]]&gt;</text>
+    </property>
+    <property name="gsb:termsOfPayment" type="RichText">
+        <text>&lt;![CDATA[&lt;div xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;/div&gt;]]&gt;</text>
+    </property>
+    <property name="gsb:title" type="RichText">
+        <text>&lt;![CDATA[&lt;div xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;p&gt;Förderung Deutsch-Französischer Koproduktionen im Rahmen des Filmförderungsgesetzes 2025 (&lt;span&gt;Minitraité-Förderung)&lt;/span&gt;&lt;/p&gt;&lt;/div&gt;]]&gt;</text>
+    </property>
+</document>

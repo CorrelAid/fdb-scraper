@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document xmlns:xlink="http://www.w3.org/1999/xlink" name="bundesagentur-fuer-arbeit" path="/BMWI/FDB/Content/DE/Adresse/B" type="gsb:Address">
+    <property name="gsb:city" type="String">
+        <value>Nürnberg</value>
+    </property>
+    <property name="gsb:comment" type="RichText">
+        <text>&lt;![CDATA[&lt;div xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;/div&gt;]]&gt;</text>
+    </property>
+    <property name="gsb:header" type="RichText">
+        <text>&lt;![CDATA[&lt;div xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;/div&gt;]]&gt;</text>
+    </property>
+    <property name="gsb:houseId" type="String">
+        <value>104</value>
+    </property>
+    <property name="gsb:languageInd" type="LinkList">
+        <links>
+            <link xlink:href="target:/BMWI/SiteGlobals/Languages/Deutsch"/>
+        </links>
+    </property>
+    <property name="gsb:remark" type="RichText">
+        <text>&lt;![CDATA[&lt;div xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;/div&gt;]]&gt;</text>
+    </property>
+    <property name="gsb:road" type="String">
+        <value>Regensburger Straße</value>
+    </property>
+    <property name="gsb:shouldNotBeIndexed" type="Long">
+        <value>0</value>
+    </property>
+    <property name="gsb:teaserText" type="RichText">
+        <text>&lt;![CDATA[&lt;div xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;/div&gt;]]&gt;</text>
+    </property>
+    <property name="gsb:title" type="RichText">
+        <text>&lt;![CDATA[&lt;div xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;p&gt;Bundesagentur für Arbeit (BA)&lt;/p&gt;&lt;/div&gt;]]&gt;</text>
+    </property>
+    <property name="gsb:zipCode" type="String">
+        <value>90478</value>
+    </property>
+</document>

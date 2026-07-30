@@ -1,0 +1,125 @@
+# The whole deployment: a weekly pipeline and a static file server, on one host.
+#
+# Coolify's server-level proxy terminates TLS and routes by Host, so no ports are
+# published and no certificates are managed here. Attach the domain to the `files`
+# service on port 80.
+#
+# The scd2 history is the one artefact here that cannot be rebuilt: upstream serves
+# only today's export. So it lives in Postgres, and the thing that matters about
+# where Postgres is declared is whether Coolify will back it up.
+#
+# VERIFY AFTER THE FIRST DEPLOY: the `history` service below should show a
+# **Backups** link in Coolify. Set a cron and an S3 destination there. Coolify
+# supports backups for compose-defined databases and, since January 2026, restoring
+# them too -- but integrated backups for *git-based* compose deployments are still
+# an open enhancement (coollabsio/coolify#7528), and this stack is git-based because
+# `pipeline` builds from the repo.
+#
+# If no Backups link appears, move the database out rather than run unbacked:
+#
+#   1. Coolify -> New Resource -> PostgreSQL, and enable its Backups tab
+#   2. delete the `history` service here
+#   3. point POSTGRES_CONN_STR at the new resource
+#
+# That is the only change needed. Nothing reaches the database except through
+# POSTGRES_CONN_STR, and it is never exposed publicly -- no ports are published, so
+# it is reachable only from within this stack.
+services:
+  history:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-fdb}
+      - POSTGRES_USER=${POSTGRES_USER:-fdb}
+      # No default. An unset password would make trust authentication the fallback,
+      # and Coolify will generate one if this is left for it to fill.
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?generate a password in Coolify}
+    volumes:
+      - history_data:/var/lib/postgresql/data
+    healthcheck:
+      # -U so the check authenticates as the right role rather than the OS user.
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-fdb} -d $${POSTGRES_DB:-fdb}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  # Runs the weekly load and rebuilds the distribution. Idle otherwise: driven by
+  # a Coolify Scheduled Task rather than a cron inside the container, so a failed
+  # run is visible in Coolify's logs instead of a container nobody looks at.
+  #
+  #   Coolify -> this resource -> Scheduled Tasks
+  #   container: pipeline
+  #   command:   python scripts/build_dist.py --out /srv/public
+  #   frequency: 0 3 * * 1
+  pipeline:
+    build: .
+    restart: unless-stopped
+    # Nothing to do until the schedule fires. Kept up so the scheduled task has a
+    # container to exec into.
+    command: ["sleep", "infinity"]
+    depends_on:
+      history:
+        condition: service_healthy
+    environment:
+      # Built from the parts above so the credentials are stated once. Replace the
+      # whole value with an external URL if the database moves out of this stack.
+      # Unset, the pipeline would fall back to a local DuckDB file -- right for a
+      # laptop, wrong here, so it is required.
+      - POSTGRES_CONN_STR=postgresql://${POSTGRES_USER:-fdb}:${POSTGRES_PASSWORD:?generate a password in Coolify}@history:5432/${POSTGRES_DB:-fdb}
+      # dlt's working directory. Recreatable scratch, unlike the history, but it
+      # must persist across runs for load ids and pipeline state to line up.
+      - DLT_DATA_DIR=/srv/state/dlt
+      # The keyword segmenter, both optional. Without them the load skips the
+      # segmentation and keywords_extracted publishes as null for anything not
+      # already segmented -- see fdb_scraper.history.tagger_configured.
+      - FDB_TAGGER_URL=${FDB_TAGGER_URL:-}
+      - FDB_TAGGER_TOKEN=${FDB_TAGGER_TOKEN:-}
+      # The segmenter client's read-through cache. On the state volume because the
+      # image's working directory is not writable by the pipeline's user.
+      - FDB_KEYWORD_CACHE=/srv/state/keyword_cache.sqlite
+      # Failure mail, all optional. NOTIFY_TO is the switch: while it is empty,
+      # scripts/notify.send_failure returns before reading anything else, so an
+      # unconfigured stack runs exactly as it did without these.
+      - NOTIFY_TO=${NOTIFY_TO:-}
+      - NOTIFY_FROM=${NOTIFY_FROM:-}
+      - SMTP_HOST=${SMTP_HOST:-}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_USERNAME=${SMTP_USERNAME:-}
+      - SMTP_PASSWORD=${SMTP_PASSWORD:-}
+    volumes:
+      # Read-write: this is the only thing that writes the published files.
+      # FDB_DATA so the container smoke test can point the stack at a temporary
+      # directory; the deployment leaves it at the default.
+      - ${FDB_DATA:-/data/fdb}:/srv
+
+  files:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    environment:
+      # Coolify reads this and writes the proxy labels for container port 80.
+      # Service name has no underscore, which is required for the _80 suffix.
+      - SERVICE_FQDN_FILES_80
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      # Only `public` is mounted, deliberately. The sibling `state` directory holds
+      # dlt's working files, which include extracted copies of the export; Caddy
+      # serves its root with directory listings on, so mounting /data/fdb here
+      # would publish them.
+      #
+      # Read-only, so a compromised Caddy cannot rewrite what it serves.
+      - ${FDB_DATA:-/data/fdb}/public:/srv:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  # The history. A named volume rather than a bind mount so Coolify manages it, and
+  # deliberately not under /data/fdb, which the file server mounts.
+  history_data:
+  caddy_data:
+  caddy_config:

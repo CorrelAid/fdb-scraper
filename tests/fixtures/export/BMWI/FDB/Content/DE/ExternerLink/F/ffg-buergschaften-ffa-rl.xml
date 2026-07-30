@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document xmlns:xlink="http://www.w3.org/1999/xlink" name="ffg-buergschaften-ffa-rl" path="/BMWI/FDB/Content/DE/ExternerLink/F" type="gsb:ExternalLink">
+    <property name="gsb:altText" type="String">
+        <value>Externer Link (öffnet neues Fenster)</value>
+    </property>
+    <property name="gsb:bodyText" type="RichText">
+        <text>&lt;![CDATA[&lt;div xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;/div&gt;]]&gt;</text>
+    </property>
+    <property name="gsb:cl2Images" type="ClassifiedLinkLists">
+        <classifiedLinkLists>
+            <classifiedLinkList>
+                <classifierText></classifierText>
+                <classifierLinks>
+                    <link xlink:href="target:/BMWI/SiteGlobals/Classifications/Classifier/Common/Bild"/>
+                </classifierLinks>
+                <links/>
+            </classifiedLinkList>
+        </classifiedLinkLists>
+    </property>
+    <property name="gsb:comment" type="RichText">
+        <text>&lt;![CDATA[&lt;div xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;/div&gt;]]&gt;</text>
+    </property>
+    <property name="gsb:dateOfIssue" type="Date">
+        <value>2025-05-23T10:57:29.614+02:00</value>
+    </property>
+    <property name="gsb:header" type="RichText">
+        <text>&lt;![CDATA[&lt;div xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;/div&gt;]]&gt;</text>
+    </property>
+    <property name="gsb:languageInd" type="LinkList">
+        <links>
+            <link xlink:href="target:/BMWI/SiteGlobals/Languages/Deutsch"/>
+        </links>
+    </property>
+    <property name="gsb:remark" type="RichText">
+        <text>&lt;![CDATA[&lt;div xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;/div&gt;]]&gt;</text>
+    </property>
+    <property name="gsb:shouldNotBeIndexed" type="Long">
+        <value>0</value>
+    </property>
+    <property name="gsb:teaserText" type="RichText">
+        <text>&lt;![CDATA[&lt;div xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;/div&gt;]]&gt;</text>
+    </property>
+    <property name="gsb:title" type="RichText">
+        <text>&lt;![CDATA[&lt;div xmlns:xlink="http://www.w3.org/1999/xlink"&gt;&lt;p&gt;Richtlinie für Bürgschaften &lt;br /&gt;(§ 85 Filmförderungsgesetz (FFG)) &lt;br /&gt;Stand: 20.03.2025&lt;br /&gt;Filmförderungsanstalt ? Bundesanstalt des öffentlichen Rechts ?&lt;/p&gt;&lt;/div&gt;]]&gt;</text>
+    </property>
+    <property name="gsb:url" type="String">
+        <value>https://www.ffa.de/files/ffa/ffg-richtlinien/20250321%20D.9%20RL_B%C3%BCrgschaften.pdf</value>
+    </property>
+</document>

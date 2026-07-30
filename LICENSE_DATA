@@ -1,0 +1,58 @@
+# Licence of the data
+
+This applies to the published dataset — `programme.parquet` and everything derived
+from it. The code in this repository is licensed separately, under the MIT licence in
+`LICENSE_CODE`.
+
+## The source
+
+The data comes from the [Förderdatenbank](https://www.foerderdatenbank.de) of the
+German federal government. Its
+[imprint](https://www.foerderdatenbank.de/FDB/DE/Meta/Impressum/impressum.html)
+licenses the texts of the site under
+**[CC BY-ND 4.0](https://creativecommons.org/licenses/by-nd/4.0/deed.de)** and names
+the **Bundesministerium für Wirtschaft und Energie** as the rights holder.
+
+That licence passes through: this dataset carries no licence of its own to grant,
+because it holds the ministry's texts. CorrelAid e.V. claims no additional rights
+over them.
+
+## What was done to the data, and why ND permits it
+
+CC BY-ND forbids distributing modified versions. What this project does is
+reformatting, not modification of the licensed texts:
+
+- the XML export is transposed into one row per Förderprogramm;
+- category values are reduced from CMS classifier paths to their leaf codes;
+- the export's internal document references are resolved into contact fields and
+  link lists;
+- five category columns are *linked* to published code lists as SKOS matches.
+
+No text is rewritten, summarised, translated or edited. Category codes are published
+as the export states them and are never substituted for a code list's own — which is
+the other reason for linking rather than replacing. Where a value could not be mapped
+honestly, it is left unmapped rather than approximated.
+
+The columns this project adds (`id_url`, `id_hash`, `on_website_from`,
+`last_updated`, `previous_update_dates`, `deleted`) are observations about the
+records, not content taken from the source.
+
+## Attributing a single row
+
+Every row carries a `license_info` column with the attribution to reproduce, for
+example:
+
+    Einstiegsgeld von Bundesministerium für Wirtschaft und Energie, lizensiert unter
+    CC BY-ND 4.0 (https://creativecommons.org/licenses/by-nd/4.0/deed.de),
+    Quelle: https://www.foerderdatenbank.de/FDB/Content/DE/Foerderprogramm/Bund/BMAS/einstiegsgeld.html
+
+That column exists because dataset-level metadata is no help to someone holding one
+extracted record. The same information is in the DCAT metadata at dataset level, as
+`dct:license` and `dcatde:licenseAttributionByText`.
+
+## No warranty
+
+The dataset is provided as-is. It is a machine-readable rendering of a third-party
+source, published in the hope it is useful for analysing the German funding
+landscape; it is not an authoritative statement of any funding programme's terms.
+Always check the linked source page before relying on a value.

@@ -1,0 +1,28 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Downloaded export
+data/foerderprogramme_export.zip
+data/foerderprogramme_export/
+# The scd2 history. State, not source -- and the one thing here that is not
+# reproducible from upstream, since the export only ever serves today.
+data/fdb.duckdb*
+# dlt's own working directory, when DLT_DATA_DIR points into the repo.
+.dlt/
+# Staging tree built by scripts/build_dist.py; regenerated every run.
+dist/
+
+# Fine-tuned keyword tagger: 437 MB, fetched from the Modal Volume (see
+# services/keyword_segmenter/README.md), never committed.
+models/
+
+# Tagger endpoint credentials (token lives in a Modal Secret; this is the local copy)
+.env.tagger
