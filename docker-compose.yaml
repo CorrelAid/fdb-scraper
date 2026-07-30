@@ -90,8 +90,11 @@ services:
     volumes:
       # Read-write: this is the only thing that writes the published files.
       # FDB_DATA so the container smoke test can point the stack at a temporary
-      # directory; the deployment leaves it at the default.
-      - ${FDB_DATA:-/data/fdb}:/srv
+      # directory; the deployment leaves it at the default. Long-form so Coolify's
+      # compose processor does not split the mount on `:` and drop `/srv`.
+      - type: bind
+        source: ${FDB_DATA:-/data/fdb}
+        target: /srv
 
   files:
     image: caddy:2-alpine
@@ -104,7 +107,11 @@ services:
       # would publish them.
       #
       # Read-only, so a compromised Caddy cannot rewrite what it serves.
-      - ${FDB_DATA:-/data/fdb}/public:/srv:ro
+      # Long-form for the same reason as the pipeline mount above.
+      - type: bind
+        source: ${FDB_DATA:-/data/fdb}/public
+        target: /srv
+        read_only: true
       - caddy_data:/data
       - caddy_config:/config
     healthcheck:
