@@ -8,7 +8,7 @@ it with the others.
 What this repository guarantees, and all it guarantees:
 
 ```
-https://fdb.correlaid.org/id/dataset/foerderdatenbank-programme.ttl
+https://fdb.cdl.correlaid.org/id/dataset/foerderdatenbank-programme.ttl
 ```
 
 A single self-contained Turtle document: the `dcat:Dataset`, its
@@ -86,7 +86,7 @@ PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>
 `dcat:themeTaxonomy` because DCAT-AP wants it on the catalogue and no dataset can
 supply it. `dct:modified` is **not** here — the build stamps it (step 4).
 
-The publisher agent: reuse `https://fdb.correlaid.org/id/agent/correlaid` and let
+The publisher agent: reuse `https://fdb.cdl.correlaid.org/id/agent/correlaid` and let
 this repository's dataset document describe it, or mint a host-neutral agent URI in
 the aggregator and describe it in the catalogue node. Either works; do not do both,
 or two `foaf:Agent`s with different URIs both claim to be CorrelAid.
@@ -97,7 +97,7 @@ or two `foaf:Agent`s with different URIs both claim to be CorrelAid.
 # sources.yaml
 sources:
   - name: foerderdatenbank-programme
-    url: https://fdb.correlaid.org/id/dataset/foerderdatenbank-programme.ttl
+    url: https://fdb.cdl.correlaid.org/id/dataset/foerderdatenbank-programme.ttl
   # one entry per dataset, added by hand
 ```
 

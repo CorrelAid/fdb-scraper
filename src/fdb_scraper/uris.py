@@ -27,7 +27,7 @@ the intended amount of friction for changing an identifier.
 from __future__ import annotations
 
 # The deployed host. 
-HOST = "https://fdb.correlaid.org"
+HOST = "https://fdb.cdl.correlaid.org"
 
 # --- Identifiers (permanent) -------------------------------------------------
 

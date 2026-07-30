@@ -38,7 +38,7 @@ SERVED = {
 }
 
 DATASET_DOC = "id/dataset/foerderdatenbank-programme.ttl"
-DATASET = URIRef("https://fdb.correlaid.org/id/dataset/foerderdatenbank-programme")
+DATASET = URIRef("https://fdb.cdl.correlaid.org/id/dataset/foerderdatenbank-programme")
 
 
 @pytest.fixture(scope="module")

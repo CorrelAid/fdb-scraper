@@ -3,20 +3,20 @@
     "http://www.w3.org/ns/csvw",
     {
       "@language": "de",
-      "fdb": "https://fdb.correlaid.org/def/fdb#"
+      "fdb": "https://fdb.cdl.correlaid.org/def/fdb#"
     }
   ],
   "dc:title": "Förderdatenbank -- Förderprogramme",
   "dc:description": "Spaltenvertrag der CSV-Distribution, generiert aus dem Pandera-Schema der Pipeline (scripts/gen_dcat.py).",
   "tableSchema": {
     "primaryKey": "id_hash",
-    "aboutUrl": "https://fdb.correlaid.org/id/programme/{id_url}",
+    "aboutUrl": "https://fdb.cdl.correlaid.org/id/programme/{id_url}",
     "null": "",
     "columns": [
       {
         "name": "programme_slug",
         "titles": "programme_slug",
-        "propertyUrl": "https://fdb.correlaid.org/def/fdb#programmeSlug",
+        "propertyUrl": "https://fdb.cdl.correlaid.org/def/fdb#programmeSlug",
         "fdb:origin": "upstream",
         "datatype": {
           "base": "string",
@@ -59,35 +59,35 @@
       {
         "name": "legal_basis",
         "titles": "legal_basis",
-        "propertyUrl": "https://fdb.correlaid.org/def/fdb#legalBasis",
+        "propertyUrl": "https://fdb.cdl.correlaid.org/def/fdb#legalBasis",
         "fdb:origin": "upstream",
         "datatype": "string"
       },
       {
         "name": "status_note",
         "titles": "status_note",
-        "propertyUrl": "https://fdb.correlaid.org/def/fdb#statusNote",
+        "propertyUrl": "https://fdb.cdl.correlaid.org/def/fdb#statusNote",
         "fdb:origin": "upstream",
         "datatype": "string"
       },
       {
         "name": "seo_description",
         "titles": "seo_description",
-        "propertyUrl": "https://fdb.correlaid.org/def/fdb#seoDescription",
+        "propertyUrl": "https://fdb.cdl.correlaid.org/def/fdb#seoDescription",
         "fdb:origin": "upstream",
         "datatype": "string"
       },
       {
         "name": "required_documents",
         "titles": "required_documents",
-        "propertyUrl": "https://fdb.correlaid.org/def/fdb#requiredDocuments",
+        "propertyUrl": "https://fdb.cdl.correlaid.org/def/fdb#requiredDocuments",
         "fdb:origin": "upstream",
         "datatype": "string"
       },
       {
         "name": "application_language",
         "titles": "application_language",
-        "propertyUrl": "https://fdb.correlaid.org/def/fdb#applicationLanguage",
+        "propertyUrl": "https://fdb.cdl.correlaid.org/def/fdb#applicationLanguage",
         "fdb:origin": "upstream",
         "datatype": "string"
       },
@@ -101,35 +101,35 @@
       {
         "name": "deadlines",
         "titles": "deadlines",
-        "propertyUrl": "https://fdb.correlaid.org/def/fdb#deadlines",
+        "propertyUrl": "https://fdb.cdl.correlaid.org/def/fdb#deadlines",
         "fdb:origin": "upstream",
         "datatype": "string"
       },
       {
         "name": "procedure",
         "titles": "procedure",
-        "propertyUrl": "https://fdb.correlaid.org/def/fdb#procedure",
+        "propertyUrl": "https://fdb.cdl.correlaid.org/def/fdb#procedure",
         "fdb:origin": "upstream",
         "datatype": "string"
       },
       {
         "name": "processing_time",
         "titles": "processing_time",
-        "propertyUrl": "https://fdb.correlaid.org/def/fdb#processingTime",
+        "propertyUrl": "https://fdb.cdl.correlaid.org/def/fdb#processingTime",
         "fdb:origin": "upstream",
         "datatype": "string"
       },
       {
         "name": "legal_requirements",
         "titles": "legal_requirements",
-        "propertyUrl": "https://fdb.correlaid.org/def/fdb#legalRequirements",
+        "propertyUrl": "https://fdb.cdl.correlaid.org/def/fdb#legalRequirements",
         "fdb:origin": "upstream",
         "datatype": "string"
       },
       {
         "name": "keywords",
         "titles": "keywords",
-        "propertyUrl": "https://fdb.correlaid.org/def/fdb#keywords",
+        "propertyUrl": "https://fdb.cdl.correlaid.org/def/fdb#keywords",
         "fdb:origin": "upstream",
         "datatype": "string"
       },
@@ -147,7 +147,7 @@
       {
         "name": "funding_type",
         "titles": "funding_type",
-        "propertyUrl": "https://fdb.correlaid.org/def/fdb#fundingType",
+        "propertyUrl": "https://fdb.cdl.correlaid.org/def/fdb#fundingType",
         "fdb:origin": "upstream",
         "datatype": "string",
         "dc:description": "zero or more values per row; closed vocabulary, 6 codes; labels in fdb_scraper.generated.vocab.FOERDERART"
@@ -155,7 +155,7 @@
       {
         "name": "eligible_applicants",
         "titles": "eligible_applicants",
-        "propertyUrl": "https://fdb.correlaid.org/def/fdb#eligibleApplicants",
+        "propertyUrl": "https://fdb.cdl.correlaid.org/def/fdb#eligibleApplicants",
         "fdb:origin": "upstream",
         "datatype": "string",
         "dc:description": "zero or more values per row; closed vocabulary, 9 codes; labels in fdb_scraper.generated.vocab.FOERDERBERECHTIGTE"
@@ -163,7 +163,7 @@
       {
         "name": "funding_area",
         "titles": "funding_area",
-        "propertyUrl": "https://fdb.correlaid.org/def/fdb#fundingArea",
+        "propertyUrl": "https://fdb.cdl.correlaid.org/def/fdb#fundingArea",
         "fdb:origin": "upstream",
         "datatype": "string",
         "dc:description": "zero or more values per row; closed vocabulary, 23 codes; labels in fdb_scraper.generated.vocab.FOERDERBEREICH"
@@ -171,7 +171,7 @@
       {
         "name": "funding_body",
         "titles": "funding_body",
-        "propertyUrl": "https://fdb.correlaid.org/def/fdb#fundingBody",
+        "propertyUrl": "https://fdb.cdl.correlaid.org/def/fdb#fundingBody",
         "fdb:origin": "upstream",
         "datatype": "string",
         "dc:description": "zero or more values per row; closed vocabulary, 3 codes; labels in fdb_scraper.generated.vocab.FOERDERGEBER"
@@ -187,7 +187,7 @@
       {
         "name": "funding_organisation",
         "titles": "funding_organisation",
-        "propertyUrl": "https://fdb.correlaid.org/def/fdb#fundingOrganisation",
+        "propertyUrl": "https://fdb.cdl.correlaid.org/def/fdb#fundingOrganisation",
         "fdb:origin": "upstream",
         "datatype": "string",
         "dc:description": "zero or more values per row"
@@ -195,7 +195,7 @@
       {
         "name": "grw",
         "titles": "grw",
-        "propertyUrl": "https://fdb.correlaid.org/def/fdb#grw",
+        "propertyUrl": "https://fdb.cdl.correlaid.org/def/fdb#grw",
         "fdb:origin": "upstream",
         "datatype": "string",
         "dc:description": "zero or more values per row; closed vocabulary, 2 codes; labels in fdb_scraper.generated.vocab.GRW"
@@ -203,7 +203,7 @@
       {
         "name": "unternehmensgroesse",
         "titles": "unternehmensgroesse",
-        "propertyUrl": "https://fdb.correlaid.org/def/fdb#unternehmensgroesse",
+        "propertyUrl": "https://fdb.cdl.correlaid.org/def/fdb#unternehmensgroesse",
         "fdb:origin": "upstream",
         "datatype": "string",
         "dc:description": "zero or more values per row; closed vocabulary, 4 codes; labels in fdb_scraper.generated.vocab.UNTERNEHMENSGROESSE"
@@ -211,7 +211,7 @@
       {
         "name": "contact_ids",
         "titles": "contact_ids",
-        "propertyUrl": "https://fdb.correlaid.org/def/fdb#contactIds",
+        "propertyUrl": "https://fdb.cdl.correlaid.org/def/fdb#contactIds",
         "fdb:origin": "upstream",
         "datatype": "string",
         "dc:description": "zero or more values per row"
@@ -219,7 +219,7 @@
       {
         "name": "funding_subarea",
         "titles": "funding_subarea",
-        "propertyUrl": "https://fdb.correlaid.org/def/fdb#fundingSubarea",
+        "propertyUrl": "https://fdb.cdl.correlaid.org/def/fdb#fundingSubarea",
         "fdb:origin": "upstream",
         "datatype": "string",
         "dc:description": "zero or more values per row; closed vocabulary, 124 \"parent.child\" paths, where parent is a foerderbereich code; one value per pair"
@@ -227,7 +227,7 @@
       {
         "name": "applicant_sector",
         "titles": "applicant_sector",
-        "propertyUrl": "https://fdb.correlaid.org/def/fdb#applicantSector",
+        "propertyUrl": "https://fdb.cdl.correlaid.org/def/fdb#applicantSector",
         "fdb:origin": "upstream",
         "datatype": "string",
         "dc:description": "zero or more values per row; closed vocabulary, 16 \"parent.child\" paths, where parent is a foerderberechtigte code; one value per pair"
@@ -246,7 +246,7 @@
       {
         "name": "id_hash",
         "titles": "id_hash",
-        "propertyUrl": "https://fdb.correlaid.org/def/fdb#idHash",
+        "propertyUrl": "https://fdb.cdl.correlaid.org/def/fdb#idHash",
         "fdb:origin": "derived",
         "datatype": {
           "base": "string",
@@ -278,14 +278,14 @@
       {
         "name": "contact_info_fax",
         "titles": "contact_info_fax",
-        "propertyUrl": "https://fdb.correlaid.org/def/fdb#contactInfoFax",
+        "propertyUrl": "https://fdb.cdl.correlaid.org/def/fdb#contactInfoFax",
         "fdb:origin": "derived",
         "datatype": "string"
       },
       {
         "name": "contact_info_mobile",
         "titles": "contact_info_mobile",
-        "propertyUrl": "https://fdb.correlaid.org/def/fdb#contactInfoMobile",
+        "propertyUrl": "https://fdb.cdl.correlaid.org/def/fdb#contactInfoMobile",
         "fdb:origin": "derived",
         "datatype": "string"
       },
@@ -306,14 +306,14 @@
       {
         "name": "contact_info_house_id",
         "titles": "contact_info_house_id",
-        "propertyUrl": "https://fdb.correlaid.org/def/fdb#contactInfoHouseId",
+        "propertyUrl": "https://fdb.cdl.correlaid.org/def/fdb#contactInfoHouseId",
         "fdb:origin": "derived",
         "datatype": "string"
       },
       {
         "name": "contact_info_building",
         "titles": "contact_info_building",
-        "propertyUrl": "https://fdb.correlaid.org/def/fdb#contactInfoBuilding",
+        "propertyUrl": "https://fdb.cdl.correlaid.org/def/fdb#contactInfoBuilding",
         "fdb:origin": "derived",
         "datatype": "string"
       },
@@ -370,7 +370,7 @@
       {
         "name": "on_website_from",
         "titles": "on_website_from",
-        "propertyUrl": "https://fdb.correlaid.org/def/fdb#onWebsiteFrom",
+        "propertyUrl": "https://fdb.cdl.correlaid.org/def/fdb#onWebsiteFrom",
         "fdb:origin": "derived",
         "datatype": {
           "base": "dateTime",
@@ -393,7 +393,7 @@
       {
         "name": "previous_update_dates",
         "titles": "previous_update_dates",
-        "propertyUrl": "https://fdb.correlaid.org/def/fdb#previousUpdateDates",
+        "propertyUrl": "https://fdb.cdl.correlaid.org/def/fdb#previousUpdateDates",
         "fdb:origin": "derived",
         "datatype": {
           "base": "dateTime"
@@ -404,7 +404,7 @@
       {
         "name": "deleted",
         "titles": "deleted",
-        "propertyUrl": "https://fdb.correlaid.org/def/fdb#deleted",
+        "propertyUrl": "https://fdb.cdl.correlaid.org/def/fdb#deleted",
         "fdb:origin": "derived",
         "datatype": "boolean",
         "required": true
@@ -412,7 +412,7 @@
       {
         "name": "keywords_extracted",
         "titles": "keywords_extracted",
-        "propertyUrl": "https://fdb.correlaid.org/def/fdb#keywordsExtracted",
+        "propertyUrl": "https://fdb.cdl.correlaid.org/def/fdb#keywordsExtracted",
         "fdb:origin": "inferred",
         "datatype": "string",
         "dc:description": "zero or more values per row; inferred, not stated by the source: the raw keywords string split into single keywords by a fine-tuned German encoder, because upstream joins them with spaces and 87.7% of values carry no separator at all. Every keyword is a contiguous span of the raw string and the spans cover it exactly, which is checked on every publish, so nothing is invented, dropped or reordered; where the boundaries fall is the model's judgement -- exact-span F1 0.967 on a held-out hand-labelled sample, against 0.878 for splitting on nothing. Null where a value has not been segmented. The raw keywords column is published unchanged beside it."

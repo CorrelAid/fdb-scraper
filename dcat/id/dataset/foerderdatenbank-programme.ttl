@@ -7,7 +7,7 @@ PREFIX prov: <http://www.w3.org/ns/prov#>
 PREFIX vcard: <http://www.w3.org/2006/vcard/ns#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
-<https://fdb.correlaid.org/id/dataset/foerderdatenbank-programme>
+<https://fdb.cdl.correlaid.org/id/dataset/foerderdatenbank-programme>
     a dcat:Dataset ;
     dcatap:availability <http://publications.europa.eu/resource/authority/planned-availability/AVAILABLE> ;
     dcatapde:politicalGeocodingLevelURI
@@ -15,8 +15,8 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
         <http://dcat-ap.de/def/politicalGeocoding/Level/state> ;
     dct:accessRights <http://publications.europa.eu/resource/authority/access-right/PUBLIC> ;
     dct:accrualPeriodicity <http://publications.europa.eu/resource/authority/frequency/WEEKLY> ;
-    dct:conformsTo <https://fdb.correlaid.org/table-schema.json> ;
-    dct:creator <https://fdb.correlaid.org/id/agent/correlaid> ;
+    dct:conformsTo <https://fdb.cdl.correlaid.org/table-schema.json> ;
+    dct:creator <https://fdb.cdl.correlaid.org/id/agent/correlaid> ;
     dct:description
         """Alle Förderprogramme der Förderdatenbank des Bundes (Bund, Länder und EU), ein Datensatz pro Programm mit 51 Feldern.
 
@@ -36,12 +36,12 @@ The export only ever contains today's state. This dataset therefore maintains a 
     dct:identifier "foerderdatenbank-programme" ;
     dct:language <http://publications.europa.eu/resource/authority/language/DEU> ;
     dct:modified "2026-07-30T00:00:00+00:00"^^xsd:dateTime ;
-    dct:publisher <https://fdb.correlaid.org/id/agent/correlaid> ;
+    dct:publisher <https://fdb.cdl.correlaid.org/id/agent/correlaid> ;
     dct:title
         "Förderdatenbank -- Förderprogramme"@de ,
         "German funding database -- programmes"@en ;
-    dcat:contactPoint <https://fdb.correlaid.org/id/agent/correlaid#contact> ;
-    dcat:distribution <https://fdb.correlaid.org/id/dataset/foerderdatenbank-programme/distribution/csv> ;
+    dcat:contactPoint <https://fdb.cdl.correlaid.org/id/agent/correlaid#contact> ;
+    dcat:distribution <https://fdb.cdl.correlaid.org/id/dataset/foerderdatenbank-programme/distribution/csv> ;
     dcat:keyword
         "Förderdatenbank"@de ,
         "Fördermittel"@de ,
@@ -55,7 +55,7 @@ The export only ever contains today's state. This dataset therefore maintains a 
     foaf:page <https://www.foerderdatenbank.de/> ;
 .
 
-<https://fdb.correlaid.org/id/agent/correlaid#contact>
+<https://fdb.cdl.correlaid.org/id/agent/correlaid#contact>
     a
         vcard:Kind ,
         vcard:Organization ;
@@ -64,18 +64,18 @@ The export only ever contains today's state. This dataset therefore maintains a 
     vcard:hasURL <https://correlaid.org/> ;
 .
 
-<https://fdb.correlaid.org/id/dataset/foerderdatenbank-programme/distribution/csv>
+<https://fdb.cdl.correlaid.org/id/dataset/foerderdatenbank-programme/distribution/csv>
     a dcat:Distribution ;
     dcatap:availability <http://publications.europa.eu/resource/authority/planned-availability/AVAILABLE> ;
     dcatapde:licenseAttributionByText "Bundesministerium für Wirtschaft und Energie"@de ;
-    dct:conformsTo <https://fdb.correlaid.org/table-schema.json> ;
+    dct:conformsTo <https://fdb.cdl.correlaid.org/table-schema.json> ;
     dct:description "Die vollständige Tabelle mit historischen Einträgen. Das verlinkte Tabellenschema beschreibt Datentypen, Pflichtfelder und Muster; Spalten mit Listenwerten enthalten JSON-Arrays als Zellenwert."@de ;
     dct:format <http://publications.europa.eu/resource/authority/file-type/CSV> ;
     dct:license <http://dcat-ap.de/def/licenses/cc-by-nd/4.0> ;
     dct:modified "2026-07-30T00:00:00+00:00"^^xsd:dateTime ;
     dct:title "Förderprogramme als CSV-Datei"@de ;
-    dcat:accessURL <https://fdb.correlaid.org/data/programme.csv> ;
-    dcat:downloadURL <https://fdb.correlaid.org/data/programme.csv> ;
+    dcat:accessURL <https://fdb.cdl.correlaid.org/data/programme.csv> ;
+    dcat:downloadURL <https://fdb.cdl.correlaid.org/data/programme.csv> ;
     dcat:mediaType <https://www.iana.org/assignments/media-types/text/csv> ;
 .
 
@@ -83,7 +83,7 @@ The export only ever contains today's state. This dataset therefore maintains a 
     a foaf:Document ;
 .
 
-<https://fdb.correlaid.org/id/agent/correlaid>
+<https://fdb.cdl.correlaid.org/id/agent/correlaid>
     a foaf:Agent ;
     foaf:homepage <https://correlaid.org/> ;
     foaf:mbox <mailto:info@correlaid.org> ;

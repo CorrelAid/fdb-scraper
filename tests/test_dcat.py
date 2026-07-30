@@ -42,7 +42,7 @@ DATASET_DOC = ROOT / "dcat" / "id" / "dataset" / "foerderdatenbank-programme.ttl
 # identifiers: importing them would make the assertions restate whatever the
 # constant happens to say, and a changed host would pass silently. Spelled here,
 # moving the host fails these tests until someone confirms the move on purpose.
-OWN = "https://fdb.correlaid.org/id/"
+OWN = "https://fdb.cdl.correlaid.org/id/"
 DATASET = f"{OWN}dataset/foerderdatenbank-programme"
 SHAPES_DIR = Path(__file__).parent / "fixtures" / "shapes"
 

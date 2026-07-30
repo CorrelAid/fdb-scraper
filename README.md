@@ -10,10 +10,10 @@ previous [scaper](https://github.com/CorrelAid/cdl_funding_scraper) we provided,
 
 | What | URL |
 | --- | --- |
-| The data | `https://fdb.correlaid.org/data/programme.csv` |
-| Column contract (CSVW) | `https://fdb.correlaid.org/table-schema.json` |
-| Metadata (DCAT-AP.de) | `https://fdb.correlaid.org/id/dataset/foerderdatenbank-programme.ttl` |
-| Minted vocabulary | `https://fdb.correlaid.org/def/fdb` |
+| The data | `https://fdb.cdl.correlaid.org/data/programme.csv` |
+| Column contract (CSVW) | `https://fdb.cdl.correlaid.org/table-schema.json` |
+| Metadata (DCAT-AP.de) | `https://fdb.cdl.correlaid.org/id/dataset/foerderdatenbank-programme.ttl` |
+| Minted vocabulary | `https://fdb.cdl.correlaid.org/def/fdb` |
 
 The metadata document is self-contained and is what a harvester fetches. This
 repository publishes **no `dcat:Catalog`** — the catalogue listing this dataset

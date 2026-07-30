@@ -8,13 +8,13 @@ Everything below has been verified end to end against a real Coolify-shaped stac
 except the two steps that need your Coolify instance — the Backups tab and the
 Scheduled Task. Those are marked.
 
-## 0. The domain is already decided: `fdb.correlaid.org`
+## 0. The domain is already decided: `fdb.cdl.correlaid.org`
 
 Nothing to configure here — this section is what you have to *match*. Every
 published URL is stated once, in `src/fdb_scraper/uris.py`:
 
 ```python
-HOST            = "https://fdb.correlaid.org"
+HOST            = "https://fdb.cdl.correlaid.org"
 BASE            = f"{HOST}/id/"                        # identifier
 VOCAB           = f"{HOST}/def/fdb#"                   # identifier
 DATASET         = f"{BASE}dataset/{DATASET_ID}"        # identifier
@@ -23,8 +23,8 @@ SCHEMA_URL      = f"{HOST}/table-schema.json"
 DOWNLOAD_BASE   = f"{HOST}/data/"
 ```
 
-So **attach `fdb.correlaid.org` in step 4**, not some other name. The dataset
-document tells harvesters to fetch `https://fdb.correlaid.org/data/programme.csv`; if
+So **attach `fdb.cdl.correlaid.org` in step 4**, not some other name. The dataset
+document tells harvesters to fetch `https://fdb.cdl.correlaid.org/data/programme.csv`; if
 the stack answers on a different host, the harvest 404s and the identifiers do not
 dereference.
 
@@ -56,7 +56,7 @@ cached the old identifiers — that is the intended friction.
 ## 1. Prerequisites
 
 - A Coolify server with the proxy running.
-- DNS: an A record for `fdb.correlaid.org` pointing at that server. Coolify issues the
+- DNS: an A record for `fdb.cdl.correlaid.org` pointing at that server. Coolify issues the
   certificate once the domain is attached.
 - The repo reachable by Coolify (GitHub App, deploy key, or a public clone URL).
 
@@ -143,7 +143,7 @@ Deploy. `history` becomes healthy first, then `pipeline` starts and idles on
 
 ## 4. Attach the domain
 
-Attach **`fdb.correlaid.org`** to the **`files`** service on port **80** — that exact
+Attach **`fdb.cdl.correlaid.org`** to the **`files`** service on port **80** — that exact
 host, for the reason in step 0. Coolify writes the proxy labels and terminates TLS;
 the `Caddyfile` binds `:80` and is host-agnostic, so it needs no per-environment
 change.
@@ -197,18 +197,18 @@ publish: 2500 programmes (2500 live), 49 columns, validated
 This downloads 28 MB and takes about a minute. Then check what is actually served:
 
 ```sh
-curl -sI https://fdb.correlaid.org/data/programme.csv | grep -i content-type
+curl -sI https://fdb.cdl.correlaid.org/data/programme.csv | grep -i content-type
 # text/csv; charset=utf-8
 
-curl -sH 'Accept: text/turtle' -I https://fdb.correlaid.org/def/fdb | grep -i content-type
+curl -sH 'Accept: text/turtle' -I https://fdb.cdl.correlaid.org/def/fdb | grep -i content-type
 # text/turtle; charset=utf-8
 
-curl -s -o /dev/null -w '%{http_code}\n' https://fdb.correlaid.org/state/
+curl -s -o /dev/null -w '%{http_code}\n' https://fdb.cdl.correlaid.org/state/
 # 404
 ```
 
 The middle one matters most: it is the check that the minted identifiers actually
-dereference. `https://fdb.correlaid.org/id/dataset/foerderdatenbank-programme` should
+dereference. `https://fdb.cdl.correlaid.org/id/dataset/foerderdatenbank-programme` should
 answer the same way.
 
 ## 7. Add the scheduled task
@@ -310,7 +310,7 @@ mounted, or its `header` matchers were reordered. Go's mime map does not know
 `.ttl` or `.jsonld`; both are set explicitly. CSV is served as `text/csv`.
 
 **A harvester fetches the metadata but downloads nothing** — the stack is answering
-on a host other than `fdb.correlaid.org`, so the `dcat:downloadURL` in the dataset
+on a host other than `fdb.cdl.correlaid.org`, so the `dcat:downloadURL` in the dataset
 document points somewhere that does not serve the file. Fix the attached domain
 (step 4), not `uris.py` — see step 0.
 
