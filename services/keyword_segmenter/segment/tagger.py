@@ -22,6 +22,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from segment.postprocess import DEFAULT_LEXICON, load_lexicon, postprocess
 from segment.tokens import joins_to_sizes, terms, tokenize
 
 DEFAULT_PATH = Path("models/keyword_tagger")
@@ -42,6 +43,7 @@ class KeywordTagger:
         threshold: float = DEFAULT_THRESHOLD,
         device: str = "cpu",
         batch_size: int = 32,
+        lexicon: str | Path | None = DEFAULT_LEXICON,
     ):
         import torch
         from transformers import AutoModelForTokenClassification, AutoTokenizer
@@ -60,6 +62,10 @@ class KeywordTagger:
         self.device = device
         self.threshold = threshold
         self.batch_size = batch_size
+        # Deterministic repairs for the class the training set does not cover:
+        # spans longer than five tokens, of which gold holds exactly one. See
+        # segment.postprocess.
+        self.lexicon = load_lexicon(lexicon)
 
     def _probabilities(self, batch: list[list[str]]) -> list[list[float]]:
         """P(inside) for each word of each row."""
@@ -106,7 +112,7 @@ class KeywordTagger:
                 # Truncation would leave the tail unlabelled; treat any missing
                 # decision as "new keyword", which is the safe direction.
                 joins += [False] * (len(tokens) - 1 - len(joins))
-                sizes = joins_to_sizes(joins)
+                sizes = joins_to_sizes(postprocess(tokens, joins, self.lexicon))
                 results[i] = {"terms": terms(tokens, sizes), "group_sizes": sizes}
 
         return [r for r in results if r is not None]

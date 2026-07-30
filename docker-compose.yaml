@@ -96,10 +96,6 @@ services:
   files:
     image: caddy:2-alpine
     restart: unless-stopped
-    environment:
-      # Coolify reads this and writes the proxy labels for container port 80.
-      # Service name has no underscore, which is required for the _80 suffix.
-      - SERVICE_FQDN_FILES_80
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       # Only `public` is mounted, deliberately. The sibling `state` directory holds
