@@ -97,10 +97,17 @@ services:
         target: /srv
 
   files:
-    image: caddy:2-alpine
+    # The Caddyfile is baked into the image via Dockerfile.caddy rather than
+    # bind-mounted. A bind mount would point at ./Caddyfile, which Coolify
+    # rewrites to <application-dir>/Caddyfile -- and if Coolify has ever created
+    # an empty `Caddyfile` directory there (which it does when initialising the
+    # resource), the file in the repo cannot overwrite it and the mount fails at
+    # container start with "not a directory".
+    build:
+      context: .
+      dockerfile: Dockerfile.caddy
     restart: unless-stopped
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
       # Only `public` is mounted, deliberately. The sibling `state` directory holds
       # dlt's working files, which include extracted copies of the export; Caddy
       # serves its root with directory listings on, so mounting /data/fdb here

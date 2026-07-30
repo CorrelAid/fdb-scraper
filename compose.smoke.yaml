@@ -29,7 +29,6 @@ services:
 
   files:
     volumes: !override
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - type: bind
         source: ${FDB_DATA}/public
         target: /srv
