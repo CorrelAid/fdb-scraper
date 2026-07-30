@@ -98,7 +98,10 @@ Then set the environment variables. One is required; the rest have working defau
 | `POSTGRES_PASSWORD` | generate one | **Required.** The compose fails to start without it rather than falling back to trust authentication |
 | `POSTGRES_USER` | `fdb` | optional, defaults to `fdb` |
 | `POSTGRES_DB` | `fdb` | optional, defaults to `fdb` |
-| `FDB_DATA` | leave unset | defaults to `/data/fdb`; only the test suite overrides it |
+
+The data directory is hardcoded to `/data/fdb` and cannot be overridden in deployment --
+Coolify's compose processor rejects `${...}` substitutions in volume source paths.
+If you set `FDB_DATA` in Coolify it has no effect; remove it.
 
 Optionally, the keyword segmenter. Both must be set for it to run at all
 (`fdb_scraper.history.tagger_configured`); without them the load still records the

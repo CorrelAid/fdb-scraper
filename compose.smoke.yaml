@@ -2,21 +2,39 @@
 #
 #   docker compose -f docker-compose.yaml -f compose.smoke.yaml up -d --build
 #
-# Two differences from a real run, and only two, so what is exercised stays close to
-# what is deployed:
+# Three differences from a real run, and only three, so what is exercised stays close
+# to what is deployed:
 #
+#   * the data directory is redirected to a temporary path (FDB_DATA), so the test
+#     does not need /data/fdb on the host;
 #   * the test fixture is mounted, so the pipeline can load an export without
 #     fetching 28 MB from a federal server on every run;
 #   * Caddy's port is published, so the assertions can reach it from the host.
 #
 # Everything else -- the image, the Postgres, the scheduled-task command, the
-# read-only public mount -- is the deployment's own configuration. FDB_DATA points
-# the stack at a temporary directory; see tests/test_compose.py.
+# read-only public mount -- is the deployment's own configuration. FDB_DATA is set
+# by tests/test_compose.py; it must be set for the bind mounts below to resolve.
+#
+# The pipeline and files `volumes` lists are replaced wholesale (`!override`), not
+# extended, because docker compose merges list items by appending and a second
+# /data/fdb mount on top of the temporary one would point at a path that does not
+# exist on the test host.
 services:
   pipeline:
-    volumes:
+    volumes: !override
+      - type: bind
+        source: ${FDB_DATA:?compose.smoke.yaml requires FDB_DATA}
+        target: /srv
       - ./tests/fixtures/export:/export:ro
 
   files:
+    volumes: !override
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - type: bind
+        source: ${FDB_DATA}/public
+        target: /srv
+        read_only: true
+      - caddy_data:/data
+      - caddy_config:/config
     ports:
       - "${SMOKE_PORT:-18099}:80"
