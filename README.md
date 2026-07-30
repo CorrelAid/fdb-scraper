@@ -76,9 +76,6 @@ No configuration is needed to run locally: unset, the pipeline writes its histor
 | `FDB_KEYWORD_CACHE` | client default, relative to the working directory | The segmenter client's sqlite cache. The deployment moves it onto the state volume |
 | `FDB_SEGMENTER_DIR` | `services/keyword_segmenter` beside the package | Where `history` imports the segmenter client from. Set by the image, which copies only that directory |
 | `FDB_TEST_POSTGRES` | unset | A Postgres URL makes the twelve history tests run against Postgres instead of skipping |
-| `NOTIFY_TO` | unset | Comma-separated recipients for mail on a failed run. Empty means `scripts/notify.py` does nothing, so the other five below are unused |
-| `NOTIFY_FROM`, `SMTP_HOST`, `SMTP_USERNAME`, `SMTP_PASSWORD` | unset | Required once `NOTIFY_TO` is set |
-| `SMTP_PORT` | `587` | STARTTLS |
 
 The two tagger variables have a local home: `.env.tagger` at the repo root,
 gitignored, sourced with `set -a; . ./.env.tagger; set +a`.

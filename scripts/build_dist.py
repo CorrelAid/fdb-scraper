@@ -42,15 +42,6 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).parent.parent
-# The deployment runs `python scripts/build_dist.py`, which puts scripts/ on
-# sys.path and not the repository root -- so `scripts.notify` in the failure
-# handler at the bottom would raise ModuleNotFoundError instead of sending the
-# notification, and take the real traceback down with it. Stated here rather than
-# imported relatively because the tests import the same module as `scripts.notify`
-# (pytest adds the root via `pythonpath`), and two spellings of one module would
-# load it twice.
-if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
 
 GEN_DCAT = ROOT / "scripts" / "gen_dcat.py"
 CSV_FILE = "programme.csv"
@@ -172,23 +163,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    try:
-        raise SystemExit(main())
-    except SystemExit:
-        raise
-    except BaseException as e:
-        # Imported inside the handler so a misconfigured notify module does not
-        # break the success path. notify.send_failure is itself a no-op when
-        # NOTIFY_TO is unset, which is the local-dev case.
-        #
-        # Guarded, because notifying is the least important thing happening here: an
-        # unreachable SMTP host or a missing NOTIFY_FROM must not replace the
-        # traceback that says why the pipeline actually failed. Print and re-raise
-        # the original either way.
-        try:
-            from scripts.notify import send_failure
-
-            send_failure(e, " ".join(sys.argv))
-        except Exception as notify_error:  # noqa: BLE001 -- best effort by design
-            print(f"could not notify: {notify_error!r}", file=sys.stderr)
-        raise
+    raise SystemExit(main())

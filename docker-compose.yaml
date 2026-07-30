@@ -78,15 +78,6 @@ services:
       # The segmenter client's read-through cache. On the state volume because the
       # image's working directory is not writable by the pipeline's user.
       - FDB_KEYWORD_CACHE=/srv/state/keyword_cache.sqlite
-      # Failure mail, all optional. NOTIFY_TO is the switch: while it is empty,
-      # scripts/notify.send_failure returns before reading anything else, so an
-      # unconfigured stack runs exactly as it did without these.
-      - NOTIFY_TO=${NOTIFY_TO:-}
-      - NOTIFY_FROM=${NOTIFY_FROM:-}
-      - SMTP_HOST=${SMTP_HOST:-}
-      - SMTP_PORT=${SMTP_PORT:-587}
-      - SMTP_USERNAME=${SMTP_USERNAME:-}
-      - SMTP_PASSWORD=${SMTP_PASSWORD:-}
     volumes:
       # Read-write: this is the only thing that writes the published files.
       # Path is hardcoded because Coolify's compose processor rejects `${...}` in

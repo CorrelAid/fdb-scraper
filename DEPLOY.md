@@ -117,22 +117,10 @@ whatever has no stored segmentation:
 It has to be on the state volume: the client's default path is relative to the image's
 working directory, which the pipeline's user cannot write.
 
-And optionally, mail on a failed run — a weekly job that fails silently is a dataset
-that quietly stops updating, and nothing else here notices. `scripts/notify.py` is a
-no-op while `NOTIFY_TO` is empty, so leaving the whole group unset is a supported
-state — nothing below it is read until a recipient exists:
-
-| Variable | Value | Notes |
-| --- | --- | --- |
-| `NOTIFY_TO` | `you@example.org` | comma-separated. **The switch:** empty means no mail is ever sent |
-| `NOTIFY_FROM` | `fdb@example.org` | required once `NOTIFY_TO` is set |
-| `SMTP_HOST` | your relay | required once `NOTIFY_TO` is set |
-| `SMTP_PORT` | `587` | defaults to `587`; STARTTLS, so not `465` |
-| `SMTP_USERNAME` | | required once `NOTIFY_TO` is set |
-| `SMTP_PASSWORD` | | required once `NOTIFY_TO` is set. Mark it secret in Coolify |
-
-A misconfigured relay cannot fail a run: `build_dist.py` notifies inside the failure
-handler and prints `could not notify: ...` if the send itself raises.
+Failure notification is the Coolify Scheduled Task's own. Wire a notification channel
+(Discord, Slack, email, webhook — Settings → Notification Channels) to this resource's
+Scheduled Task; a failed run then pages the configured target with the container's
+last log lines, which include the traceback.
 
 Two more are set inside the compose file, not by hand:
 
