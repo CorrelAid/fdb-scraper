@@ -42,7 +42,9 @@ See `notebooks/exploration.ipynb` for an example on how to load and use the data
 | process | `process.process` | decoding, adding ids and links, collapsing pivots, renaming | 
 | validate | `schema.build_schema` | raises `SchemaErrors` on bad values |
 
-We additionally do some non-determinstic segmenting for keywords with a finetuned BERT model. In the export, keywords often (87.7%) carry no separator. The keywords are joined by single spaces, so a multi-word keyword is indistinguishable from several one-word keywords. The resulting field is called `keywords_extracted`. In the future we might add more information extraction to this pipeline, but non-deterministic methods will always be declared as such.
+We additionally do some non-determinstic segmenting for keywords with a finetuned BERT model. In the export, keywords often (87.7%) carry no separator. The keywords are joined by single spaces, so a multi-word keyword is indistinguishable from several one-word keywords. The resulting field is called `keywords_extracted`.
+
+In the future we might add more information extraction to this pipeline, but non-deterministic methods will always be declared as such. It would for example make sense to extract deadlines and provide them in a structured way. Currently, the deadline field is mostly not filled and not very structured.
 
 ## Parsing the XML yourself
 
