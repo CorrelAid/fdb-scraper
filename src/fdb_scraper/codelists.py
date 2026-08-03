@@ -4,8 +4,16 @@ Five of the export's closed vocabularies describe the same things as codelists
 published in XRepository, and one (``funding_location``) as NUTS. This module
 records how, as SKOS match relations rather than as a substitution:
 ``funding_type`` keeps the value ``"zuschuss"``, and the fact that it is also
-``001 Zuschuss`` in ``urn:xoev-de:stmd:codeliste:finanzierungsform`` is published
-alongside for whoever wants it.
+``001 Zuschuss`` in ``urn:xoev-de:stmd:codeliste:finanzierungsform`` is recorded here
+for whoever wants it.
+
+Deliberately not part of what is published. The alignment is loose -- a label match
+against codelists that publish no URI per code, five of the nine closed vocabularies,
+and no counterpart at all for several categories -- so putting it in the dataset's
+metadata would dress it up as more than it is. :func:`matches` and :func:`unmatched`
+are the interface: a consumer who wants the standard code imports them, and the
+published table stays the export's own codes. ``README.md`` says the same for someone
+who never opens this file.
 
 That way round because substituting loses data. Every codelist here is missing at
 least one concept the export uses -- Garantie, Mobilität, Frauenförderung, and
@@ -35,17 +43,8 @@ from dataclasses import dataclass
 
 import polars as pl
 
+from fdb_scraper.config import CODE_URI, LINKED, RENAMES
 from fdb_scraper.generated import CODELISTS, CLOSED_VOCABS
-from fdb_scraper.schema import RENAMES
-
-# Published column -> (codelist, key into vocab.CLOSED_VOCABS).
-LINKED = {
-    "funding_type": ("finanzierungsform", "foerderart"),
-    "funding_body": ("geldgebende-institution", "foerdergeber"),
-    "funding_location": ("nuts", "foerdergebiet"),
-    "funding_area": ("foerderbereich", "foerderbereich"),
-    "eligible_applicants": ("foerdernehmende", "foerderberechtigte"),
-}
 
 IDENTIFIERS = {name: cl["identifier"] for name, cl in CODELISTS.items()}
 VERSIONS = {name: cl["version"] for name, cl in CODELISTS.items()}
@@ -172,12 +171,6 @@ def _build(codelist: str, vocab_key: str) -> dict[str, tuple[Match, ...]]:
 MATCHES: dict[str, dict[str, tuple[Match, ...]]] = {
     codelist: _build(codelist, vocab_key) for codelist, vocab_key in LINKED.values()
 }
-
-# Codelist code -> its URI, where the codelist publishes per-code URIs. XÖV
-# identifies its lists by URN and gives codes no URI of their own, so only NUTS
-# has one; for the rest a consumer resolves the code against the list identifier.
-CODE_URI = {"nuts": "http://data.europa.eu/nuts/code/{}"}
-
 
 def code_uri(codelist: str, code: str) -> str | None:
     """Dereferenceable URI for a code, or None if the codelist publishes none."""

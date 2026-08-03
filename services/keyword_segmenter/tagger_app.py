@@ -19,7 +19,9 @@ spend the container budget.
     modal deploy services/keyword_segmenter/tagger_app.py
 
 The pipeline talks to it through :mod:`segment.client`, which caches by
-``md5(keywords)`` so a rerun re-segments only what changed.
+``md5(revision + keywords)`` so a rerun re-segments only what changed -- and a
+redeploy or a retrain changes the revision, so an improvement reaches the column
+without anyone clearing a cache by hand.
 """
 
 import hmac
@@ -83,12 +85,17 @@ app = modal.App("fdb-keyword-tagger", image=image)
 class Tagger:
     @modal.enter()
     def load(self) -> None:
+        from segment.revision import revision
         from segment.tagger import KeywordTagger
 
         self.tagger = KeywordTagger(MODEL_DIR, device="cuda" if GPU else "cpu")
+        # Reported with every response so a caller can tell whether a segmentation
+        # it stored earlier came from this code and this checkpoint.
+        # See segment/revision.py for why the client cannot compute it alone.
+        self.revision = revision(MODEL_DIR)
         meta_path = f"{MODEL_DIR}/training_meta.json"
         if os.path.exists(meta_path):
-            print(f"loaded tagger: {open(meta_path).read()}")
+            print(f"loaded tagger {self.revision}: {open(meta_path).read()}")
 
     @staticmethod
     def _authorised(header: str | None) -> bool:
@@ -131,7 +138,13 @@ class Tagger:
         if len(values) > 512:
             raise HTTPException(status_code=413, detail="at most 512 values per request")
 
-        return {"model": "deepset/gbert-base", "results": self.tagger.segment(values)}
+        # An empty list is a legitimate request, not a mistake: it is how the client
+        # asks for the revision before it decides which values are still cached.
+        return {
+            "model": "deepset/gbert-base",
+            "revision": self.revision,
+            "results": self.tagger.segment(values),
+        }
 
     @modal.method()
     def segment_batch(self, values: list[str]) -> list[dict]:

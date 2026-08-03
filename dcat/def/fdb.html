@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Förderdatenbank -- minted Begriffe</title>
+<link rel="alternate" type="text/turtle" href="https://fdb.cdl.correlaid.org/def/fdb">
+<link rel="alternate" type="application/ld+json" href="https://fdb.cdl.correlaid.org/def/fdb.jsonld">
+<style>
+  /* Colours, fonts and spacing are the CorrelAid CDL design tokens
+     (@correlaid/cdl-design). Copied as literals rather than imported: this page
+     is a static file served next to the RDF, with no build step and no request
+     to a stylesheet the site would then have to keep serving. The brand faces
+     are licensed and not hosted here, so each stack falls back on its own. */
+  :root {
+    --bg: #8bb8ff; --fg: #86185f; --accent: #86184f; --surface: #ffffff;
+    --sans: "Inter", -apple-system, "Segoe UI", sans-serif;
+    --heading: "PP Fraktion Sans", -apple-system, "Segoe UI", sans-serif;
+    --mono: "PP Fraktion Mono", ui-monospace, "Source Code Pro", monospace;
+  }
+  body { font-family: var(--sans); background: var(--bg); color: var(--fg);
+    max-width: 42rem; margin: 0 auto; padding: 2rem 1rem; line-height: 1.6; }
+  h1, h2 { font-family: var(--heading); letter-spacing: -0.01em; line-height: 1.15; }
+  h1 { font-size: 1.9rem; }
+  h2 { font-size: 1.4rem; margin-top: 2rem; }
+  dl { display: grid; grid-template-columns: max-content 1fr; gap: 0.35rem 1.5rem; }
+  dt { font-weight: 700; }
+  dd { margin: 0; }
+  .desc { white-space: pre-wrap; }
+  code { font-family: var(--mono); background: var(--surface); padding: 0.1em 0.3em;
+    border-radius: 0.25rem; }
+  a { color: var(--accent); text-decoration-thickness: 1.5px; }
+  hr { border: 0; border-top: 1.5px solid var(--accent); margin: 2rem 0; }
+  table { border-collapse: collapse; }
+  th, td { text-align: left; padding: 0.4rem 0.8rem 0.4rem 0; vertical-align: top; }
+</style>
+</head>
+<body>
+<h1>Förderdatenbank -- minted Begriffe</h1>
+<div class="desc">Begriffe für die Spalten der Förderprogramm-Tabelle, für die kein etablierter Begriff passt. Generiert aus fdb_scraper.semantics.</div>
+<h2>Classes</h2>
+<table><thead><tr><th>Term</th><th>Comment</th></tr></thead><tbody><tr><td><code>Förderprogramm</code></td><td>Ein Förderprogramm der Förderdatenbank des Bundes; eine Zeile der veröffentlichten Tabelle.</td></tr></tbody></table>
+<h2>Properties</h2>
+<table><thead><tr><th>Term</th><th>Comment</th><th>Origin</th></tr></thead><tbody><tr><td><code>origin</code></td><td>Where a column&#x27;s values come from: &quot;upstream&quot; -- stated by the source export and only reshaped; &quot;derived&quot; -- computed from upstream values or from the load history by a rule, exactly and reproducibly; &quot;inferred&quot; -- produced by a machine-learning model, therefore neither deterministic nor exact. The inferred columns are keywords_extracted; their accuracy is measured against a labelled sample rather than guaranteed.</td><td><code></code></td></tr><tr><td><code>programme_slug</code></td><td>last path segment of the source URL. Not unique -- a programme offered by several Länder appears once per Land with the same slug -- so it does not identify a row; id_url does</td><td><code>upstream</code></td></tr><tr><td><code>legal_basis</code></td><td></td><td><code>upstream</code></td></tr><tr><td><code>status_note</code></td><td></td><td><code>upstream</code></td></tr><tr><td><code>seo_description</code></td><td></td><td><code>upstream</code></td></tr><tr><td><code>required_documents</code></td><td></td><td><code>upstream</code></td></tr><tr><td><code>application_language</code></td><td></td><td><code>upstream</code></td></tr><tr><td><code>deadlines</code></td><td></td><td><code>upstream</code></td></tr><tr><td><code>procedure</code></td><td></td><td><code>upstream</code></td></tr><tr><td><code>processing_time</code></td><td></td><td><code>upstream</code></td></tr><tr><td><code>legal_requirements</code></td><td></td><td><code>upstream</code></td></tr><tr><td><code>keywords</code></td><td></td><td><code>upstream</code></td></tr><tr><td><code>funding_type</code></td><td>closed vocabulary, 6 codes; labels in fdb_scraper.generated.vocab.FOERDERART</td><td><code>upstream</code></td></tr><tr><td><code>eligible_applicants</code></td><td>closed vocabulary, 9 codes; labels in fdb_scraper.generated.vocab.FOERDERBERECHTIGTE</td><td><code>upstream</code></td></tr><tr><td><code>funding_area</code></td><td>closed vocabulary, 23 codes; labels in fdb_scraper.generated.vocab.FOERDERBEREICH</td><td><code>upstream</code></td></tr><tr><td><code>funding_body</code></td><td>closed vocabulary, 3 codes; labels in fdb_scraper.generated.vocab.FOERDERGEBER</td><td><code>upstream</code></td></tr><tr><td><code>funding_organisation</code></td><td></td><td><code>upstream</code></td></tr><tr><td><code>grw</code></td><td>closed vocabulary, 2 codes; labels in fdb_scraper.generated.vocab.GRW</td><td><code>upstream</code></td></tr><tr><td><code>unternehmensgroesse</code></td><td>closed vocabulary, 4 codes; labels in fdb_scraper.generated.vocab.UNTERNEHMENSGROESSE</td><td><code>upstream</code></td></tr><tr><td><code>contact_ids</code></td><td></td><td><code>upstream</code></td></tr><tr><td><code>funding_subarea</code></td><td>closed vocabulary, 124 &quot;parent.child&quot; paths, where parent is a foerderbereich code; one value per pair</td><td><code>upstream</code></td></tr><tr><td><code>applicant_sector</code></td><td>closed vocabulary, 16 &quot;parent.child&quot; paths, where parent is a foerderberechtigte code; one value per pair</td><td><code>upstream</code></td></tr><tr><td><code>id_hash</code></td><td>md5 of id_url, hex. Primary key of the published table and the key the version history groups by. A digest of the identifier rather than an identifier of its own: it is stable exactly as long as the source URL is</td><td><code>derived</code></td></tr><tr><td><code>contact_info_fax</code></td><td></td><td><code>derived</code></td></tr><tr><td><code>contact_info_mobile</code></td><td></td><td><code>derived</code></td></tr><tr><td><code>contact_info_house_id</code></td><td></td><td><code>derived</code></td></tr><tr><td><code>contact_info_building</code></td><td></td><td><code>derived</code></td></tr><tr><td><code>on_website_from</code></td><td>first run in which any version of this programme was present in the export. An observation of ours, not a date the source states: the export ships only its current state, so nothing before this dataset&#x27;s first load is visible and a programme older than that reads as first seen then</td><td><code>derived</code></td></tr><tr><td><code>previous_update_dates</code></td><td>one timestamp per superseded version, ascending: the run in which that version stopped being the current one. Empty for a programme that has never changed; its length is therefore the number of changes observed</td><td><code>derived</code></td></tr><tr><td><code>deleted</code></td><td>true when no version of this programme is current any more: it was in an earlier export and is absent from the latest one. The row is kept, carrying the values of its last seen version, so the dataset outlives what upstream removed -- last_updated then says when that happened. Derived from our load history, not stated by the source, and absence is all it means: a programme may be gone because it ended, because it was reorganised, or because upstream restructured the export. A programme that reappears goes back to false</td><td><code>derived</code></td></tr><tr><td><code>keywords_extracted</code></td><td>inferred, not stated by the source: the raw keywords string split into single keywords by a fine-tuned German encoder, because upstream joins them with spaces and 87.7% of values carry no separator at all. Every keyword is a contiguous span of the raw string and the spans cover it exactly, which is checked on every publish, so nothing is invented, dropped or reordered; where the boundaries fall is the model&#x27;s judgement -- exact-span F1 0.967 on a held-out hand-labelled sample, against 0.878 for splitting on nothing. Null where a value has not been segmented. The raw keywords column is published unchanged beside it.</td><td><code>inferred</code></td></tr></tbody></table>
+<hr>
+<p><small>
+Representations: <a href="https://fdb.cdl.correlaid.org/def/fdb">Turtle</a> &middot;
+<a href="https://fdb.cdl.correlaid.org/def/fdb.jsonld">JSON-LD</a> &middot;
+<a href="https://fdb.cdl.correlaid.org/def/fdb.ttl">.ttl</a>.
+</small></p>
+</body>
+</html>

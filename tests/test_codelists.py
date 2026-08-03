@@ -2,11 +2,11 @@ import polars as pl
 import pytest
 
 from fdb_scraper.generated import CODELISTS
+from fdb_scraper.config import LINKED
 from fdb_scraper.codelists import (
     BROAD,
     EXACT,
     IDENTIFIERS,
-    LINKED,
     MANUAL,
     MATCHES,
     NARROW,

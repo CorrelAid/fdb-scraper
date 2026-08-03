@@ -122,6 +122,56 @@ def row(df: pl.DataFrame, url: str) -> dict:
     return df.filter(pl.col("url") == url).to_dicts()[0]
 
 
+def test_the_published_projection_can_change_without_touching_the_history(
+    export: Path, pipe
+) -> None:
+    """Dropping or renaming a *published* column is free. Dropping a stored one is not.
+
+    The two live in different places on purpose. ``fold`` derives
+    ``on_website_from``, ``last_updated`` and ``previous_update_dates`` from the
+    ``programmes`` versions alone, and ``publish`` only reads them -- so a change to
+    ``PUBLISHED_FIELDS``, to a rename, or to any column assembled at publish time (all
+    of ``contact_info_*``, which comes from the ``documents`` index) cannot put a
+    timestamp in a consumer's update history.
+    """
+    load(export, pipe=pipe)
+    before, _ = snapshot(pipe)
+    full = publish(pipe=pipe)
+    fewer = publish(fields=[f for f in PUBLISHED_FIELDS if f != "contact_info_fax"], pipe=pipe)
+
+    assert "contact_info_fax" not in fewer.columns
+    assert fewer.height == full.height
+    after, _ = snapshot(pipe)
+    assert before.equals(after), "publishing a narrower projection altered the history"
+    assert after["previous_update_dates"].list.len().sum() == 0
+
+
+# The columns stored per programme version. scd2 runs with
+# `row_version_column_name` unset, so dlt hashes *every* column of the row it is
+# given: add or remove one and all 2500 rows re-hash, every live version retires and
+# re-inserts, and every programme comes out with `last_updated` set to the migration
+# and a junk entry in `previous_update_dates`. Nothing detects that -- it looks
+# exactly like upstream having edited the whole export in one night.
+#
+# So this is pinned. If a change here is deliberate, either
+#   * keep storing the field and drop it from PUBLISHED_FIELDS instead, which is free
+#     (see the test above), or
+#   * accept the churn knowingly, and migrate the published dates: record the load id
+#     of the migration and exclude its timestamp in `fold`, so the column keeps saying
+#     "when upstream last changed this programme" rather than "when we refactored".
+STORED_PROGRAMME_FIELDS = 48
+
+
+def test_the_stored_columns_are_pinned_because_changing_them_rewrites_history() -> None:
+    assert len(USEABLE_FIELDS) == STORED_PROGRAMME_FIELDS, (
+        "USEABLE_FIELDS changed: every stored row will re-hash and every programme "
+        "will get a spurious last_updated. Read the comment above this test."
+    )
+    # contact_info_* is not stored, which is why removing one is a publish-time
+    # decision rather than a migration.
+    assert not [f for f in USEABLE_FIELDS if f.startswith("contact_info")]
+
+
 def test_an_unchanged_export_adds_no_versions(export: Path, pipe) -> None:
     """Loading the same export twice must not look like every programme changed."""
     load(export, pipe=pipe)
@@ -399,8 +449,13 @@ class StubTagger:
     back by ``publish`` -- none of which needs the model to be right.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, revision: str = "code0.weights0") -> None:
         self.calls: list[list[str]] = []
+        self._revision = revision
+
+    def revision(self) -> str:
+        """What the endpoint would report. Settable, so a redeploy can be simulated."""
+        return self._revision
 
     def segment(self, values: list[str]) -> list[dict]:
         self.calls.append(list(values))
@@ -466,6 +521,53 @@ def test_an_unchanged_keywords_value_is_not_resegmented(export: Path, pipe) -> N
     load(export, pipe=pipe)
     assert segment_keywords(pipe, client=stub)["segmented"] == 0
     assert len(stub.calls) == 1
+
+
+def test_an_improved_segmenter_resegments_the_whole_column(export: Path, pipe) -> None:
+    """The failure this prevents, at the level where it actually happened.
+
+    Function-word glue fixed the agency names, the deploy went out, and the pipeline
+    published the old splits anyway: every value was already in ``keyword_segments``,
+    so nothing was sent. Skipping is now conditional on the revision matching.
+    """
+    load(export, pipe=pipe)
+    stub = StubTagger()
+    first = segment_keywords(pipe, client=stub)
+    assert first["resegmented"] == 0
+
+    improved = StubTagger(revision="code1.weights0")
+    again = segment_keywords(pipe, client=improved)
+
+    assert again["segmented"] == first["values"], "a redeploy reached none of the column"
+    assert again["resegmented"] == first["values"]
+    # Replaced, not duplicated: the row identity is still the string.
+    assert again["stored"] == first["stored"]
+
+
+def test_a_rerun_on_the_same_revision_still_sends_nothing(export: Path, pipe) -> None:
+    """Re-segmentation is triggered by a changed revision, not by every run."""
+    load(export, pipe=pipe)
+    stub = StubTagger()
+    segment_keywords(pipe, client=stub)
+    again = segment_keywords(pipe, client=stub)
+    assert len(stub.calls) == 1
+    assert again["segmented"] == 0
+
+
+def test_rows_written_before_revisions_existed_count_as_stale(export: Path, pipe) -> None:
+    """Which is what makes the deployed table self-healing rather than needing a DELETE."""
+    from fdb_scraper.history import KEYWORD_TABLE, stored_revisions
+
+    load(export, pipe=pipe)
+    segment_keywords(pipe, client=StubTagger())
+    with pipe.sql_client() as sql:
+        sql.execute_sql(
+            f"UPDATE {sql.make_qualified_table_name(KEYWORD_TABLE)} SET revision = NULL"
+        )
+    assert set(stored_revisions(pipe).values()) == {None}
+
+    stub = StubTagger()
+    assert segment_keywords(pipe, client=stub)["resegmented"] > 0
 
 
 def test_publish_reads_the_stored_segmentation_rather_than_the_model(

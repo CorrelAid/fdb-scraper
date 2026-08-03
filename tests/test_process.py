@@ -3,14 +3,10 @@ import hashlib
 import polars as pl
 
 from fdb_scraper.process import _id_url, add_keyword_segments, decode, process
-from fdb_scraper.schema import (
-    CODE_ALIASES,
-    CONSUMED_FIELDS,
-    DROPPED_FIELDS,
-    RENAMES,
-    USEABLE_FIELDS,
-)
-from fdb_scraper.scraper import ALL_FIELDS, scrape
+from fdb_scraper.config import CODE_ALIASES, CONSUMED_FIELDS, DROPPED_FIELDS, RENAMES
+from fdb_scraper.schema import USEABLE_FIELDS
+from fdb_scraper.parser import ALL_FIELDS
+from fdb_scraper.scraper import scrape
 from tests.conftest import EINGLIEDERUNG, EINSTIEGSGELD, EXPORT, FILM
 
 

@@ -3,7 +3,15 @@ import polars as pl
 import pytest
 
 from fdb_scraper import collect
-from fdb_scraper.schema import EXPORT_FIELDS, PUBLISHED_FIELDS, build_schema
+from fdb_scraper.config import PIVOTS, RENAMES
+from fdb_scraper.generated import CLOSED_VOCABS
+from fdb_scraper.schema import (
+    COLUMNS,
+    EXPORT_FIELDS,
+    PIVOTED_SOURCES,
+    PUBLISHED_FIELDS,
+    build_schema,
+)
 
 
 def _failed_checks(excinfo) -> set[str]:
@@ -20,6 +28,47 @@ def test_a_new_upstream_category_raises(df):
     with pytest.raises(pandera.errors.SchemaErrors) as excinfo:
         build_schema(EXPORT_FIELDS).validate(drifted, lazy=True)
     assert "funding_type_closed_vocab" in _failed_checks(excinfo)
+
+
+# Every column whose values are drawn from a closed vocabulary, named by the check the
+# schema builds for it. Derived rather than listed, so a new closed vocabulary is
+# covered without an edit -- and an existing one that quietly loses its check fails
+# test_every_closed_vocabulary_is_checked below rather than going unnoticed.
+VOCAB_COLUMNS = sorted(
+    column
+    for column in PUBLISHED_FIELDS
+    for check in COLUMNS[column].checks
+    if check.name and check.name.endswith("_closed_vocab")
+)
+
+
+def test_every_closed_vocabulary_is_checked():
+    """The nine columns that have one, against what the config declares.
+
+    Guards the parametrisation below -- which would pass vacuously on an empty list --
+    and the enforcement itself: a vocabulary column whose check disappeared would
+    silently start accepting anything, and nothing else in the suite would notice.
+    """
+    declared = {RENAMES.get(f, f) for f in CLOSED_VOCABS if f not in PIVOTED_SOURCES}
+    assert set(VOCAB_COLUMNS) == declared | set(PIVOTS)
+
+
+@pytest.mark.parametrize("column", VOCAB_COLUMNS)
+def test_an_unknown_code_is_rejected_in_every_vocabulary_column(df, column):
+    """Closed means closed, in all nine columns and not only ``funding_type``.
+
+    The published values are the export's own codes and the only statement of what they
+    may be is this check, so a column where it does not bite would publish whatever
+    upstream started sending -- see ``fdb_scraper.generated.vocab``, which
+    ``scripts/gen_vocab.py`` regenerates when that is a legitimate change.
+    """
+    # The fixture is already processed -- renamed and with the pivots collapsed -- so
+    # every vocabulary column is present under its published name.
+    assert column in df.columns
+    drifted = df.with_columns(pl.col(column).list.eval(pl.lit("__not_a_code__")))
+    with pytest.raises(pandera.errors.SchemaErrors) as excinfo:
+        build_schema(EXPORT_FIELDS).validate(drifted, lazy=True)
+    assert f"{column}_closed_vocab" in _failed_checks(excinfo)
 
 
 def test_an_unresolved_list_element_fails(df):

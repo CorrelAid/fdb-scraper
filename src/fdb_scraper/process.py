@@ -20,7 +20,7 @@ order :func:`process` applies them:
     ``decode`` strips to leaf labels.
 
 ``collapse_pivots``
-    :data:`fdb_scraper.schema.PIVOTS` applied: 21 columns to 2.
+    :data:`fdb_scraper.config.PIVOTS` applied: 21 columns to 2.
 
 ``drop`` and ``rename``
     ``CONSUMED_FIELDS`` out, ``RENAMES`` applied. The rename is last, so every
@@ -30,7 +30,7 @@ order :func:`process` applies them:
     ``keywords_extracted``, looked up in an already-computed mapping. After the
     rename, and last, because it is the only step whose input is not the export.
 
-50 columns in, 47 out, 48 with the segmentation. The module is not called
+48 columns in, 45 out, 46 with the segmentation. The module is not called
 "publish": publishing is what ``dcat/`` and the distributions do, and nothing here
 writes anything.
 """
@@ -41,18 +41,18 @@ import hashlib
 
 import polars as pl
 
-from fdb_scraper.links import CONTACT_KEYS
-from fdb_scraper.schema import (
+from fdb_scraper.config import (
     CODE_ALIASES,
     CONSUMED_FIELDS,
     CONTACT_PREFIX,
+    LICENCE_DEED_URL,
+    LICENCE_LABEL,
+    LICENSOR,
     PIVOTS,
     RENAMES,
     SEPARATOR,
-    SOURCE_LICENCE,
-    SOURCE_LICENCE_URL,
-    SOURCE_LICENSOR,
 )
+from fdb_scraper.links import CONTACT_KEYS
 
 _LEAF = r"([^/]+)$"
 
@@ -113,9 +113,9 @@ def add_license(df: pl.DataFrame) -> pl.DataFrame:
         pl.format(
             "{} von {}, lizensiert unter {} ({}), Quelle: {}",
             subject,
-            pl.lit(SOURCE_LICENSOR),
-            pl.lit(SOURCE_LICENCE),
-            pl.lit(SOURCE_LICENCE_URL),
+            pl.lit(LICENSOR),
+            pl.lit(LICENCE_LABEL),
+            pl.lit(LICENCE_DEED_URL),
             pl.col("url"),
         ).alias("license_info")
     )

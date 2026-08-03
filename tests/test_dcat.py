@@ -29,7 +29,8 @@ from rdflib import Graph, URIRef
 from rdflib.namespace import DCAT, DCTERMS, RDF, SH, SKOS
 
 from fdb_scraper.schema import PUBLISHED_FIELDS
-from fdb_scraper.semantics import ANNOTATIONS, PREDICATES, VOCAB, expand
+from fdb_scraper.config import VOCAB
+from fdb_scraper.semantics import ANNOTATIONS, PREDICATES, expand
 
 ROOT = Path(__file__).parent.parent
 TABLE_SCHEMA = ROOT / "dcat" / "table-schema.json"
@@ -38,7 +39,7 @@ DATASET_DOC = ROOT / "dcat" / "id" / "dataset" / "foerderdatenbank-programme.ttl
 # Namespace the project mints its own identifiers under. Used to tell a shape
 # result about our own graph from one about a remote vocabulary we did not load.
 #
-# Written out rather than imported from fdb_scraper.uris. These are published
+# Written out rather than imported from fdb_scraper.config. These are published
 # identifiers: importing them would make the assertions restate whatever the
 # constant happens to say, and a changed host would pass silently. Spelled here,
 # moving the host fails these tests until someone confirms the move on purpose.

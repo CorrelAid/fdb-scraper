@@ -17,9 +17,10 @@ from xml.etree import ElementTree as ET
 
 import polars as pl
 
+from fdb_scraper.parser import strip_html
 from fdb_scraper.process import decode
 from fdb_scraper.schema import USEABLE_FIELDS
-from fdb_scraper.scraper import _strip_html, scrape
+from fdb_scraper.scraper import scrape
 
 TD_RE = re.compile(r"<td>(.*?)</td>", re.DOTALL)
 
@@ -39,13 +40,13 @@ def german_label(path: Path) -> str | None:
         text = prop.find("text")
         if text is None or not text.text:
             break
-        tds = [_strip_html(td) for td in TD_RE.findall(html.unescape(text.text))]
+        tds = [strip_html(td) for td in TD_RE.findall(html.unescape(text.text))]
         # Cells 0 and 1 are the language header ("de", "en"); 2 and 3 the values.
         if len(tds) >= 3 and tds[0] == "de":
             return tds[2]
     for prop in root.findall("property"):
         if prop.get("name") == "gsb:description":
-            return _strip_html(_value_of(prop))
+            return strip_html(_value_of(prop))
     return None
 
 

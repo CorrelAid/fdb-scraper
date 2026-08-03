@@ -1,0 +1,1109 @@
+[
+  {
+    "@id": "https://fdb.cdl.correlaid.org/def/fdb",
+    "@type": [
+      "http://www.w3.org/2002/07/owl#Ontology"
+    ],
+    "http://purl.org/dc/terms/description": [
+      {
+        "@language": "de",
+        "@value": "Begriffe für die Spalten der Förderprogramm-Tabelle, für die kein etablierter Begriff passt. Generiert aus fdb_scraper.semantics."
+      }
+    ],
+    "http://purl.org/dc/terms/modified": [
+      {
+        "@type": "http://www.w3.org/2001/XMLSchema#date",
+        "@value": "2026-08-03"
+      }
+    ],
+    "http://purl.org/dc/terms/publisher": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/id/agent/correlaid"
+      }
+    ],
+    "http://purl.org/dc/terms/source": [
+      {
+        "@id": "https://www.foerderdatenbank.de/"
+      }
+    ],
+    "http://purl.org/dc/terms/title": [
+      {
+        "@language": "de",
+        "@value": "Förderdatenbank -- minted Begriffe"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#seeAlso": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/id/dataset/foerderdatenbank-programme"
+      }
+    ]
+  },
+  {
+    "@id": "https://fdb.cdl.correlaid.org/def/fdb#Foerderprogramm",
+    "@type": [
+      "http://www.w3.org/2000/01/rdf-schema#Class"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#comment": [
+      {
+        "@language": "de",
+        "@value": "Ein Förderprogramm der Förderdatenbank des Bundes; eine Zeile der veröffentlichten Tabelle."
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#isDefinedBy": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@language": "de",
+        "@value": "Förderprogramm"
+      },
+      {
+        "@language": "en",
+        "@value": "funding programme"
+      }
+    ]
+  },
+  {
+    "@id": "https://fdb.cdl.correlaid.org/def/fdb#applicantSector",
+    "@type": [
+      "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#comment": [
+      {
+        "@language": "en",
+        "@value": "closed vocabulary, 16 \"parent.child\" paths, where parent is a foerderberechtigte code; one value per pair"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#domain": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb#Foerderprogramm"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#isDefinedBy": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "applicant_sector"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#range": [
+      {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    ],
+    "https://fdb.cdl.correlaid.org/def/fdb#origin": [
+      {
+        "@value": "upstream"
+      }
+    ]
+  },
+  {
+    "@id": "https://fdb.cdl.correlaid.org/def/fdb#applicationLanguage",
+    "@type": [
+      "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#domain": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb#Foerderprogramm"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#isDefinedBy": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "application_language"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#range": [
+      {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    ],
+    "https://fdb.cdl.correlaid.org/def/fdb#origin": [
+      {
+        "@value": "upstream"
+      }
+    ]
+  },
+  {
+    "@id": "https://fdb.cdl.correlaid.org/def/fdb#contactIds",
+    "@type": [
+      "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#domain": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb#Foerderprogramm"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#isDefinedBy": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "contact_ids"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#range": [
+      {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    ],
+    "https://fdb.cdl.correlaid.org/def/fdb#origin": [
+      {
+        "@value": "upstream"
+      }
+    ]
+  },
+  {
+    "@id": "https://fdb.cdl.correlaid.org/def/fdb#contactInfoBuilding",
+    "@type": [
+      "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#domain": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb#Foerderprogramm"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#isDefinedBy": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "contact_info_building"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#range": [
+      {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    ],
+    "https://fdb.cdl.correlaid.org/def/fdb#origin": [
+      {
+        "@value": "derived"
+      }
+    ]
+  },
+  {
+    "@id": "https://fdb.cdl.correlaid.org/def/fdb#contactInfoFax",
+    "@type": [
+      "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#domain": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb#Foerderprogramm"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#isDefinedBy": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "contact_info_fax"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#range": [
+      {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    ],
+    "https://fdb.cdl.correlaid.org/def/fdb#origin": [
+      {
+        "@value": "derived"
+      }
+    ]
+  },
+  {
+    "@id": "https://fdb.cdl.correlaid.org/def/fdb#contactInfoHouseId",
+    "@type": [
+      "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#domain": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb#Foerderprogramm"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#isDefinedBy": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "contact_info_house_id"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#range": [
+      {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    ],
+    "https://fdb.cdl.correlaid.org/def/fdb#origin": [
+      {
+        "@value": "derived"
+      }
+    ]
+  },
+  {
+    "@id": "https://fdb.cdl.correlaid.org/def/fdb#contactInfoMobile",
+    "@type": [
+      "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#domain": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb#Foerderprogramm"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#isDefinedBy": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "contact_info_mobile"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#range": [
+      {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    ],
+    "https://fdb.cdl.correlaid.org/def/fdb#origin": [
+      {
+        "@value": "derived"
+      }
+    ]
+  },
+  {
+    "@id": "https://fdb.cdl.correlaid.org/def/fdb#deadlines",
+    "@type": [
+      "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#domain": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb#Foerderprogramm"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#isDefinedBy": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "deadlines"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#range": [
+      {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    ],
+    "https://fdb.cdl.correlaid.org/def/fdb#origin": [
+      {
+        "@value": "upstream"
+      }
+    ]
+  },
+  {
+    "@id": "https://fdb.cdl.correlaid.org/def/fdb#deleted",
+    "@type": [
+      "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#comment": [
+      {
+        "@language": "en",
+        "@value": "true when no version of this programme is current any more: it was in an earlier export and is absent from the latest one. The row is kept, carrying the values of its last seen version, so the dataset outlives what upstream removed -- last_updated then says when that happened. Derived from our load history, not stated by the source, and absence is all it means: a programme may be gone because it ended, because it was reorganised, or because upstream restructured the export. A programme that reappears goes back to false"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#domain": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb#Foerderprogramm"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#isDefinedBy": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "deleted"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#range": [
+      {
+        "@id": "http://www.w3.org/2001/XMLSchema#boolean"
+      }
+    ],
+    "https://fdb.cdl.correlaid.org/def/fdb#origin": [
+      {
+        "@value": "derived"
+      }
+    ]
+  },
+  {
+    "@id": "https://fdb.cdl.correlaid.org/def/fdb#eligibleApplicants",
+    "@type": [
+      "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#comment": [
+      {
+        "@language": "en",
+        "@value": "closed vocabulary, 9 codes; labels in fdb_scraper.generated.vocab.FOERDERBERECHTIGTE"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#domain": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb#Foerderprogramm"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#isDefinedBy": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "eligible_applicants"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#range": [
+      {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    ],
+    "https://fdb.cdl.correlaid.org/def/fdb#origin": [
+      {
+        "@value": "upstream"
+      }
+    ]
+  },
+  {
+    "@id": "https://fdb.cdl.correlaid.org/def/fdb#fundingArea",
+    "@type": [
+      "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#comment": [
+      {
+        "@language": "en",
+        "@value": "closed vocabulary, 23 codes; labels in fdb_scraper.generated.vocab.FOERDERBEREICH"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#domain": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb#Foerderprogramm"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#isDefinedBy": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "funding_area"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#range": [
+      {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    ],
+    "https://fdb.cdl.correlaid.org/def/fdb#origin": [
+      {
+        "@value": "upstream"
+      }
+    ]
+  },
+  {
+    "@id": "https://fdb.cdl.correlaid.org/def/fdb#fundingBody",
+    "@type": [
+      "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#comment": [
+      {
+        "@language": "en",
+        "@value": "closed vocabulary, 3 codes; labels in fdb_scraper.generated.vocab.FOERDERGEBER"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#domain": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb#Foerderprogramm"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#isDefinedBy": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "funding_body"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#range": [
+      {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    ],
+    "https://fdb.cdl.correlaid.org/def/fdb#origin": [
+      {
+        "@value": "upstream"
+      }
+    ]
+  },
+  {
+    "@id": "https://fdb.cdl.correlaid.org/def/fdb#fundingOrganisation",
+    "@type": [
+      "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#domain": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb#Foerderprogramm"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#isDefinedBy": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "funding_organisation"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#range": [
+      {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    ],
+    "https://fdb.cdl.correlaid.org/def/fdb#origin": [
+      {
+        "@value": "upstream"
+      }
+    ]
+  },
+  {
+    "@id": "https://fdb.cdl.correlaid.org/def/fdb#fundingSubarea",
+    "@type": [
+      "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#comment": [
+      {
+        "@language": "en",
+        "@value": "closed vocabulary, 124 \"parent.child\" paths, where parent is a foerderbereich code; one value per pair"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#domain": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb#Foerderprogramm"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#isDefinedBy": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "funding_subarea"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#range": [
+      {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    ],
+    "https://fdb.cdl.correlaid.org/def/fdb#origin": [
+      {
+        "@value": "upstream"
+      }
+    ]
+  },
+  {
+    "@id": "https://fdb.cdl.correlaid.org/def/fdb#fundingType",
+    "@type": [
+      "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#comment": [
+      {
+        "@language": "en",
+        "@value": "closed vocabulary, 6 codes; labels in fdb_scraper.generated.vocab.FOERDERART"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#domain": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb#Foerderprogramm"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#isDefinedBy": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "funding_type"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#range": [
+      {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    ],
+    "https://fdb.cdl.correlaid.org/def/fdb#origin": [
+      {
+        "@value": "upstream"
+      }
+    ]
+  },
+  {
+    "@id": "https://fdb.cdl.correlaid.org/def/fdb#grw",
+    "@type": [
+      "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#comment": [
+      {
+        "@language": "en",
+        "@value": "closed vocabulary, 2 codes; labels in fdb_scraper.generated.vocab.GRW"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#domain": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb#Foerderprogramm"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#isDefinedBy": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "grw"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#range": [
+      {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    ],
+    "https://fdb.cdl.correlaid.org/def/fdb#origin": [
+      {
+        "@value": "upstream"
+      }
+    ]
+  },
+  {
+    "@id": "https://fdb.cdl.correlaid.org/def/fdb#idHash",
+    "@type": [
+      "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#comment": [
+      {
+        "@language": "en",
+        "@value": "md5 of id_url, hex. Primary key of the published table and the key the version history groups by. A digest of the identifier rather than an identifier of its own: it is stable exactly as long as the source URL is"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#domain": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb#Foerderprogramm"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#isDefinedBy": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "id_hash"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#range": [
+      {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    ],
+    "https://fdb.cdl.correlaid.org/def/fdb#origin": [
+      {
+        "@value": "derived"
+      }
+    ]
+  },
+  {
+    "@id": "https://fdb.cdl.correlaid.org/def/fdb#keywords",
+    "@type": [
+      "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#domain": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb#Foerderprogramm"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#isDefinedBy": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "keywords"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#range": [
+      {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    ],
+    "https://fdb.cdl.correlaid.org/def/fdb#origin": [
+      {
+        "@value": "upstream"
+      }
+    ]
+  },
+  {
+    "@id": "https://fdb.cdl.correlaid.org/def/fdb#keywordsExtracted",
+    "@type": [
+      "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#comment": [
+      {
+        "@language": "en",
+        "@value": "inferred, not stated by the source: the raw keywords string split into single keywords by a fine-tuned German encoder, because upstream joins them with spaces and 87.7% of values carry no separator at all. Every keyword is a contiguous span of the raw string and the spans cover it exactly, which is checked on every publish, so nothing is invented, dropped or reordered; where the boundaries fall is the model's judgement -- exact-span F1 0.967 on a held-out hand-labelled sample, against 0.878 for splitting on nothing. Null where a value has not been segmented. The raw keywords column is published unchanged beside it."
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#domain": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb#Foerderprogramm"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#isDefinedBy": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "keywords_extracted"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#range": [
+      {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    ],
+    "https://fdb.cdl.correlaid.org/def/fdb#origin": [
+      {
+        "@value": "inferred"
+      }
+    ]
+  },
+  {
+    "@id": "https://fdb.cdl.correlaid.org/def/fdb#legalBasis",
+    "@type": [
+      "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#domain": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb#Foerderprogramm"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#isDefinedBy": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "legal_basis"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#range": [
+      {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    ],
+    "https://fdb.cdl.correlaid.org/def/fdb#origin": [
+      {
+        "@value": "upstream"
+      }
+    ]
+  },
+  {
+    "@id": "https://fdb.cdl.correlaid.org/def/fdb#legalRequirements",
+    "@type": [
+      "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#domain": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb#Foerderprogramm"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#isDefinedBy": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "legal_requirements"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#range": [
+      {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    ],
+    "https://fdb.cdl.correlaid.org/def/fdb#origin": [
+      {
+        "@value": "upstream"
+      }
+    ]
+  },
+  {
+    "@id": "https://fdb.cdl.correlaid.org/def/fdb#onWebsiteFrom",
+    "@type": [
+      "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#comment": [
+      {
+        "@language": "en",
+        "@value": "first run in which any version of this programme was present in the export. An observation of ours, not a date the source states: the export ships only its current state, so nothing before this dataset's first load is visible and a programme older than that reads as first seen then"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#domain": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb#Foerderprogramm"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#isDefinedBy": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "on_website_from"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#range": [
+      {
+        "@id": "http://www.w3.org/2001/XMLSchema#dateTime"
+      }
+    ],
+    "https://fdb.cdl.correlaid.org/def/fdb#origin": [
+      {
+        "@value": "derived"
+      }
+    ]
+  },
+  {
+    "@id": "https://fdb.cdl.correlaid.org/def/fdb#origin",
+    "@type": [
+      "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#comment": [
+      {
+        "@language": "en",
+        "@value": "Where a column's values come from: \"upstream\" -- stated by the source export and only reshaped; \"derived\" -- computed from upstream values or from the load history by a rule, exactly and reproducibly; \"inferred\" -- produced by a machine-learning model, therefore neither deterministic nor exact. The inferred columns are keywords_extracted; their accuracy is measured against a labelled sample rather than guaranteed."
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#isDefinedBy": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "origin"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#range": [
+      {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    ]
+  },
+  {
+    "@id": "https://fdb.cdl.correlaid.org/def/fdb#previousUpdateDates",
+    "@type": [
+      "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#comment": [
+      {
+        "@language": "en",
+        "@value": "one timestamp per superseded version, ascending: the run in which that version stopped being the current one. Empty for a programme that has never changed; its length is therefore the number of changes observed"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#domain": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb#Foerderprogramm"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#isDefinedBy": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "previous_update_dates"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#range": [
+      {
+        "@id": "http://www.w3.org/2001/XMLSchema#dateTime"
+      }
+    ],
+    "https://fdb.cdl.correlaid.org/def/fdb#origin": [
+      {
+        "@value": "derived"
+      }
+    ]
+  },
+  {
+    "@id": "https://fdb.cdl.correlaid.org/def/fdb#procedure",
+    "@type": [
+      "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#domain": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb#Foerderprogramm"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#isDefinedBy": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "procedure"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#range": [
+      {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    ],
+    "https://fdb.cdl.correlaid.org/def/fdb#origin": [
+      {
+        "@value": "upstream"
+      }
+    ]
+  },
+  {
+    "@id": "https://fdb.cdl.correlaid.org/def/fdb#processingTime",
+    "@type": [
+      "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#domain": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb#Foerderprogramm"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#isDefinedBy": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "processing_time"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#range": [
+      {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    ],
+    "https://fdb.cdl.correlaid.org/def/fdb#origin": [
+      {
+        "@value": "upstream"
+      }
+    ]
+  },
+  {
+    "@id": "https://fdb.cdl.correlaid.org/def/fdb#programmeSlug",
+    "@type": [
+      "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#comment": [
+      {
+        "@language": "en",
+        "@value": "last path segment of the source URL. Not unique -- a programme offered by several Länder appears once per Land with the same slug -- so it does not identify a row; id_url does"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#domain": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb#Foerderprogramm"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#isDefinedBy": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "programme_slug"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#range": [
+      {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    ],
+    "https://fdb.cdl.correlaid.org/def/fdb#origin": [
+      {
+        "@value": "upstream"
+      }
+    ]
+  },
+  {
+    "@id": "https://fdb.cdl.correlaid.org/def/fdb#requiredDocuments",
+    "@type": [
+      "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#domain": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb#Foerderprogramm"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#isDefinedBy": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "required_documents"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#range": [
+      {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    ],
+    "https://fdb.cdl.correlaid.org/def/fdb#origin": [
+      {
+        "@value": "upstream"
+      }
+    ]
+  },
+  {
+    "@id": "https://fdb.cdl.correlaid.org/def/fdb#seoDescription",
+    "@type": [
+      "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#domain": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb#Foerderprogramm"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#isDefinedBy": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "seo_description"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#range": [
+      {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    ],
+    "https://fdb.cdl.correlaid.org/def/fdb#origin": [
+      {
+        "@value": "upstream"
+      }
+    ]
+  },
+  {
+    "@id": "https://fdb.cdl.correlaid.org/def/fdb#statusNote",
+    "@type": [
+      "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#domain": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb#Foerderprogramm"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#isDefinedBy": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "status_note"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#range": [
+      {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    ],
+    "https://fdb.cdl.correlaid.org/def/fdb#origin": [
+      {
+        "@value": "upstream"
+      }
+    ]
+  },
+  {
+    "@id": "https://fdb.cdl.correlaid.org/def/fdb#unternehmensgroesse",
+    "@type": [
+      "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#comment": [
+      {
+        "@language": "en",
+        "@value": "closed vocabulary, 4 codes; labels in fdb_scraper.generated.vocab.UNTERNEHMENSGROESSE"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#domain": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb#Foerderprogramm"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#isDefinedBy": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/def/fdb"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#label": [
+      {
+        "@value": "unternehmensgroesse"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#range": [
+      {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    ],
+    "https://fdb.cdl.correlaid.org/def/fdb#origin": [
+      {
+        "@value": "upstream"
+      }
+    ]
+  }
+]

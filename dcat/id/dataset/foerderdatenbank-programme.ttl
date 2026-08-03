@@ -18,28 +18,30 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     dct:conformsTo <https://fdb.cdl.correlaid.org/table-schema.json> ;
     dct:creator <https://fdb.cdl.correlaid.org/id/agent/correlaid> ;
     dct:description
-        """Alle Förderprogramme der Förderdatenbank des Bundes (Bund, Länder und EU), ein Datensatz pro Programm mit 51 Feldern.
+        """Alle Förderprogramme der Förderdatenbank des Bundes (Bund, Länder und EU), ein Datensatz pro Programm mit 50 Feldern.
 
 Die Bundesregierung bietet mit der Förderdatenbank eine Suchmaschine für Förderungen an, veröffentlicht den zugrundeliegenden Datensatz aber nicht als Open Data im normativen Sinne. 
-Grundlage ist der XML-Programmexport der Förderdatenbank. Kategorien liegen dadurch immer als interne Codes vor, nie als Anzeigenamen; die deutschen Labels werden mitgeliefert. 5 Kategoriespalten sind zusätzlich mit veröffentlichten Codelisten verknüpft: 4 mit XÖV-Codelisten (XFLB), eine mit NUTS. Verknüpft, nicht ersetzt -- die Werte bleiben die internen Codes des Exports, und die Zuordnung wird als SKOS-Match mitveröffentlicht, weil jede dieser Codelisten mindestens eine Kategorie des Exports nicht abbilden kann. 
-Eine Spalte ist modellbasiert und nicht Teil der Quelle: ``keywords_extracted`` enthält die Stichwörter, die ein feinabgestimmtes Sprachmodell aus der Rohspalte ``keywords`` herausliest -- upstream sind sie durch Leerzeichen verbunden und in 87,7 % der Fälle nicht trennbar. Jedes Stichwort ist nachweislich ein zusammenhängender Abschnitt des Originalstrings, geprüft bei jeder Veröffentlichung; die Grenzziehung selbst ist eine Modellentscheidung (F1 0,967 auf einer Handstichprobe). ``keywords`` bleibt unverändert daneben stehen. Das Tabellenschema kennzeichnet jede Spalte mit ``fdb:origin`` als ``upstream``, ``derived`` oder ``inferred``. 
-Der Export beinhaltet immer nur den heutigen Stand. Dieser Datensatz führt daher eine Historie: jedes Programm trägt, wann es zuerst erfasst wurde (``on_website_from``), wann sich sein Inhalt zuletzt geändert hat (``dct:modified``) und alle bisherigen Änderungszeitpunkte (``previous_update_dates``). Programme, die aus der Förderdatenbank verschwinden, bleiben mit ihrem letzten bekannten Inhalt und ``deleted = true`` enthalten. Der Datensatz umfasst damit mehr Programme als der Export und wächst über die Zeit."""@de ,
-        """All funding programmes in the German federal funding database (Förderdatenbank; federal, state and EU programmes), one record per programme with 51 fields.
+Grundlage ist der XML-Programmexport der Förderdatenbank.
+
+Der Export beinhaltet immer nur den heutigen Stand. Dieser Datensatz führt daher eine Historie: jedes Programm trägt, wann es zuerst erfasst wurde (``on_website_from``), wann sich sein Inhalt zuletzt geändert hat (``dct:modified``) und alle bisherigen Änderungszeitpunkte (``previous_update_dates``). Programme, die aus der Förderdatenbank verschwinden, bleiben mit ihrem letzten bekannten Inhalt und ``deleted = true`` enthalten. Der Datensatz umfasst damit mehr Programme als der Export und wächst über die Zeit.
+
+Eine Spalte ist modellbasiert und nicht Teil der Quelle: ``keywords_extracted`` enthält die Stichwörter, die ein finetuned Sprachmodell aus der Rohspalte ``keywords`` herausliest. Upstream sind sie durch Leerzeichen verbunden und in 87,7 % der Fälle nicht trennbar. Jedes Stichwort ist nachweislich ein zusammenhängender Abschnitt des Originalstrings, geprüft bei jeder Veröffentlichung; die Grenzziehung selbst ist eine Modellentscheidung (F1 0,967 auf einer Handstichprobe). ``keywords`` bleibt unverändert daneben stehen. Das Tabellenschema kennzeichnet jede Spalte mit ``fdb:origin`` als ``upstream``, ``derived`` oder ``inferred``."""@de ,
+        """All funding programmes in the German federal funding database (Förderdatenbank; federal, state and EU programmes), one record per programme with 50 fields.
 
 The federal government provides the Förderdatenbank as a search engine for funding programmes, but does not publish the underlying dataset as Open Data in the normative sense.
 
-The basis is the Förderdatenbank's XML programme export. As a result, categories are always internal codes rather than display names; the German labels are supplied alongside. 5 category columns are additionally linked to published code lists: 4 to XÖV (XFLB) code lists, one to NUTS. Linked, not substituted -- the values remain the export's internal codes, and the mapping is published as a SKOS match, because each of these code lists is missing at least one category that the export uses.
+The basis is the Förderdatenbank's XML programme export.
 
-One column is model-produced and not part of the source: ``keywords_extracted`` holds the keywords a fine-tuned language model reads out of the raw ``keywords`` column, which upstream joins with spaces and which carries no separator at all in 87.7% of cases. Every keyword is verifiably a contiguous span of the original string, checked on every publish; where the boundaries fall is the model's judgement (F1 0.967 on a hand-labelled sample). ``keywords`` is published unchanged beside it. The table schema marks every column with ``fdb:origin`` as ``upstream``, ``derived`` or ``inferred``.
+The export only ever contains today's state. This dataset therefore maintains a history: each programme carries when it was first recorded (``on_website_from``), when its content last changed (``dct:modified``) and all previous change timestamps (``previous_update_dates``). Programmes that disappear from the Förderdatenbank are retained with their last known content and ``deleted = true``. The dataset thus covers more programmes than the export and grows over time.
 
-The export only ever contains today's state. This dataset therefore maintains a history: each programme carries when it was first recorded (``on_website_from``), when its content last changed (``dct:modified``) and all previous change timestamps (``previous_update_dates``). Programmes that disappear from the Förderdatenbank are retained with their last known content and ``deleted = true``. The dataset thus covers more programmes than the export and grows over time."""@en ;
+One column is model-produced and not part of the source: ``keywords_extracted`` holds the keywords a finetuned language model reads out of the raw ``keywords`` column. Upstream they are joined with spaces and carry no separator at all in 87.7% of cases. Every keyword is verifiably a contiguous span of the original string, checked on every publish; where the boundaries fall is the model's judgement (F1 0.967 on a hand-labelled sample). ``keywords`` is published unchanged beside it. The table schema marks every column with ``fdb:origin`` as ``upstream``, ``derived`` or ``inferred``."""@en ;
     dct:identifier "foerderdatenbank-programme" ;
     dct:language <http://publications.europa.eu/resource/authority/language/DEU> ;
-    dct:modified "2026-07-30T00:00:00+00:00"^^xsd:dateTime ;
+    dct:modified "2026-08-03T00:00:00+00:00"^^xsd:dateTime ;
     dct:publisher <https://fdb.cdl.correlaid.org/id/agent/correlaid> ;
     dct:title
-        "Förderdatenbank -- Förderprogramme"@de ,
-        "German funding database -- programmes"@en ;
+        "Förderprogramme aus der Förderdatenbank des Bundes"@de ,
+        "Funding Programmes from the German funding database"@en ;
     dcat:contactPoint <https://fdb.cdl.correlaid.org/id/agent/correlaid#contact> ;
     dcat:distribution <https://fdb.cdl.correlaid.org/id/dataset/foerderdatenbank-programme/distribution/csv> ;
     dcat:keyword
@@ -59,7 +61,7 @@ The export only ever contains today's state. This dataset therefore maintains a 
     a
         vcard:Kind ,
         vcard:Organization ;
-    vcard:fn "CorrelAid e.V. -- Civic Data Lab"@de ;
+    vcard:fn "CorrelAid e.V."@de ;
     vcard:hasEmail <mailto:info@correlaid.org> ;
     vcard:hasURL <https://correlaid.org/> ;
 .
@@ -72,7 +74,7 @@ The export only ever contains today's state. This dataset therefore maintains a 
     dct:description "Die vollständige Tabelle mit historischen Einträgen. Das verlinkte Tabellenschema beschreibt Datentypen, Pflichtfelder und Muster; Spalten mit Listenwerten enthalten JSON-Arrays als Zellenwert."@de ;
     dct:format <http://publications.europa.eu/resource/authority/file-type/CSV> ;
     dct:license <http://dcat-ap.de/def/licenses/cc-by-nd/4.0> ;
-    dct:modified "2026-07-30T00:00:00+00:00"^^xsd:dateTime ;
+    dct:modified "2026-08-03T00:00:00+00:00"^^xsd:dateTime ;
     dct:title "Förderprogramme als CSV-Datei"@de ;
     dcat:accessURL <https://fdb.cdl.correlaid.org/data/programme.csv> ;
     dcat:downloadURL <https://fdb.cdl.correlaid.org/data/programme.csv> ;

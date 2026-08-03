@@ -19,10 +19,10 @@ from __future__ import annotations
 from pathlib import Path
 from xml.etree import ElementTree as ET
 
-from fdb_scraper.scraper import SITE_URL, XLINK, _strip_html, parse_xml
+from fdb_scraper.parser import SITE_URL, XLINK, parse_xml, strip_html
 
 CONTENT_DIR = "BMWI/FDB/Content/DE"
-# Everything except the programmes themselves, which are parsed by scraper.py.
+# Everything except the programmes themselves, which are parsed by parser.py.
 LINKED_TREES = ("ExternerLink", "Kontakt", "Adresse", "Foerdergeber", "Archiv", "Download")
 
 CONTACT_FIELDS = {
@@ -32,6 +32,10 @@ CONTACT_FIELDS = {
     "gsb:fax": "fax",
     "gsb:mobile": "mobile",
 }
+# gsb:state is deliberately absent: 1 of 611 Adresse documents fills it, and that
+# one value ("Berlin") repeats the gsb:city beside it. Dropped rather than kept
+# out of a default list, because unlike the programme fields these are read from
+# the linked-document trees, where the field list *is* the parser's request.
 ADDRESS_FIELDS = {
     "gsb:road": "road",
     "gsb:houseId": "house_id",
@@ -39,7 +43,6 @@ ADDRESS_FIELDS = {
     "gsb:zipCode": "zip_code",
     "gsb:city": "city",
     "gsb:postBox": "post_box",
-    "gsb:state": "state",
     "gsb:country": "country",
 }
 DOC_FIELDS = {**CONTACT_FIELDS, **ADDRESS_FIELDS, "gsb:url": "url"}
@@ -52,9 +55,9 @@ def _text(prop: ET.Element) -> str | None:
     """Value of a property, whether stored as <value> or as RichText."""
     v = prop.find("value")
     if v is not None and v.text is not None:
-        return _strip_html(v.text)
+        return strip_html(v.text)
     t = prop.find("text")
-    return _strip_html(t.text) if t is not None else None
+    return strip_html(t.text) if t is not None else None
 
 
 def _hrefs(prop: ET.Element) -> list[str]:

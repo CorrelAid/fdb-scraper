@@ -7,6 +7,7 @@ number the service reports is meaningless.
 
 from __future__ import annotations
 
+import collections
 import json
 import sys
 from pathlib import Path
@@ -17,6 +18,7 @@ SERVICE = Path(__file__).parents[1] / "services" / "keyword_segmenter"
 sys.path.insert(0, str(SERVICE))
 
 from segment.metric import pool, score_one  # noqa: E402
+from segment.postprocess import FUNCTION_WORDS, glue_function_words  # noqa: E402
 from segment.tokens import is_partition, spans, terms, tokenize  # noqa: E402
 
 
@@ -79,10 +81,17 @@ def test_every_label_is_a_valid_partition():
 
 
 def test_split_sizes_are_what_the_eval_claims():
-    counts = {"train": 0, "test": 0}
-    for row in labels():
-        counts[row["split"]] += 1
-    assert counts == {"train": 70, "test": 50}
+    """70 random train rows, 61 uncertainty-drawn ones, and the same untouched 50.
+
+    The held-out half must never grow: it is the only reason a number from this round
+    is comparable with the last. Everything the second sample added is train, because
+    a sample chosen by asking the model where it is unsure cannot also measure it.
+    """
+    counts = collections.Counter(row["split"] for row in labels())
+    assert counts == {"train": 131, "test": 50}
+    by_source = collections.Counter(row["source"] for row in labels())
+    assert by_source == {"random": 120, "uncertainty": 50, "compound-pattern": 11}
+    assert all(r["split"] == "train" for r in labels() if r["source"] != "random")
 
 
 # -- the metric --------------------------------------------------------------
@@ -119,6 +128,27 @@ def test_pool_is_micro_averaged_over_terms():
     big = score_one([1] * 10, [1] * 10, 10)  # 10/10 right
     small = score_one([2], [1, 1], 2)  # 0/2 right
     assert pool([big, small]).recall == pytest.approx(10 / 12)
+
+
+def test_long_spans_are_covered_now_and_stay_covered():
+    """The gap the second sample was drawn to close, as a number.
+
+    Before it: 93% single-token terms, ten of length three, longest span five, and
+    nothing at all beyond -- which is why seven-token agency names came back split.
+    After it: 85% single-token, 45 of length three, and spans up to eight. Pinned so a
+    later re-draw cannot quietly undo the coverage this round paid for.
+    """
+    lengths = collections.Counter(s for r in labels() for s in r["group_sizes"])
+    assert 0.8 < lengths[1] / sum(lengths.values()) < 0.9
+    assert max(lengths) == 8
+    assert lengths[3] == 45
+    assert sum(v for k, v in lengths.items() if k >= 3) == 54
+    # The training half is where the new labels went, so that is where the coverage
+    # has to show up.
+    train = collections.Counter(
+        s for r in labels() if r["split"] == "train" for s in r["group_sizes"]
+    )
+    assert max(train) == 8
 
 
 def test_all_ones_baseline_is_the_bar_the_model_must_clear():
@@ -158,7 +188,7 @@ def test_joins_and_sizes_round_trip_on_every_gold_label():
 
 # -- auditing the gold labels -------------------------------------------------
 #
-# Everything reported rests on 120 rows labelled by one person, so the labels get
+# Everything reported rests on 181 rows labelled by one person, so the labels get
 # audited by rule rather than trusted. The rule that does the work is German
 # orthography: an attributive adjective must be inflected. "Erneuerbare Energien"
 # agrees and is one keyword; "digital Websites" does not and is two.
@@ -175,11 +205,19 @@ def _adjective_initial(token: str) -> bool:
 
 
 def test_no_uninflected_adjective_was_joined_to_its_neighbour():
-    """A join whose first word is an uninflected adjective is a labelling error."""
+    """A join whose first word is an uninflected adjective is a labelling error.
+
+    Unless the join is licensed by something other than agreement: "proof of concept"
+    is held together by the preposition, not by German morphology, and rule 7 requires
+    it -- publishing "of" as a keyword of its own is the alternative. So a span whose
+    second token is a function word is out of this rule's scope.
+    """
     for row in labels():
         for lo, hi in spans(row["group_sizes"]):
             first = row["tokens"][lo]
             if hi - lo > 1 and first[0].islower() and _adjective_initial(first):
+                if row["tokens"][lo + 1].strip(" ,;.:()").lower() in FUNCTION_WORDS:
+                    continue
                 assert INFLECTED.search(first), (row["slug"], " ".join(row["tokens"][lo:hi]))
 
 
@@ -226,9 +264,11 @@ def test_no_inflected_adjective_noun_pair_was_left_unjoined():
 def test_most_joins_are_explained_by_a_rule_not_by_taste():
     """Quantifies how much of the gold rests on judgement alone.
 
-    34 of 51 joins follow from inflection; the rest are proper names, English
+    143 of 209 joins follow from inflection; the rest are proper names, English
     terms, numbers and shared-prefix ellipses, which no orthographic rule covers.
-    If that ratio moves a lot, the labels have drifted toward taste.
+    If that ratio moves a lot, the labels have drifted toward taste. It held across the
+    second sample -- 34 of 51 before, so the added labels are no more judgement-heavy
+    than the originals, which is the thing worth checking about a non-random draw.
     """
     by_rule = judgement = 0
     for row in labels():
@@ -240,8 +280,102 @@ def test_most_joins_are_explained_by_a_rule_not_by_taste():
                 by_rule += 1
             else:
                 judgement += 1
-    assert by_rule + judgement == 51
+    assert by_rule + judgement == 209
     assert by_rule >= 2 * judgement, f"only {by_rule} of {by_rule + judgement} joins rule-explained"
+
+
+# -- the deterministic repair --------------------------------------------------
+#
+# This runs on the model's output, so it is held to the same contract: it may only ever
+# *add* joins to a valid partition, which keeps every published term a contiguous span
+# of the source. No weights needed to check any of it.
+
+AGENCY = "Beauftragte der Bundesregierung für Kultur und Medien BKM".split()
+
+
+def test_a_function_word_neither_opens_nor_closes_a_keyword():
+    """The rule that repairs the agency names, on the row that motivated it."""
+    from segment.tokens import joins_to_sizes
+
+    # What the model actually predicts here: confident on the two-token compounds,
+    # undecided (0.354, 0.460) on the two gaps around "der" and "für".
+    joins = [True, False, True, False, True, True, False]
+    assert terms(AGENCY, joins_to_sizes(joins)) == [
+        "Beauftragte der",
+        "Bundesregierung für",
+        "Kultur und Medien",
+        "BKM",
+    ]
+    fixed = joins_to_sizes(glue_function_words(AGENCY, joins))
+    assert terms(AGENCY, fixed) == ["Beauftragte der Bundesregierung für Kultur und Medien", "BKM"]
+
+
+def test_glue_only_adds_joins():
+    """Monotonicity is what makes the repair safe: it cannot invent a boundary."""
+    for row in labels():
+        from segment.tokens import sizes_to_joins
+
+        joins = sizes_to_joins(row["group_sizes"])
+        glued = glue_function_words(row["tokens"], joins)
+        assert all(b or not a or a == b for a, b in zip(joins, glued))
+        assert all(b for a, b in zip(joins, glued) if a), row["slug"]
+
+
+def test_glue_never_crosses_a_delimiter_the_author_wrote():
+    """A comma is evidence about this row; the rule is only inference."""
+    tokens = "Wohnen, und Verkehr".split()
+    # Gap 0 is closed by the author's comma and must stay closed even though the
+    # next token is a function word.
+    assert glue_function_words(tokens, [False, False]) == [False, True]
+
+
+def test_a_function_word_at_either_end_of_the_value_glues_inward():
+    """There is only one gap to work with, and the rule uses it.
+
+    A dangling "für" is not a keyword, so binding it to the neighbour it does have
+    is the right move even though the resulting term ends in a preposition -- the
+    alternative publishes "für" as a search term of its own.
+    """
+    assert glue_function_words("Zuschuss für".split(), [False]) == [True]
+    assert glue_function_words("für Kommunen".split(), [False]) == [True]
+
+
+def test_the_rule_contradicts_no_gold_label():
+    """The strongest check available without new labelling.
+
+    The rule is asserted against all 181 hand-labelled rows: if it fired where a human
+    had deliberately placed a boundary, that is a bug in the rule, not the label. It
+    fires nowhere on gold, which is what licenses running it over the whole column --
+    and it is the same statement as labelling rule 7, checked from the other side.
+    """
+    from segment.tokens import sizes_to_joins
+
+    for row in labels():
+        joins = sizes_to_joins(row["group_sizes"])
+        assert glue_function_words(row["tokens"], joins) == joins, row["slug"]
+
+
+def test_function_word_list_holds_only_words_that_cannot_be_a_keyword():
+    """Guards the licence for the rule: "Land" is a keyword, "von" is not."""
+    assert "land" not in FUNCTION_WORDS
+    assert "recht" not in FUNCTION_WORDS
+    assert {"der", "für", "und", "zur"} <= FUNCTION_WORDS
+
+
+
+
+
+
+
+def test_the_repair_output_is_always_still_a_partition():
+    from segment.tokens import joins_to_sizes, sizes_to_joins
+
+    for row in labels():
+        n = len(row["tokens"])
+        for joins in ([False] * (n - 1), [True] * (n - 1), sizes_to_joins(row["group_sizes"])):
+            sizes = joins_to_sizes(glue_function_words(row["tokens"], list(joins)))
+            assert is_partition(sizes, n), row["slug"]
+
 
 
 # -- threshold sweep ----------------------------------------------------------
@@ -341,8 +475,114 @@ def test_tagger_beats_the_never_join_baseline_on_the_held_out_split(tagger):
         [score_one([1] * len(r["tokens"]), r["group_sizes"], len(r["tokens"])) for r in rows]
     )
     assert baseline.f1 == pytest.approx(0.8776, abs=5e-4)
-    # Measured 0.965 at seed 0; the floor allows for retraining drift.
+    # Measured 0.968 at seed 0 (0.965 before the second labelling round); the floor
+    # allows for retraining drift.
     assert scored.f1 > 0.93, f"tagger F1 {scored.f1:.3f} vs baseline {baseline.f1:.3f}"
+
+
+@pytest.mark.model
+def test_tagger_scores_the_long_span_slice_separately(tagger):
+    """The slice the headline number hides.
+
+    The headline is honest about the corpus and quiet about long terms: only five
+    held-out rows contain a three-token-plus keyword, so they move the pooled figure by
+    almost nothing while being the whole reason a model is needed. This slice is what
+    the second labelling round was drawn to fix, and it is where the gain showed up --
+    **0.906**, against 0.818 before the round and 0.550 for never-joining.
+    """
+    rows = [
+        r
+        for r in labels()
+        if r["split"] == "test" and any(s >= 3 for s in r["group_sizes"])
+    ]
+    assert len(rows) == 5
+    results = tagger.segment([r["keywords"] for r in rows])
+    scored = pool(
+        [
+            score_one(res["group_sizes"], r["group_sizes"], len(r["tokens"]))
+            for res, r in zip(results, rows)
+        ]
+    )
+    baseline = pool(
+        [score_one([1] * len(r["tokens"]), r["group_sizes"], len(r["tokens"])) for r in rows]
+    )
+    assert baseline.f1 == pytest.approx(0.5500, abs=5e-4)
+    # Floor, not the measurement: 0.906 at seed 0, and retraining moves it.
+    assert scored.f1 > 0.85, f"long-span F1 {scored.f1:.3f} vs baseline {baseline.f1:.3f}"
+
+
+@pytest.mark.model
+def test_tagger_keeps_a_whole_agency_name_together(tagger):
+    """The failure that prompted postprocess, end to end through the real weights.
+
+    Zero rows containing an agency name were labelled, so nothing in the eval above
+    can see this; it is pinned here by name instead.
+    """
+    value = (
+        "Stoffentwicklung Dokumentarfilm Filmförderung Stoffentwicklungsförderung "
+        "Kinofilm Beauftragte der Bundesregierung für Kultur und Medien BKM"
+    )
+    assert tagger(value)["terms"] == [
+        "Stoffentwicklung",
+        "Dokumentarfilm",
+        "Filmförderung",
+        "Stoffentwicklungsförderung",
+        "Kinofilm",
+        "Beauftragte der Bundesregierung für Kultur und Medien BKM",
+    ]
+
+
+@pytest.mark.model
+def test_the_reported_failures_are_segmented_correctly(tagger):
+    """Regression guard for the two rows a human caught, not evidence of learning.
+
+    Both are in ``train`` -- deliberately, since a reported failure is worth more as a
+    label than as a test case -- so passing this proves memorisation, nothing more. The
+    generalisation claim rests on the held-out slices above, where the long-span score
+    went 0.818 -> 0.906 without these rows ever being scored.
+    """
+    value = (
+        "polnische Kulturförderung Erhaltung polnische Sprache Pflege polnischer Sprache "
+        "polnischsprachige Bürger Beauftragte der Bundesregierung für Kultur und Medien BKM"
+    )
+    assert tagger(value)["terms"] == [
+        "polnische Kulturförderung",
+        "Erhaltung polnische Sprache",
+        "Pflege polnischer Sprache",
+        "polnischsprachige Bürger",
+        "Beauftragte der Bundesregierung für Kultur und Medien BKM",
+    ]
+
+
+@pytest.mark.model
+def test_the_repairs_do_not_cost_anything_on_the_held_out_split(tagger):
+    """A repair that helps the tail must not quietly hurt the body.
+
+    It no longer helps it either, which is the interesting part. Before the second
+    labelling round the rule was worth +0.003 here and +0.024 on the long-span slice;
+    after it, nothing on either, and its corpus-wide footprint fell from 105 rows to
+    31. The model learned the rule from labels, so it now serves as a guard rather than
+    a fix -- the assertion is therefore "costs nothing", not "gains something". The
+    institution gazetteer that ran beside it reached 0 rows and was deleted.
+    """
+    from segment.tokens import joins_to_sizes
+
+    rows = [r for r in labels() if r["split"] == "test"]
+    raw_scores, fixed_scores = [], []
+    for row in rows:
+        tokens = row["tokens"]
+        n = len(tokens)
+        if n < 2:
+            continue
+        probs = tagger._probabilities([tokens])[0]
+        joins = [p >= tagger.threshold for p in probs[1:n]]
+        joins += [False] * (n - 1 - len(joins))
+        gold = row["group_sizes"]
+        raw_scores.append(score_one(joins_to_sizes(joins), gold, n))
+        fixed = glue_function_words(tokens, joins)
+        fixed_scores.append(score_one(joins_to_sizes(fixed), gold, n))
+    raw, fixed = pool(raw_scores), pool(fixed_scores)
+    assert fixed.f1 >= raw.f1, f"postprocess cost {raw.f1:.4f} -> {fixed.f1:.4f}"
 
 
 @pytest.mark.model
@@ -357,15 +597,24 @@ def test_single_token_values_never_reach_the_model(tagger):
 
 
 class _StubEndpoint:
-    """Counts calls, so a test can assert the cache actually prevented them."""
+    """Counts calls, so a test can assert the cache actually prevented them.
 
-    def __init__(self):
+    ``revision`` is settable: redeploying the segmenter is exactly what the cache has
+    to notice, and a stub that can never change revision could not test it.
+    """
+
+    def __init__(self, revision: str = "code0.weights0"):
         self.calls: list[list[str]] = []
+        self.revision = revision
 
     def __call__(self, values):
-        self.calls.append(list(values))
+        # The probe carries no values and is not a segmentation call, so it is not
+        # counted -- the assertions below are about work, not round trips.
+        if values:
+            self.calls.append(list(values))
         return {
             "model": "stub",
+            "revision": self.revision,
             "results": [
                 {"terms": v.split(), "group_sizes": [1] * len(v.split())} for v in values
             ],
@@ -433,6 +682,155 @@ def test_cache_survives_a_new_client_on_the_same_file(tmp_path, monkeypatch):
         second._post = stub
         second.segment(["Erneuerbare Energien"])
     assert stub.calls == [], "cache did not persist across processes"
+
+
+# -- revision-keyed invalidation ----------------------------------------------
+#
+# The bug these exist for: function-word glue changed what the decoder returns, the
+# cache was keyed on md5(keywords) alone, and 2340 stored rows stayed stale through a
+# rerun. Nothing failed. A person had to notice.
+
+
+def test_a_redeployed_segmenter_is_a_cache_miss(client):
+    """The whole point: better code must reach the column without a manual DELETE."""
+    c, stub = client
+    c.segment(["Beauftragte der Bundesregierung"])
+    assert len(stub.calls) == 1
+
+    stub.revision = "code1.weights0"  # function-word glue added
+    c._revision = None  # a new run, so the revision is probed afresh
+    c.segment(["Beauftragte der Bundesregierung"])
+    assert len(stub.calls) == 2, "stale entry served after the segmenter changed"
+
+
+def test_a_retrained_checkpoint_is_a_cache_miss(client):
+    """Same for weights, which the client cannot fingerprint itself."""
+    c, stub = client
+    c.segment(["Zuschuss Kommune"])
+    stub.revision = "code0.weights1"
+    c._revision = None
+    c.segment(["Zuschuss Kommune"])
+    assert len(stub.calls) == 2
+
+
+def test_rolling_back_the_code_reuses_the_old_entries(client):
+    """Why the revision is part of the key rather than a column to compare.
+
+    Both revisions stay addressable, so reverting a bad deploy costs nothing instead
+    of paying for the whole column again.
+    """
+    c, stub = client
+    c.segment(["Zuschuss Kommune"])
+    stub.revision = "code1.weights0"
+    c._revision = None
+    c.segment(["Zuschuss Kommune"])
+    assert len(stub.calls) == 2
+
+    stub.revision = "code0.weights0"  # rolled back
+    c._revision = None
+    c.segment(["Zuschuss Kommune"])
+    assert len(stub.calls) == 2, "rollback re-segmented what it had already paid for"
+
+
+def test_the_revision_is_asked_for_once_per_client(client):
+    c, stub = client
+    c.segment(["A B"])
+    c.segment(["C D"])
+    assert c.revision() == "code0.weights0"
+
+
+def test_an_endpoint_that_reports_no_revision_still_works(client):
+    """Deploy order is not guaranteed: an old container must not break the client."""
+    c, stub = client
+    c._post = lambda values: {
+        "model": "old",
+        "results": [{"terms": v.split(), "group_sizes": [1] * len(v.split())} for v in values],
+    }
+    assert c.segment(["Zuschuss Kommune"])[0]["terms"] == ["Zuschuss", "Kommune"]
+    assert c.revision() == "unknown"
+
+
+def test_an_empty_request_never_reaches_the_network(client):
+    c, stub = client
+    assert c.segment([]) == []
+    assert stub.calls == []
+
+
+def test_the_cache_records_which_revision_produced_each_row(client):
+    """So a stale entry can be explained after the fact, not just missed."""
+    c, stub = client
+    c.segment(["Zuschuss Kommune"])
+    rows = c.cache.db.execute("SELECT keywords, revision FROM segments").fetchall()
+    assert rows == [("Zuschuss Kommune", "code0.weights0")]
+
+
+def test_a_pre_revision_cache_file_is_upgraded_not_rejected(tmp_path, monkeypatch):
+    """Deployments have caches written before the column existed."""
+    import sqlite3
+
+    path = tmp_path / "cache.sqlite"
+    old = sqlite3.connect(path)
+    old.execute(
+        """CREATE TABLE segments (
+               md5 TEXT PRIMARY KEY, keywords TEXT NOT NULL, result TEXT NOT NULL,
+               model TEXT, created_at REAL NOT NULL)"""
+    )
+    old.execute("INSERT INTO segments VALUES ('x', 'Zuschuss Kommune', '{}', 'old', 0)")
+    old.commit()
+    old.close()
+
+    from segment.client import Cache, TaggerClient
+
+    monkeypatch.setenv("FDB_TAGGER_URL", "https://example.invalid")
+    monkeypatch.setenv("FDB_TAGGER_TOKEN", "test-token")
+    with TaggerClient(cache=Cache(path)) as c:
+        stub = _StubEndpoint()
+        c._post = stub
+        # The pre-revision row is unreachable rather than trusted, so the value is
+        # re-segmented instead of served from code that no longer exists.
+        c.segment(["Zuschuss Kommune"])
+        assert len(stub.calls) == 1
+
+
+# -- the revision itself -------------------------------------------------------
+
+
+def test_revision_changes_when_the_decoding_code_changes(tmp_path):
+    from segment.revision import DECISION_SURFACE, code_revision
+
+    for name in DECISION_SURFACE:
+        (tmp_path / name).write_text("original")
+    before = code_revision(tmp_path)
+    (tmp_path / "postprocess.py").write_text("original, edited")
+    assert code_revision(tmp_path) != before
+
+
+
+def test_revision_changes_when_the_model_is_retrained(tmp_path):
+    from segment.revision import revision
+
+    meta = tmp_path / "training_meta.json"
+    meta.write_text('{"seed": 0, "held_out_f1_at_0.5": 0.9651}')
+    before = revision(tmp_path)
+    meta.write_text('{"seed": 0, "held_out_f1_at_0.5": 0.9712}')
+    assert revision(tmp_path) != before
+
+
+def test_revision_is_stable_across_calls_and_survives_missing_files(tmp_path):
+    """Same inputs, same string -- otherwise every run would invalidate everything."""
+    from segment.revision import UNKNOWN, code_revision, revision
+
+    assert code_revision(tmp_path) == code_revision(tmp_path)
+    assert revision(None).endswith(UNKNOWN)
+    assert revision(tmp_path).endswith(UNKNOWN)  # no training_meta.json
+
+
+def test_the_shipped_revision_is_reported_for_the_real_files():
+    from segment.revision import revision
+
+    code, _, weights = revision().partition(".")
+    assert len(code) == 12 and code.isalnum()
+    assert weights  # "unknown" without local weights, a digest with them
 
 
 def test_client_refuses_to_start_without_credentials(monkeypatch):

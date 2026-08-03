@@ -37,13 +37,11 @@ from __future__ import annotations
 
 import argparse
 import shutil
-import subprocess
-import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).parent.parent
 
-GEN_DCAT = ROOT / "scripts" / "gen_dcat.py"
 CSV_FILE = "programme.csv"
 # Published beside the data, not just kept in the repo: a consumer who downloads the
 # CSV from the served tree should be able to reach the licence from there. The
@@ -117,12 +115,26 @@ def build(
 
 
 def generate_metadata(out: Path) -> None:
-    """Regenerate the DCAT artefacts into ``out``, with byteSize for what was built."""
-    for args in (
-        ["--out-dir", str(out), "--data-dir", str(out / "data")],
-        ["--check-csv", str(out / "data" / CSV_FILE)],
-    ):
-        subprocess.run([sys.executable, str(GEN_DCAT), *args], cwd=ROOT, check=True)
+    """Regenerate the DCAT artefacts into ``out``, with byteSize for what was built.
+
+    Then check the written CSV against the schema just generated for it. A publish
+    that disagrees with its own metadata about which columns exist is exactly the
+    failure a consumer cannot work around, so it fails the run rather than warning.
+    """
+    # Late like the pipeline imports above, for the same reason.
+    from fdb_scraper.dcat import check_csv, distribution_sizes, write_artefacts
+
+    modified = datetime.now(timezone.utc)
+    sizes, missing = distribution_sizes(out / "data")
+    for note in missing:
+        print(note)
+    for line in write_artefacts(out, modified, sizes):
+        print(line)
+
+    if problems := check_csv(out / "data" / CSV_FILE):
+        for problem in problems:
+            print(f"csv: {problem}")
+        raise SystemExit(1)
 
 
 def main() -> None:

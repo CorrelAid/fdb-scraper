@@ -15,11 +15,20 @@ previous [scaper](https://github.com/CorrelAid/cdl_funding_scraper) we provided,
 | Metadata (DCAT-AP.de) | `https://fdb.cdl.correlaid.org/id/dataset/foerderdatenbank-programme.ttl` |
 | Minted vocabulary | `https://fdb.cdl.correlaid.org/def/fdb` |
 
-The metadata document is self-contained and is what a harvester fetches. This
-repository publishes **no `dcat:Catalog`** — the catalogue listing this dataset
-alongside the Civic Data Lab's others is a separate deployment that merges this
-document with the others. See [CATALOGUE.md](CATALOGUE.md), which also specifies how
-to build that aggregator.
+Nine columns take their values from a closed vocabulary, enumerated in
+[`fdb_scraper.generated.vocab`](src/fdb_scraper/generated/vocab.py) and enforced per
+cell by the pandera schema — an unknown code fails the build rather than being
+published. The table schema names the vocabulary and its size per column.
+
+Five of those nine also have a loose alignment to a published codelist (XÖV
+`finanzierungsform`, `geldgebende-institution`, `foerderbereich`, `foerdernehmende`,
+and NUTS for `funding_location`), derived by label match in
+[`fdb_scraper.codelists`](src/fdb_scraper/codelists.py). It is not published as part
+of the dataset: the values stay the export's own codes, and the mapping is available
+in-repo via `fdb_scraper.matches()` and `fdb_scraper.unmatched()` for anyone who wants
+the standard code. 
+
+See `notebooks/exploration.ipynb` for an example on how to load and use the data.
 
 ## Pipeline
 
@@ -28,38 +37,16 @@ to build that aggregator.
 | --- | --- | --- | 
 | download + unzip | `scraper.export` | Loads documents to disk|
 | structural contract | `contract.check_export` | raises `ContractError` on drift | 
-| parse programmes | `scraper.scrape` | extracts useable fields | 
+| parse programmes | `parser.parse_programmes` | XML documents to rows; `scraper.scrape` is this with a download in front | 
 | index linked documents | `links.resolve` |  contacts / addresses / links | 
 | process | `process.process` | decoding, adding ids and links, collapsing pivots, renaming | 
 | validate | `schema.build_schema` | raises `SchemaErrors` on bad values |
 
+We additionally do some non-determinstic segmenting for keywords with a finetuned BERT model. In the export, keywords often (87.7%) carry no separator. The keywords are joined by single spaces, so a multi-word keyword is indistinguishable from several one-word keywords. The resulting field is called `keywords_extracted`. In the future we might add more information extraction to this pipeline, but non-deterministic methods will always be declared as such.
 
+## Parsing the XML yourself
 
-
-## Field names
-
-The XML property names come from a generic CMS template and several mean the
-opposite of what they say. Each mapping was confirmed against a rendered detail
-page and all 2500 values.
-
-| Page section | XML property | Published |
-| --- | --- | --- |
-| Kurzzusammenfassung › Kurztext | `gsb:teaserText` | `short_description` |
-| Kurzzusammenfassung › Volltext | `gsb:summary` | `description` |
-| Rechtsgrundlage › Richtlinie | `gsb:bodyText` | `legal_basis` |
-| Rechtsgrundlage (citation) | `gsb:procDescription` | `legal_citation` |
-| Zusatzinfos › Rechtliche Voraussetzungen | `gsb:regulatoryFWork` | `legal_requirements` |
-| Zusatzinfos › Verfahrensablauf | `gsb:procMethod` | `procedure` |
-| Zusatzinfos › Fristen | `gsb:procInfluence` | `deadlines` |
-| Zusatzinfos › Bearbeitungsdauer | `gsb:progress` | `processing_time` |
-| Zusatzinfos › Erforderliche Unterlagen | `gsb:competenceDescr` | `required_documents` |
-| Antragssprache | `gsb:functions` | `application_language` |
-| Suchmaschinen-Beschreibung | `gsb:remark` | `seo_description` |
-
-Sub-sections stay apart, so the crawler's `more_info` blob is gone. Reasons for
-every dropped field are in `schema.DROPPED_FIELDS`.
-
-
+If you want the XML step, copy it. It lives on its own in [src/fdb_scraper/parser.py](src/fdb_scraper/parser.py) and needs nothing but `polars` and the standard library. `parse_programmes("data/foerderprogramme_export")` is the whole entry point: give it any directory holding a `BMWI` tree and it returns the same 65-column frame.
 
 ## Install
 
@@ -77,14 +64,6 @@ No configuration is needed to run locally: unset, the pipeline writes its histor
 | `FDB_SEGMENTER_DIR` | `services/keyword_segmenter` beside the package | Where `history` imports the segmenter client from. Set by the image, which copies only that directory |
 | `FDB_TEST_POSTGRES` | unset | A Postgres URL makes the twelve history tests run against Postgres instead of skipping |
 
-The two tagger variables have a local home: `.env.tagger` at the repo root,
-gitignored, sourced with `set -a; . ./.env.tagger; set +a`.
-[notebooks/model_demos.ipynb](notebooks/model_demos.ipynb) reads it directly and
-demonstrates calling the endpoint.
-
-The published URLs are *not* configurable; they are hardcoded in
-[src/fdb_scraper/uris.py](src/fdb_scraper/uris.py) on purpose.
-
 ## Scripts
 
 | # | Script | Description | Input it needs | Regenerate when |
@@ -93,4 +72,7 @@ The published URLs are *not* configurable; they are hardcoded in
 | 2 | `gen_vocab.py` | The export's own label bundle, which the closed vocabularies are matched against, into `generated/vocab.py` | an extracted export | upstream labels changed. **After 1**: `process.decode` reads the codelist data |
 | — | `gen_contract.py` | Which properties each document type carries and what container each declares, into `generated/contract_data.py` | an extracted export | a `ContractError` turned out to be a legitimate upstream change. Independent of the rest |
 | 3 | `build_dist.py` | The pipeline itself: load, process, validate, write the CSV and the metadata into a staging tree | — | every run; it produces the CSV that 4 measures |
-| 4 | `gen_dcat.py` | The committed `dcat/` — dataset document, minted vocabulary, CSVW table schema | `schema`/`semantics` + that CSV | a published column, URI or vocabulary changed |
+| 4 | `gen_dcat.py` | The committed `dcat/` — dataset document, minted vocabulary, CSVW table schema, each also as JSON-LD and HTML. A command line around `fdb_scraper.dcat`, which is what the pipeline and the tests import | `schema`/`semantics` + that CSV | a published column, URI or vocabulary changed |
+
+What gets published, and why each part is shaped the way it is, is documented in
+[src/fdb_scraper/dcat/\_\_init\_\_.py](src/fdb_scraper/dcat/__init__.py).

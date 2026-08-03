@@ -14,7 +14,7 @@ from collections import defaultdict
 from pathlib import Path
 
 from fdb_scraper.links import CONTENT_DIR
-from fdb_scraper.scraper import parse_xml
+from fdb_scraper.parser import parse_xml
 
 OUT = Path(__file__).parent.parent / "src" / "fdb_scraper" / "generated" / "contract_data.py"
 

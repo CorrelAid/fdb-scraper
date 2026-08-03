@@ -1,15 +1,12 @@
 """The published table's contract: what it contains, and what is checked.
 
-One file, so that "what does the result look like" needs no other. In reading
-order:
+What is *decided* -- which fields are dropped, what they are renamed to, which
+taxonomies are collapsed, what a value has to look like -- is declared in
+:mod:`fdb_scraper.config` and read from there. This file turns those decisions into
+a checkable schema, in reading order:
 
-* :data:`DROPPED_FIELDS` -- what the parser is not asked for, and why.
-* :data:`CODE_ALIASES` -- upstream category records that are duplicates, collapsed.
-* :data:`RENAMES` -- export field to published name. The XML property names come
-  from a generic CMS template and several mean the opposite of what they say.
-* :data:`CONSUMED_FIELDS` -- parsed because a later step needs it, then dropped.
-* :data:`PIVOTS` -- the two taxonomies the export ships spread across one column
-  per parent value, republished as one column of ``"parent.child"`` paths each.
+* :data:`USEABLE_FIELDS` -- what the parser is asked for, per
+  :data:`~fdb_scraper.config.DROPPED_FIELDS`.
 * :data:`COLUMNS` -- dtype, nullability, uniqueness and value checks per column.
 * :data:`PUBLISHED_FIELDS` -- the output, in order.
 * :data:`ORIGIN` -- upstream, derived or inferred, per column. The one thing a
@@ -19,198 +16,42 @@ order:
 to answer a question about the output than reading this file.
 
 :mod:`fdb_scraper.process` applies these declarations; it holds no declarations of
-its own, so the two never disagree. Import direction is process -> schema.
+its own, so the two never disagree. Import direction is process -> schema -> config.
 """
 
 from __future__ import annotations
 
 from collections.abc import Iterable
-from datetime import datetime, timezone
 
 import pandera.polars as pa
 import polars as pl
 
-from fdb_scraper.links import CONTACT_KEYS
-from fdb_scraper.scraper import ALL_FIELDS
-from fdb_scraper.scraper import INVISIBLE_RE
-from fdb_scraper.generated import CLOSED_VOCABS
-
-# Fields carrying no usable information in the export. Kept out of the default
-# field list rather than deleted from the parser, so a field that starts being
-# populated upstream can be picked up again by asking for it explicitly.
-DROPPED_FIELDS = frozenset(
-    {
-        # Temporary extraction directory -- meaningless once the run ends.
-        "path",
-        # Never populated: Null dtype across every programme.
-        "challenge",
-        "customer_benefit",
-        "proc_quality",
-        "requirements",
-        "service_description",
-        "service_fee_descr",
-        "terms_of_payment",
-        # Always an empty link list.
-        "foerdertermin",
-        # Single value ("Deutsch") on all but three programmes.
-        "languages",
-        # Mostly nonsense: of 638 non-null values, 480 fall outside any
-        # plausible range (the minimum is year 0207).
-        "date_of_expiration",
-        # Mix of year labels ("01".."20") and buckets ("nicht_relevant"),
-        # dominated by "nicht_relevant"; not usable as stated.
-        "unternehmensalter",
-        # Internal editorial ticket ids ("# 861223"), non-null on 2495 of 2500.
-        "comment",
-        # Opaque 14-digit numbers ("99102158080000") on 10 programmes, with
-        # nothing upstream that says what registry they belong to or how to
-        # resolve them.
-        "external_id",
-        # The CMS's robots noindex flag: 0 on 2023 programmes, absent on 477,
-        # never 1. The 0-vs-absent split records whether the CMS wrote the
-        # property, not anything about the programme -- the two groups are
-        # indistinguishable on every other column. Notebook E9 watches `raw` for
-        # upstream starting to set it, which would plausibly mean a withdrawal.
-        "should_not_be_indexed",
-        # Constant: "ServiceOffer-FundingProgram" on 2497 programmes, absent on 3.
-        # Those 3 are exactly the rows where `title` is null (E12), so the only
-        # usable thing about the column duplicates a check consumers are already
-        # told to make.
-        "subtype",
-        # gsb:referenceCustomer holds the funding ministry as a display string
-        # ("Bundesministerium für Wirtschaft und Klimaschutz (BMWK)") on 25
-        # programmes -- and every one of those rows already carries the same body
-        # in foerderorganisation as a code. A label for something the table
-        # states elsewhere, on 1% of rows.
-        "reference_customer",
-    }
+from fdb_scraper.config import (
+    CONSUMED_FIELDS,
+    CONTACT_PREFIX,
+    DROPPED_FIELDS,
+    FAR_FUTURE,
+    INFERRED_COLUMNS,
+    ISSUE_EPOCH,
+    LICENCE_LABEL,
+    LOAD_EPOCH,
+    OPEN_LINK_FIELDS,
+    PIVOTS,
+    RENAMES,
+    SEPARATOR,
+    SLUG,
+    TERM_EDGE,
+    TEXT_FIELDS,
+    URL_PREFIX,
 )
+from fdb_scraper.links import CONTACT_KEYS
+from fdb_scraper.parser import ALL_FIELDS
+from fdb_scraper.parser import INVISIBLE_RE
+from fdb_scraper.generated import CLOSED_VOCABS
 
 USEABLE_FIELDS: tuple[str, ...] = tuple(f for f in ALL_FIELDS if f not in DROPPED_FIELDS)
 
-# Upstream ships two category records for nationwide scope, "_bundesweit" (577
-# programmes) and "bundesweit" (85). Their XML is byte-identical apart from the
-# name, and one programme carries both, so they are a duplicate rather than two
-# concepts. "_bundesweit" is canonical: it is the one with a label entry in the
-# export and the one the website's filter sidebar offers, the underscore sorting
-# it above the Bundesländer. Kept as an explicit alias so the collapse is
-# visible and reversible; every other upstream oddity is left verbatim.
-CODE_ALIASES: dict[str, dict[str, str]] = {"foerdergebiet": {"bundesweit": "_bundesweit"}}
-
-# Export field -> published name. Page section noted where the name is not
-# self-explanatory.
-RENAMES = {
-    # Kurzzusammenfassung > Kurztext / Volltext
-    "teaser": "short_description",
-    "summary": "description",
-    # Rechtsgrundlage > Richtlinie, plus its citation line
-    "body_text": "legal_basis",
-    "proc_description": "legal_citation",
-    # Zusatzinfos, one column per sub-section
-    "regulatory_framework": "legal_requirements",
-    "proc_method": "procedure",
-    "proc_influence": "deadlines",
-    "progress": "processing_time",
-    "competence_descr": "required_documents",
-    # Categories, keeping the names the previous dataset published
-    "foerderart": "funding_type",
-    "foerderbereich": "funding_area",
-    "foerdergebiet": "funding_location",
-    "foerderberechtigte": "eligible_applicants",
-    "foerdergeber": "funding_body",
-    "foerderorganisation": "funding_organisation",
-    # Editorial status note, e.g. "Programm aktiv, Antragstellung nicht möglich"
-    "header": "status_note",
-    # gsb:functions holds the language the application has to be written in --
-    # "Deutsch", "Die Antragssprache für Skizzen ist in der Regel Englisch". 11
-    # distinct values on 25 programmes. It is also where the usable half of the
-    # language information ended up: the languages classifier was dropped for
-    # saying only "Deutsch", while this states the exceptions.
-    "functions": "application_language",
-    # gsb:remark holds the page's search-engine description -- second person,
-    # call to action ("Beantragen Sie als Konsortium Förderung für ..."). Written
-    # for a search result, not an editorial note about the programme.
-    "remark": "seo_description",
-    "kontakt": "contact_ids",
-}
-
-# Fields the pipeline needs as input but does not publish. Distinct from
-# process.DROPPED_FIELDS, which is never parsed at all: these have to survive the
-# scrape because a later step consumes them.
-#
-# externer_link holds "target:/BMWI/..." document references. add_links resolves
-# them against the linked-document index and publishes the result as
-# further_links, so the raw references are an intermediate, not an output.
-CONSUMED_FIELDS = frozenset({"externer_link"})
-
-CONTACT_PREFIX = "contact_info_"
 CONTACT_COLUMNS = tuple(f"{CONTACT_PREFIX}{f}" for f in CONTACT_KEYS)
-# grw and unternehmensgroesse keep their export names: GRW is the name of a law,
-# and "Unternehmensgröße" buckets are defined by it rather than translatable.
-
-# --- Columns the export ships pivoted ----------------------------------------
-# Two taxonomies arrive spread across one column per parent value, because the
-# export models each parent as its own classifier. Both are republished as a
-# single column of "parent.child" paths.
-#
-# The parent has to travel in the value, in both cases for the same reason: the
-# child vocabulary is shared between parents, so a bare child code cannot be
-# attributed back.
-#
-# funding_subarea (19 -> 1)
-#     The second Förderbereich level. 91% of programmes carry one, but no single
-#     source column exceeds 18% fill, so as 19 columns it was 28% of the table's
-#     width and 43597 empty cells in a CSV. 11 sub-area codes occur under more
-#     than one parent -- "beratung_schulung" under five -- and 56% of programmes
-#     list several Förderbereiche, so dropping the parent would collapse 349 of
-#     5963 values.
-#
-# applicant_sector (2 -> 1)
-#     The applicant's economic sector. The two source columns carry the
-#     byte-identical eight-sector list and differ only in which applicant type it
-#     describes, so their names encode a value of another vocabulary
-#     (foerderberechtigte) exactly as the uf_* names encode a Förderbereich. The
-#     distinction is real data, not redundancy: "Niederlassung von Ärztinnen und
-#     Ärzten" is freie_berufe for a founder and dienstleistungen for an existing
-#     business, and InvestEU lists all eight sectors for founders against one for
-#     companies. 15 of the 206 programmes that fill both differ that way.
-SEPARATOR = "."  # schema.SLUG forbids "/", and no category code contains a dot
-
-PIVOTS: dict[str, dict[str, str]] = {
-    "funding_subarea": {
-        "uf_arbeit": "arbeit",
-        "uf_aus_weiterbildung": "aus_weiterbildung",
-        "uf_aussenwirtschaft": "aussenwirtschaft",
-        "uf_beratung": "beratung",
-        "uf_energieeffizienz": "energieeffizienz_erneuerbare_energien",
-        "uf_existenzgruendung": "existenzgruendung_festigung",
-        # The two Forschung classifier names are abbreviated upstream.
-        "uf_forschung_offen": "forschung_innovation_themenoffen",
-        "uf_forschung_spezifisch": "forschung_innovation_themenspezifisch",
-        "uf_frauenfoerderung": "frauenfoerderung",
-        "uf_gesundheit_soziales": "gesundheit_soziales",
-        "uf_infrastruktur": "infrastruktur",
-        "uf_kultur_medien_sport": "kultur_medien_sport",
-        "uf_landwirtschaft": "landwirtschaft_laendliche_entwicklung",
-        "uf_messen_ausstellungen": "messen_ausstellungen",
-        "uf_regionalfoerderung": "regionalfoerderung",
-        "uf_staedtebau_stadterneuerung": "staedtebau_stadterneuerung",
-        "uf_umwelt_naturschutz": "umwelt_naturschutz",
-        "uf_unternehmensfinanzierung": "unternehmensfinanzierung",
-        "uf_wohnungsbau": "wohnungsbau_modernisierung",
-    },
-    "applicant_sector": {
-        "branchen_existenzgruenderin": "existenzgruenderin",
-        "branchen_unternehmen": "unternehmen",
-    },
-}
-
-# Target column -> the vocabulary its parents come from, so a consumer can tell
-# what the left half of a path is.
-PIVOT_PARENT_VOCAB = {
-    "funding_subarea": "foerderbereich",
-    "applicant_sector": "foerderberechtigte",
-}
 
 # Source columns that no longer exist once the pivots are collapsed.
 PIVOTED_SOURCES = frozenset(c for parents in PIVOTS.values() for c in parents)
@@ -227,70 +68,10 @@ def pivot_paths(target: str) -> tuple[str, ...]:
     )
 
 
-# A leaf label, e.g. "keine_grw_foerderung" or "gesellschaft fuer ... (giz)-31032".
-# Deliberately loose: the point is that the "target:/BMWI/..." prefix is gone,
-# and upstream slugs contain mixed case, spaces, parentheses and umlauts.
-SLUG = r"^[^/]+$"
-URL_PREFIX = r"^https://www\.foerderdatenbank\.de/FDB/Content/DE/Foerderprogramm/"
-
-# Open-ended link lists: new entries appear constantly, so validate the shape
-# of the leaf rather than its membership.
-OPEN_LINK_FIELDS = ("funding_organisation", "contact_ids")
-
-# --- The source's licence ----------------------------------------------------
-# From the Förderdatenbank imprint, which licenses the site's texts under CC BY-ND
-# and names the ministry as rights holder. Declared here rather than in the
-# generator so the per-row attribution and the DCAT metadata cannot disagree about
-# what this data is licensed as.
-#
-# ND is why nothing here rewrites a value: the published table reformats the export
-# into columns and resolves its internal links, which is not a derivative work of
-# the texts, but editing them would be.
-#
-# funding_crawler recorded CC BY-ND 3.0 DE and "Wirtschaft und Klimaschutz". Both
-# are now out of date -- the imprint says 4.0 and the ministry was renamed -- so
-# these are taken from the current imprint rather than carried over.
-SOURCE_LICENSOR = "Bundesministerium für Wirtschaft und Energie"
-SOURCE_LICENCE = "CC BY-ND 4.0"
-# The deed, not the dcat-ap.de URI: this one is for a human reading a cell.
-SOURCE_LICENCE_URL = "https://creativecommons.org/licenses/by-nd/4.0/deed.de"
-
-# Bounds for the history timestamps, which are load times rather than anything the
-# export states. Nothing can predate the first load, and a value in the far future
-# means a clock or a timezone went wrong. Deliberately not "not after now": that
-# would make the check depend on when it runs.
-LOAD_EPOCH = datetime(2025, 1, 1, tzinfo=timezone.utc)
-FAR_FUTURE = datetime(2100, 1, 1, tzinfo=timezone.utc)
-
 # The timestamp dtype the history columns carry. Named because the aggregates that
 # derive them have to be cast to it explicitly: on a first load nothing has been
 # retired yet, so the aggregates come out Null and List(Null).
 TIMESTAMP = pl.Datetime(time_unit="us", time_zone="UTC")
-
-TEXT_FIELDS = (
-    "title", "description", "short_description", "legal_basis", "legal_citation",
-    "legal_requirements", "procedure", "deadlines", "processing_time",
-    "required_documents", "status_note", "seo_description",
-    "application_language", "keywords",
-)
-
-# --- The inferred column ------------------------------------------------------
-# ``keywords`` arrives as one string holding several keywords with no reliable
-# separator -- 87.7% of values carry no separator signal at all, and a multi-word
-# keyword is indistinguishable from several one-word ones without reading the
-# German. ``keywords_extracted`` is that string split up by a fine-tuned encoder
-# (services/keyword_segmenter). The raw column stays untouched beside it.
-#
-# It is the only published column no rule produces, which is why :data:`ORIGIN`
-# exists: everything else here either restates the export or follows from it, and a
-# consumer reading the CSV has no way to tell the difference by looking.
-INFERRED_COLUMNS: tuple[str, ...] = ("keywords_extracted",)
-
-# Punctuation the segmenter strips from the edges of a term. Stated here rather
-# than imported from ``segment.tokens``: services/keyword_segmenter is not an
-# installed package, and this is the contract the published column is held to
-# whatever produced it.
-_TERM_EDGE = " ,;.:()[]\"'"
 
 
 def _is_span_partition(keywords: str | None, extracted: list[str] | None) -> bool:
@@ -312,15 +93,15 @@ def _is_span_partition(keywords: str | None, extracted: list[str] | None) -> boo
         return True
     if keywords is None:
         return not extracted  # nothing to be a span of
-    tokens = [t for t in keywords.split() if t.strip(_TERM_EDGE)]
+    tokens = [t for t in keywords.split() if t.strip(TERM_EDGE)]
     produced = [
         t
         for term in extracted
         for t in term.split()
-        if t.strip(_TERM_EDGE)
+        if t.strip(TERM_EDGE)
     ]
-    return [t.strip(_TERM_EDGE) for t in tokens] == [
-        t.strip(_TERM_EDGE) for t in produced
+    return [t.strip(TERM_EDGE) for t in tokens] == [
+        t.strip(TERM_EDGE) for t in produced
     ]
 
 
@@ -369,9 +150,9 @@ def _list_elements(check: pl.Expr, name: str, description: str) -> pa.Check:
 
 
 def _text_column() -> pa.Column:
-    """A text column the scraper has already cleaned.
+    """A text column the parser has already cleaned.
 
-    Asserts what ``scraper._clean`` guarantees: no soft hyphen, no C0/C1 control
+    Asserts what ``parser._clean`` guarantees: no soft hyphen, no C0/C1 control
     character, no run of whitespace, no leading or trailing space. Cheap, and it
     catches a text field added to the parser without going through ``_clean`` --
     which is how ``keywords`` shipped a literal tab.
@@ -430,7 +211,7 @@ COLUMNS: dict[str, pa.Column] = {
     "license_info": pa.Column(
         pl.String,
         nullable=False,
-        checks=pa.Check.str_contains(SOURCE_LICENCE),
+        checks=pa.Check.str_contains(LICENCE_LABEL),
     ),
     "further_links": pa.Column(
         pl.List(pl.Struct({"url": pl.String, "title": pl.String})),
@@ -445,10 +226,7 @@ COLUMNS: dict[str, pa.Column] = {
     "date_of_issue": pa.Column(
         pl.Datetime(time_unit="us", time_zone="UTC"),
         nullable=True,
-        checks=pa.Check.in_range(
-            datetime(2000, 1, 1, tzinfo=timezone.utc),
-            datetime(2100, 1, 1, tzinfo=timezone.utc),
-        ),
+        checks=pa.Check.in_range(ISSUE_EPOCH, FAR_FUTURE),
     ),
     **{f: _text_column() for f in TEXT_FIELDS},
     **{

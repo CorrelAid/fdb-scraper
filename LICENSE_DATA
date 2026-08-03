@@ -1,7 +1,7 @@
 # Licence of the data
 
-This applies to the published dataset — `programme.parquet` and everything derived
-from it. The code in this repository is licensed separately, under the MIT licence in
+This applies to the published dataset — `programme.csv` and everything derived from
+it. The code in this repository is licensed separately, under the MIT licence in
 `LICENSE_CODE`.
 
 ## The source
@@ -46,9 +46,13 @@ example:
     CC BY-ND 4.0 (https://creativecommons.org/licenses/by-nd/4.0/deed.de),
     Quelle: https://www.foerderdatenbank.de/FDB/Content/DE/Foerderprogramm/Bund/BMAS/einstiegsgeld.html
 
-That column exists because dataset-level metadata is no help to someone holding one
-extracted record. The same information is in the DCAT metadata at dataset level, as
-`dct:license` and `dcatde:licenseAttributionByText`.
+That column exists because the published metadata is no help to someone holding one
+extracted record: it states the licence and the rights holder for the file as a
+whole, on the CSV distribution, as `dct:license`
+(`http://dcat-ap.de/def/licenses/cc-by-nd/4.0`, the same licence under the identifier
+DCAT-AP.de uses) and `dcatapde:licenseAttributionByText`
+(`Bundesministerium für Wirtschaft und Energie`). It does not name a single
+programme or its source page, which is what the row's own line adds.
 
 ## No warranty
 

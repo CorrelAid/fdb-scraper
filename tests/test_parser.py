@@ -3,14 +3,15 @@ from xml.etree import ElementTree as ET
 import polars as pl
 import pytest
 
-from fdb_scraper.scraper import (
+from fdb_scraper import scraper
+from fdb_scraper.parser import (
     ALL_FIELDS,
     EXPORT_SCHEMA,
     _clean,
     _parse_iso,
-    _strip_html,
+    parse_programmes,
     parse_xml,
-    scrape,
+    strip_html,
 )
 from tests.conftest import MALFORMED
 
@@ -25,7 +26,7 @@ def test_malformed_document_is_rejected_by_a_strict_parse():
 def test_parse_xml_repairs_forbidden_control_characters():
     root = parse_xml(MALFORMED)
     title = next(p for p in root.findall("property") if p.get("name") == "gsb:title")
-    text = _strip_html(title.find("text").text)
+    text = strip_html(title.find("text").text)
     # The control character is dropped, so the word around it closes up.
     assert "De-minimis-Beihilfen" in text
     assert "\x02" not in text
@@ -33,13 +34,13 @@ def test_parse_xml_repairs_forbidden_control_characters():
 
 def test_strip_html_unwraps_cdata_and_collapses_whitespace():
     raw = "&lt;![CDATA[&lt;div&gt;&lt;p&gt;Ein   Satz&lt;/p&gt;\n&lt;p&gt;und noch einer&lt;/p&gt;&lt;/div&gt;]]&gt;"
-    assert _strip_html(raw) == "Ein Satz und noch einer"
+    assert strip_html(raw) == "Ein Satz und noch einer"
 
 
 def test_strip_html_maps_empty_markup_to_none():
-    assert _strip_html("&lt;![CDATA[&lt;div&gt;&lt;/div&gt;]]&gt;") is None
-    assert _strip_html("") is None
-    assert _strip_html(None) is None
+    assert strip_html("&lt;![CDATA[&lt;div&gt;&lt;/div&gt;]]&gt;") is None
+    assert strip_html("") is None
+    assert strip_html(None) is None
 
 
 def test_parse_iso_discards_unparseable_timestamps():
@@ -83,13 +84,24 @@ def test_classifier_links_keep_their_full_href(raw):
 
 def test_unknown_field_is_rejected(export_dir):
     with pytest.raises(ValueError, match="unknown fields"):
-        scrape(["title", "nope"], export_dir=export_dir)
+        parse_programmes(export_dir, ["title", "nope"])
+
+
+def test_unknown_field_is_rejected_before_the_download(monkeypatch):
+    """scrape checks the field list first, so a typo costs no 50 MB fetch."""
+
+    def fail(dest):
+        raise AssertionError("downloaded despite an unknown field")
+
+    monkeypatch.setattr(scraper, "_download_and_extract", fail)
+    with pytest.raises(ValueError, match="unknown fields"):
+        scraper.scrape(["title", "nope"])
 
 
 def test_missing_programme_directory_names_the_path(tmp_path):
     """A wrong root must say so, not surface as a missing-column error."""
     with pytest.raises(FileNotFoundError, match="Foerderprogramm"):
-        scrape(export_dir=tmp_path)
+        parse_programmes(tmp_path)
 
 
 def test_invisible_characters_are_dropped():

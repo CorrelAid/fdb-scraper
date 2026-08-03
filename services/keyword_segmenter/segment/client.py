@@ -12,8 +12,12 @@ That makes a cache load-bearing rather than a nicety:
 * **A new export is cheap.** 2440 rows collapse to 2341 unique strings; on the
   second export only genuinely new keyword values are sent.
 
-The key is ``md5(keywords)`` over the exact raw string, so any upstream edit is a
-miss and gets re-segmented.
+The key is ``md5(revision + keywords)``: the exact raw string, so any upstream edit
+is a miss, *and* the segmenter revision, so a code change or a retrained checkpoint is
+a miss too. The second half was learned the hard way -- keyed on the string alone,
+adding the function-word repair left 2340 stale rows that a rerun had no reason to
+touch, and the fix reached nothing until someone deleted the cache by hand. See
+:mod:`segment.revision`.
 
     export FDB_TAGGER_URL=https://...modal.run
     export FDB_TAGGER_TOKEN=...
@@ -36,7 +40,22 @@ CHUNK = 256
 
 
 def fingerprint(keywords: str) -> str:
+    """Content hash of one raw value. The pipeline's primary key, revision-free.
+
+    A new revision must *replace* a stored segmentation rather than sit beside it,
+    so the row identity stays the string alone and the revision travels as a column.
+    The local cache is the opposite case -- see :func:`cache_key`.
+    """
     return hashlib.md5(keywords.encode()).hexdigest()
+
+
+def cache_key(keywords: str, revision: str) -> str:
+    """Cache identity: the value *and* what would segment it.
+
+    Keeping both revisions addressable is what makes a rollback cheap -- reverting
+    the code restores its cache entries instead of paying for the column again.
+    """
+    return hashlib.md5(f"{revision}\n{keywords}".encode()).hexdigest()
 
 
 class Cache:
@@ -52,9 +71,15 @@ class Cache:
                    keywords TEXT NOT NULL,
                    result TEXT NOT NULL,
                    model TEXT,
-                   created_at REAL NOT NULL
+                   created_at REAL NOT NULL,
+                   revision TEXT
                )"""
         )
+        # Pre-revision caches exist in deployments. Their rows are keyed on
+        # md5(keywords) and can never collide with a revision-keyed lookup, so they
+        # are simply unreachable rather than wrong -- adding the column is enough.
+        if "revision" not in {row[1] for row in self.db.execute("PRAGMA table_info(segments)")}:
+            self.db.execute("ALTER TABLE segments ADD COLUMN revision TEXT")
         self.db.commit()
 
     def close(self) -> None:
@@ -68,9 +93,9 @@ class Cache:
     def __exit__(self, *exc) -> None:
         self.close()
 
-    def get_many(self, values: list[str]) -> dict[str, dict]:
+    def get_many(self, values: list[str], revision: str) -> dict[str, dict]:
         out: dict[str, dict] = {}
-        keys = [fingerprint(v) for v in values]
+        keys = [cache_key(v, revision) for v in values]
         for start in range(0, len(keys), 500):  # sqlite parameter limit
             chunk = keys[start : start + 500]
             rows = self.db.execute(
@@ -80,11 +105,18 @@ class Cache:
             out.update({kw: json.loads(res) for kw, res in rows})
         return out
 
-    def put_many(self, pairs: list[tuple[str, dict]], model: str) -> None:
+    def put_many(self, pairs: list[tuple[str, dict]], model: str, revision: str) -> None:
         self.db.executemany(
-            "INSERT OR REPLACE INTO segments VALUES (?, ?, ?, ?, ?)",
+            "INSERT OR REPLACE INTO segments VALUES (?, ?, ?, ?, ?, ?)",
             [
-                (fingerprint(kw), kw, json.dumps(res, ensure_ascii=False), model, time.time())
+                (
+                    cache_key(kw, revision),
+                    kw,
+                    json.dumps(res, ensure_ascii=False),
+                    model,
+                    time.time(),
+                    revision,
+                )
                 for kw, res in pairs
             ],
         )
@@ -109,6 +141,7 @@ class TaggerClient:
         self.cache = cache if cache is not None else Cache()
         self.timeout = timeout
         self.retries = retries
+        self._revision: str | None = None
 
     def close(self) -> None:
         self.cache.close()
@@ -148,9 +181,27 @@ class TaggerClient:
             time.sleep(2**attempt)
         raise RuntimeError("unreachable")
 
+    def revision(self) -> str:
+        """What the endpoint is currently serving, asked once per client.
+
+        A request with no values: the endpoint answers with its revision and does no
+        work. It costs one round trip, which also warms the container that the first
+        real chunk would otherwise have waited on -- and the client cannot derive
+        this locally, because the checkpoint lives on a Volume it never reads.
+
+        An endpoint too old to report one leaves the cache keyed as it was before,
+        which is the pre-revision behaviour and no worse than it.
+        """
+        if self._revision is None:
+            self._revision = self._post([]).get("revision", "unknown")
+        return self._revision
+
     def segment(self, values: list[str], use_cache: bool = True) -> list[dict]:
         """Segment many values, in input order. Only cache misses hit the network."""
-        cached = self.cache.get_many(values) if use_cache else {}
+        if not values:
+            return []
+        revision = self.revision()
+        cached = self.cache.get_many(values, revision) if use_cache else {}
         # Deduplicate as well as cache: the column repeats, and a duplicate is a
         # wasted call even on a cold cache.
         missing = list(dict.fromkeys(v for v in values if v not in cached))
@@ -164,6 +215,11 @@ class TaggerClient:
             pairs = list(zip(chunk, results))
             cached.update(dict(pairs))
             if use_cache:
-                self.cache.put_many(pairs, body.get("model", "unknown"))
+                # The revision from this very response, not the probed one: if the
+                # service were redeployed mid-run, storing these under the old key
+                # would cache new answers as old ones.
+                self.cache.put_many(
+                    pairs, body.get("model", "unknown"), body.get("revision", revision)
+                )
 
         return [cached[v] for v in values]

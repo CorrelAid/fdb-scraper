@@ -1,0 +1,249 @@
+[
+  {
+    "@id": "https://fdb.cdl.correlaid.org/id/agent/correlaid",
+    "@type": [
+      "http://xmlns.com/foaf/0.1/Agent"
+    ],
+    "http://xmlns.com/foaf/0.1/homepage": [
+      {
+        "@id": "https://correlaid.org/"
+      }
+    ],
+    "http://xmlns.com/foaf/0.1/mbox": [
+      {
+        "@id": "mailto:info@correlaid.org"
+      }
+    ],
+    "http://xmlns.com/foaf/0.1/name": [
+      {
+        "@language": "de",
+        "@value": "CorrelAid e.V."
+      }
+    ]
+  },
+  {
+    "@id": "https://fdb.cdl.correlaid.org/id/agent/correlaid#contact",
+    "@type": [
+      "http://www.w3.org/2006/vcard/ns#Kind",
+      "http://www.w3.org/2006/vcard/ns#Organization"
+    ],
+    "http://www.w3.org/2006/vcard/ns#fn": [
+      {
+        "@language": "de",
+        "@value": "CorrelAid e.V."
+      }
+    ],
+    "http://www.w3.org/2006/vcard/ns#hasEmail": [
+      {
+        "@id": "mailto:info@correlaid.org"
+      }
+    ],
+    "http://www.w3.org/2006/vcard/ns#hasURL": [
+      {
+        "@id": "https://correlaid.org/"
+      }
+    ]
+  },
+  {
+    "@id": "https://fdb.cdl.correlaid.org/id/dataset/foerderdatenbank-programme",
+    "@type": [
+      "http://www.w3.org/ns/dcat#Dataset"
+    ],
+    "http://data.europa.eu/r5r/availability": [
+      {
+        "@id": "http://publications.europa.eu/resource/authority/planned-availability/AVAILABLE"
+      }
+    ],
+    "http://dcat-ap.de/def/dcatde/politicalGeocodingLevelURI": [
+      {
+        "@id": "http://dcat-ap.de/def/politicalGeocoding/Level/federal"
+      },
+      {
+        "@id": "http://dcat-ap.de/def/politicalGeocoding/Level/state"
+      }
+    ],
+    "http://purl.org/dc/terms/accessRights": [
+      {
+        "@id": "http://publications.europa.eu/resource/authority/access-right/PUBLIC"
+      }
+    ],
+    "http://purl.org/dc/terms/accrualPeriodicity": [
+      {
+        "@id": "http://publications.europa.eu/resource/authority/frequency/WEEKLY"
+      }
+    ],
+    "http://purl.org/dc/terms/conformsTo": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/table-schema.json"
+      }
+    ],
+    "http://purl.org/dc/terms/creator": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/id/agent/correlaid"
+      }
+    ],
+    "http://purl.org/dc/terms/description": [
+      {
+        "@language": "de",
+        "@value": "Alle Förderprogramme der Förderdatenbank des Bundes (Bund, Länder und EU), ein Datensatz pro Programm mit 50 Feldern.\n\nDie Bundesregierung bietet mit der Förderdatenbank eine Suchmaschine für Förderungen an, veröffentlicht den zugrundeliegenden Datensatz aber nicht als Open Data im normativen Sinne. \nGrundlage ist der XML-Programmexport der Förderdatenbank.\n\nDer Export beinhaltet immer nur den heutigen Stand. Dieser Datensatz führt daher eine Historie: jedes Programm trägt, wann es zuerst erfasst wurde (``on_website_from``), wann sich sein Inhalt zuletzt geändert hat (``dct:modified``) und alle bisherigen Änderungszeitpunkte (``previous_update_dates``). Programme, die aus der Förderdatenbank verschwinden, bleiben mit ihrem letzten bekannten Inhalt und ``deleted = true`` enthalten. Der Datensatz umfasst damit mehr Programme als der Export und wächst über die Zeit.\n\nEine Spalte ist modellbasiert und nicht Teil der Quelle: ``keywords_extracted`` enthält die Stichwörter, die ein finetuned Sprachmodell aus der Rohspalte ``keywords`` herausliest. Upstream sind sie durch Leerzeichen verbunden und in 87,7 % der Fälle nicht trennbar. Jedes Stichwort ist nachweislich ein zusammenhängender Abschnitt des Originalstrings, geprüft bei jeder Veröffentlichung; die Grenzziehung selbst ist eine Modellentscheidung (F1 0,967 auf einer Handstichprobe). ``keywords`` bleibt unverändert daneben stehen. Das Tabellenschema kennzeichnet jede Spalte mit ``fdb:origin`` als ``upstream``, ``derived`` oder ``inferred``."
+      },
+      {
+        "@language": "en",
+        "@value": "All funding programmes in the German federal funding database (Förderdatenbank; federal, state and EU programmes), one record per programme with 50 fields.\n\nThe federal government provides the Förderdatenbank as a search engine for funding programmes, but does not publish the underlying dataset as Open Data in the normative sense.\n\nThe basis is the Förderdatenbank's XML programme export.\n\nThe export only ever contains today's state. This dataset therefore maintains a history: each programme carries when it was first recorded (``on_website_from``), when its content last changed (``dct:modified``) and all previous change timestamps (``previous_update_dates``). Programmes that disappear from the Förderdatenbank are retained with their last known content and ``deleted = true``. The dataset thus covers more programmes than the export and grows over time.\n\nOne column is model-produced and not part of the source: ``keywords_extracted`` holds the keywords a finetuned language model reads out of the raw ``keywords`` column. Upstream they are joined with spaces and carry no separator at all in 87.7% of cases. Every keyword is verifiably a contiguous span of the original string, checked on every publish; where the boundaries fall is the model's judgement (F1 0.967 on a hand-labelled sample). ``keywords`` is published unchanged beside it. The table schema marks every column with ``fdb:origin`` as ``upstream``, ``derived`` or ``inferred``."
+      }
+    ],
+    "http://purl.org/dc/terms/identifier": [
+      {
+        "@value": "foerderdatenbank-programme"
+      }
+    ],
+    "http://purl.org/dc/terms/language": [
+      {
+        "@id": "http://publications.europa.eu/resource/authority/language/DEU"
+      }
+    ],
+    "http://purl.org/dc/terms/modified": [
+      {
+        "@type": "http://www.w3.org/2001/XMLSchema#dateTime",
+        "@value": "2026-08-03T00:00:00+00:00"
+      }
+    ],
+    "http://purl.org/dc/terms/publisher": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/id/agent/correlaid"
+      }
+    ],
+    "http://purl.org/dc/terms/title": [
+      {
+        "@language": "de",
+        "@value": "Förderprogramme aus der Förderdatenbank des Bundes"
+      },
+      {
+        "@language": "en",
+        "@value": "Funding Programmes from the German funding database"
+      }
+    ],
+    "http://www.w3.org/ns/dcat#contactPoint": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/id/agent/correlaid#contact"
+      }
+    ],
+    "http://www.w3.org/ns/dcat#distribution": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/id/dataset/foerderdatenbank-programme/distribution/csv"
+      }
+    ],
+    "http://www.w3.org/ns/dcat#keyword": [
+      {
+        "@language": "de",
+        "@value": "Förderdatenbank"
+      },
+      {
+        "@language": "de",
+        "@value": "Fördermittel"
+      },
+      {
+        "@language": "de",
+        "@value": "Förderprogramme"
+      },
+      {
+        "@language": "de",
+        "@value": "Förderung"
+      }
+    ],
+    "http://www.w3.org/ns/dcat#landingPage": [
+      {
+        "@id": "https://github.com/CorrelAid/fdb_scraper"
+      }
+    ],
+    "http://www.w3.org/ns/dcat#theme": [
+      {
+        "@id": "http://publications.europa.eu/resource/authority/data-theme/ECON"
+      },
+      {
+        "@id": "http://publications.europa.eu/resource/authority/data-theme/GOVE"
+      }
+    ],
+    "http://www.w3.org/ns/prov#wasDerivedFrom": [
+      {
+        "@id": "https://www.foerderdatenbank.de/FDB/WS/export"
+      }
+    ],
+    "http://xmlns.com/foaf/0.1/page": [
+      {
+        "@id": "https://www.foerderdatenbank.de/"
+      }
+    ]
+  },
+  {
+    "@id": "https://fdb.cdl.correlaid.org/id/dataset/foerderdatenbank-programme/distribution/csv",
+    "@type": [
+      "http://www.w3.org/ns/dcat#Distribution"
+    ],
+    "http://data.europa.eu/r5r/availability": [
+      {
+        "@id": "http://publications.europa.eu/resource/authority/planned-availability/AVAILABLE"
+      }
+    ],
+    "http://dcat-ap.de/def/dcatde/licenseAttributionByText": [
+      {
+        "@language": "de",
+        "@value": "Bundesministerium für Wirtschaft und Energie"
+      }
+    ],
+    "http://purl.org/dc/terms/conformsTo": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/table-schema.json"
+      }
+    ],
+    "http://purl.org/dc/terms/description": [
+      {
+        "@language": "de",
+        "@value": "Die vollständige Tabelle mit historischen Einträgen. Das verlinkte Tabellenschema beschreibt Datentypen, Pflichtfelder und Muster; Spalten mit Listenwerten enthalten JSON-Arrays als Zellenwert."
+      }
+    ],
+    "http://purl.org/dc/terms/format": [
+      {
+        "@id": "http://publications.europa.eu/resource/authority/file-type/CSV"
+      }
+    ],
+    "http://purl.org/dc/terms/license": [
+      {
+        "@id": "http://dcat-ap.de/def/licenses/cc-by-nd/4.0"
+      }
+    ],
+    "http://purl.org/dc/terms/modified": [
+      {
+        "@type": "http://www.w3.org/2001/XMLSchema#dateTime",
+        "@value": "2026-08-03T00:00:00+00:00"
+      }
+    ],
+    "http://purl.org/dc/terms/title": [
+      {
+        "@language": "de",
+        "@value": "Förderprogramme als CSV-Datei"
+      }
+    ],
+    "http://www.w3.org/ns/dcat#accessURL": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/data/programme.csv"
+      }
+    ],
+    "http://www.w3.org/ns/dcat#downloadURL": [
+      {
+        "@id": "https://fdb.cdl.correlaid.org/data/programme.csv"
+      }
+    ],
+    "http://www.w3.org/ns/dcat#mediaType": [
+      {
+        "@id": "https://www.iana.org/assignments/media-types/text/csv"
+      }
+    ]
+  },
+  {
+    "@id": "https://www.foerderdatenbank.de/",
+    "@type": [
+      "http://xmlns.com/foaf/0.1/Document"
+    ]
+  }
+]

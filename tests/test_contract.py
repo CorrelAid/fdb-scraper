@@ -7,7 +7,7 @@ from fdb_scraper import collect
 from fdb_scraper.contract import ContractError, check_export, violations
 from fdb_scraper.generated import DOCUMENTS, PROPERTY_CHILD
 from fdb_scraper.links import CONTENT_DIR
-from fdb_scraper.scraper import parse_xml
+from fdb_scraper.parser import parse_xml
 from tests.conftest import PROGRAMME, property_named as _property
 
 

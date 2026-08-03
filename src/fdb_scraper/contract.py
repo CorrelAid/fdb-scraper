@@ -30,7 +30,7 @@ from xml.etree import ElementTree as ET
 
 from fdb_scraper.generated import DOCUMENTS, PROPERTY_CHILD
 from fdb_scraper.links import CONTENT_DIR
-from fdb_scraper.scraper import parse_xml
+from fdb_scraper.parser import parse_xml
 
 ROOT_TAG = "document"
 ROOT_ATTRS = frozenset({"name", "path", "type"})

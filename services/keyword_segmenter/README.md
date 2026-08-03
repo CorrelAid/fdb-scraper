@@ -1,39 +1,40 @@
 # keyword_segmenter
 
-Splits the upstream `keywords` string into a list of keywords, using a fine-tuned
-German encoder (`deepset/gbert-base`, 110M parameters, MIT) served from a Modal
-CPU endpoint.
+Splits the upstream `keywords` string into a list of keywords with a fine-tuned
+German encoder (`deepset/gbert-base`, 110M parameters, MIT), served from a Modal CPU
+endpoint.
 
-Held-out **F1 0.967** against **0.878** for doing nothing. Five prompted decoders
-up to 12B all *lost* to doing nothing — see [RESULTS.md](RESULTS.md) for why, and
-for the full measurement trail.
+Held-out **F1 0.968** against **0.878** for doing nothing, and **0.906** on the rows
+whose keywords run three tokens or longer. Five prompted decoders up to 12B all *lost*
+to doing nothing — [RESULTS.md](RESULTS.md) has the full measurement trail.
 
 ## The problem
 
 `keywords` is one string per programme holding several keywords. 2440 of 2500
-programmes have a value, and **2140 of those (87.7%) carry no separator signal at
-all** — no semicolon, no comma, not even a double space. The keywords are joined by
-single spaces, so a multi-word keyword is indistinguishable from several one-word
-keywords without reading the German:
+programmes have a value, and **2140 of those (87.7%) carry no separator at all** — no
+semicolon, no comma, not even a double space. A multi-word keyword is therefore
+indistinguishable from several one-word keywords without reading the German:
 
 ```
 ... Erhaltung polnische Sprache Pflege polnischer Sprache polnischsprachige Bürger
     Beauftragte der Bundesregierung für Kultur und Medien BKM
 ```
 
-The last eight tokens are **one** keyword. Splitting on whitespace turns it into
-eight useless ones. The delimiter-using minority is unreliable too: 226 of 552
+The last eight tokens are **one** keyword; so are `Erhaltung polnische Sprache` and
+`Pflege polnischer Sprache`. Splitting on whitespace turns twelve keywords into
+twenty-six useless ones. The delimiter-using minority is unreliable too: 226 of 552
 comma-separated fields contain a space, and some commas sit *inside* a keyword.
 
 The raw XML was checked directly — every one of the 2440 `gsb:keywords` properties
-holds exactly one `<value>` element. There is no structure to recover; this export
-puts its real structure in the classifier tree (`funding_area`, `funding_type`, …),
-which the pipeline already parses.
+holds exactly one `<value>`. There is no structure to recover; this export puts its real
+structure in the classifier tree (`funding_area`, `funding_type`, …), which the pipeline
+already parses.
 
 ## The approach
 
-Per-word BIO tagging. Each whitespace token either **begins** a keyword or
-**continues** the previous one:
+**Predict the gaps, not the strings.** Each whitespace token either begins a keyword or
+continues the previous one — per-word BIO tagging, which is what an encoder is natively
+fine-tuned for:
 
 ```
 tokens: Erneuerbare Energien Zuschuss Kommune
@@ -41,48 +42,87 @@ labels:      B          I        B        B
 terms:  ["Erneuerbare Energien", "Zuschuss", "Kommune"]
 ```
 
-Two properties make an inferred column defensible in a dataset whose selling point
-is a checked contract:
+Two invariants follow, and they are why an *inferred* column is defensible in a dataset
+whose selling point is a checked contract:
 
 - Every keyword is a **contiguous span of the source**. Invention, omission and
   reordering are unrepresentable, not merely untested.
-- Any label sequence maps to a valid segmentation, so there is no malformed output
-  to handle — no retries, no fallbacks, no parse failures.
+- **Any** label sequence maps to a valid segmentation. There is no malformed output to
+  handle — no retries, no fallbacks, no parse failures. Asking a model for group sizes
+  instead made a quarter of replies unusable: well-formed integer lists that did not sum
+  to the token count.
 
-What remains unverifiable is **boundary placement alone**, which is exactly what
-the labelled sample measures.
+What remains unverifiable is **boundary placement alone**, which is exactly what the
+labelled sample measures.
 
-## The bar, and why it is high
+Why an encoder beat five prompted decoders, briefly: token classification is native to
+the architecture; a bidirectional model sees both sides of every gap, and adjectival
+agreement — the rule behind two thirds of the joins — depends on the noun *after* the
+adjective; and class weighting addresses the 10.4% join rate directly, where few-shot
+demonstrations only set a prior.
 
-A baseline that **never joins anything** scores **F1 0.878**, because only
-**10.4% of the gaps** between adjacent tokens are joins. That baseline is already
-89.6% per-gap accurate, and a spurious join costs about **2.5×** what a caught
-compound earns: it destroys two gold keywords and invents a wrong one, while a
-correct join wins one.
+### One deterministic repair
 
-Metric is exact-span P/R/F1, micro-averaged over keywords — a keyword counts only
-when *both* boundaries are right. Reported alongside is the score restricted to
-rows containing a multi-token keyword (baseline 0.658), because without that cut the
-easy majority hides everything the model is for.
+A German keyword neither begins nor ends with an article, preposition or conjunction, so
+`Beauftragte der` and `Bundesregierung für` are ill-formed on their face. Forcing a
+function word to bind on both sides ([`postprocess.py`](segment/postprocess.py)) fixes
+that without touching the weights, and cannot invent text — it only ever *adds* joins to
+an already valid partition, and never crosses a delimiter the author actually wrote.
 
-`gbert-base` reaches **97.4% per-gap**. Three reasons an encoder can where a
-prompted decoder could not:
+It was worth +0.024 on the long-span slice against the first checkpoint and **nothing
+measurable** against the current one: the second labelling round taught the model the
+rule, and the repair's footprint fell from 105 changed values to 31. It stays as a
+guard, since those boundaries are ill-formed whatever a future retrain believes. A second
+rule — a 646-entry gazetteer of institution names — reached zero changed rows and was
+deleted rather than kept as decoration.
 
-1. It **is** token classification — one label per word, native to the architecture.
-2. A bidirectional encoder sees both sides of every gap. Adjectival agreement, the
-   rule behind two thirds of the joins, depends on the noun *after* the adjective —
-   the hardest direction for a left-to-right decoder.
-3. Class weighting addresses the 10.4% base rate directly. Few-shot demonstrations
-   cannot: they set a prior and leave nothing to recalibrate.
+## The bar, and the numbers
 
-The model already knows German from pretraining; 70 labelled rows only teach the
-task mapping. That is why so little data suffices — and the ablation confirms it:
-gold-only scores 0.965 against 0.967 with distant supervision added.
+A baseline that **never joins anything** scores **F1 0.878**, because only **10.4% of
+gaps** are joins. That baseline is already 89.6% per-gap accurate, and a spurious join
+costs about **2.5×** what a caught compound earns: it destroys two gold keywords and
+invents a wrong one, while a correct join wins one. So the operating point leans towards
+splitting, and the metric is exact-span P/R/F1 micro-averaged over keywords — a keyword
+counts only when *both* boundaries are right.
+
+| held-out slice | rows | never join | 70 labels | 131 labels |
+| --- | --- | --- | --- | --- |
+| all | 50 | 0.878 | 0.968 | **0.968** |
+| contains a multi-token keyword | 12 | 0.658 | 0.917 | **0.943** |
+| contains a 3+ token keyword | 5 | 0.550 | 0.818 | **0.906** |
+
+Per-gap accuracy is 0.977. The slices matter more than the headline: 45 of the 50
+held-out rows were already right before the second round, so a pooled number cannot move
+much and cannot show what changed. The five-row slice is thin, which is the honest caveat
+on it.
+
+## The labels
+
+131 training rows, 50 held out, from two samples. [`labels.jsonl`](labels.jsonl) is built
+from both by [`build_labels.py`](build_labels.py), which documents the seven labelling
+rules and the bias they resolve toward (splitting: an over-split term is a recoverable
+search miss, a wrongly-joined one is a term no consumer will ever match).
+
+- **[`sample_gold.py`](sample_gold.py)** — 120 rows, seeded random draw. The held-out 50
+  comes from here and **never grows**: it is the only reason numbers stay comparable
+  across rounds.
+- **[`sample_uncertain.py`](sample_uncertain.py)** — 61 rows, all `train`. A random draw
+  over this column mostly asks the easy question, which is why the first round's terms
+  were 93% single-token with a longest span of five, and why seven-token agency names
+  came back split. This draw targets that: gaps at p ∈ [0.2, 0.8] stratified by token
+  count, plus a pattern aimed at *confident* errors (`Erhaltung polnische Sprache` was
+  wrong at p=0.016, so uncertainty sampling cannot see it), plus rows a human reported by
+  name. It is selected with the model's own probabilities, so it can only ever be
+  training data.
+
+Sentences are excluded, deliberately. A few dozen values are prose rather than keyword
+lists, there is no defensible keyword partition of a relative clause, and labelling taste
+as gold would train the one failure that already dominates — over-joining.
 
 ## Architecture
 
-The pipeline host is small, so inference runs as a service — but a much cheaper one
-than the vLLM prompting service it replaced.
+The pipeline host is small, so inference is a service — a far cheaper one than the vLLM
+prompting service it replaced.
 
 | | prompting (removed) | this |
 | --- | --- | --- |
@@ -90,48 +130,51 @@ than the vLLM prompting service it replaced.
 | image | ~8GB (CUDA) | ~1GB |
 | weights | 22GB checkpoint | 437MB |
 | cold start | 76–222s | ~20s |
-| full column | ~80 min sequential | **134s**, measured |
+| full column | ~80 min sequential | **158s**, measured |
 
-- **`tagger_app.py`** — Modal class, `min_containers=0` so cold start on first
-  request and nothing is billed between rebuilds. `GPU` is a single constant: `None`
-  by default because with the cache warm each export brings only a handful of new
-  strings and cold start dominates, where the 1GB CPU image wins. Set `"T4"` for a
-  one-off backfill (134s → ~40s).
-- **Auth** — bearer token from a Modal Secret, compared with `hmac.compare_digest`.
-  Sent as `X-Tagger-Token`, *not* `Authorization`: Modal's web-endpoint proxy
-  reserves that header and the value never reaches the handler.
-- **`segment/client.py`** — read-through cache in sqlite, keyed on
-  `md5(keywords)`, plus deduplication. Repeated runs cost nothing, a rerun after a
-  processing fix re-segments only what changed, and `publish()` can read a
-  materialised result instead of re-running a model.
+- **[`tagger_app.py`](tagger_app.py)** — Modal class, `min_containers=0`, so cold start
+  on first request and nothing billed between runs. `GPU` is one constant, `None` by
+  default: with the cache warm each export brings a handful of new strings, cold start
+  dominates, and the 1GB CPU image wins. Set `"T4"` for a backfill.
+- **Auth** — bearer token from a Modal Secret, compared with `hmac.compare_digest`. Sent
+  as `X-Tagger-Token`, *not* `Authorization`: Modal's web-endpoint proxy reserves that
+  header and the value never reaches the handler.
+- **[`client.py`](segment/client.py)** — read-through sqlite cache plus deduplication,
+  keyed on `md5(revision + keywords)`. The pipeline stores results in `keyword_segments`
+  and publishes from there, because inference is not bit-reproducible across container
+  generations and two publishes of one history have to agree.
+- **[`revision.py`](segment/revision.py)** — `<code>.<weights>`, reported with every
+  response. It exists because of a real failure: keyed on the string alone, adding the
+  function-word repair left 2340 stale rows that a rerun had no reason to touch, and the
+  improvement reached nothing until someone cleared the cache by hand. A code change or a
+  retrain now invalidates by construction.
 
 ## Usage
 
-Train once, and persist the weights to a Volume:
-
 ```bash
 uv sync --extra segmenter
+
+# train, evaluate, persist to the Volume
 uv run modal run services/keyword_segmenter/finetune_app.py::train
-```
+uv run modal run services/keyword_segmenter/finetune_app.py            # all 3 models
+uv run modal run services/keyword_segmenter/finetune_app.py::verify    # seeds + ablation
 
-Deploy the endpoint:
-
-```bash
+# deploy
 modal secret create fdb-tagger-token TAGGER_TOKEN=$(openssl rand -hex 32)
 uv run modal deploy services/keyword_segmenter/tagger_app.py
 ```
 
-Call it from the pipeline:
+From the pipeline (`FDB_TAGGER_URL`, `FDB_TAGGER_TOKEN`):
 
 ```python
 from segment.client import TaggerClient
 
-with TaggerClient() as client:            # FDB_TAGGER_URL, FDB_TAGGER_TOKEN
+with TaggerClient() as client:
     results = client.segment(df["keywords"].drop_nulls().to_list())
 # [{'terms': ['Erneuerbare Energien', 'Zuschuss'], 'group_sizes': [2, 1]}, ...]
 ```
 
-Or by hand:
+By hand:
 
 ```bash
 curl -X POST "$FDB_TAGGER_URL" -H 'content-type: application/json' \
@@ -139,107 +182,45 @@ curl -X POST "$FDB_TAGGER_URL" -H 'content-type: application/json' \
   -d '{"keywords": ["Erneuerbare Energien Zuschuss Kommune"]}'
 ```
 
-Running the model in process is also supported (`segment.tagger.KeywordTagger`)
-and is what the `model`-marked tests use — but it needs `--extra tagger` (torch)
-and the weights fetched locally, which the pipeline host cannot afford:
+In process, which is what the `model`-marked tests use — needs `--extra tagger` and the
+weights fetched locally:
 
 ```bash
 modal volume get fdb-keyword-tagger keyword_tagger models/
 ```
 
-Evaluation and the checks behind the numbers:
+Re-drawing the samples. The random draw is the held-out set's source and should not be
+re-drawn without a reason; the uncertainty draw depends on the current checkpoint, so
+re-running it after a retrain returns different rows, which need labelling before
+`build_labels.py` will accept them:
 
 ```bash
-uv run modal run services/keyword_segmenter/finetune_app.py           # all 3 models
-uv run modal run services/keyword_segmenter/finetune_app.py::verify   # seeds + ablation
+uv run python services/keyword_segmenter/sample_gold.py > .../sample.jsonl
+uv run --extra tagger python services/keyword_segmenter/sample_uncertain.py > .../sample_uncertain.jsonl
+uv run python services/keyword_segmenter/build_labels.py
 ```
 
-Re-drawing or re-labelling the sample:
+## Files
 
-```bash
-uv run python services/keyword_segmenter/sample_gold.py > services/keyword_segmenter/sample.jsonl
-uv run python services/keyword_segmenter/build_labels.py   # validates every partition
-```
-
-## Layout
-
-| Path | Role |
+| | |
 | --- | --- |
-| `segment/tokens.py` | Tokenisation, the partition contract, join↔size conversion |
-| `segment/dataset.py` | BIO labels; distant supervision from delimited rows |
-| `segment/metric.py` | Exact-span P/R/F1, micro-averaged, plus the threshold sweep |
-| `segment/tagger.py` | Inference: loads the fine-tuned model, segments a batch |
-| `segment/client.py` | **Pipeline entry point.** Endpoint client + sqlite cache |
-| `tagger_app.py` | The deployed service: CPU container, token auth, POST endpoint |
-| `finetune_app.py` | Modal: train, score, save to Volume, seed/ablation checks |
-| `sample_gold.py` | Draws the fixed 120-row sample (seeded, reproducible) |
-| `build_labels.py` | Hand-written gold partitions and the labelling rules used |
-| `labels.jsonl` | 120 labelled rows: 70 `train`, 50 `test` |
-| `distant.jsonl` | 61 rows recovered from delimited fields (not load-bearing) |
+| `segment/tokens.py` | Tokenisation and the partition contract |
+| `segment/tagger.py` | The model, in process |
+| `segment/postprocess.py` | The function-word repair |
+| `segment/metric.py` | Exact-span P/R/F1 and the threshold sweep |
+| `segment/dataset.py` | BIO labels from gold and from delimited rows |
+| `segment/client.py` | HTTP client, revision-keyed cache |
+| `segment/revision.py` | What produced a segmentation |
+| `tagger_app.py` | The Modal endpoint |
+| `finetune_app.py` | Training, evaluation, ablations |
+| `sample_gold.py`, `sample_uncertain.py` | The two draws |
+| `build_labels.py` | The labels and the rules behind them |
+| `labels.jsonl` | 181 labelled rows, built from both samples |
+| `distant.jsonl` | 61 rows recovered from delimited fields (measured not load-bearing) |
 
-## Tests
+## Known limits
 
-```bash
-uv run pytest tests/test_keyword_segmenter.py        # 34, no weights or network
-uv run pytest tests/test_keyword_segmenter.py -m model    # 4, needs local weights
-uv run pytest tests/test_keyword_segmenter.py -m network   # 4, needs the endpoint
-```
-
-The default set covers the partition contract, the metric's behaviour on
-wrongly-split and wrongly-joined predictions, the threshold sweep, the cache
-(against a stub endpoint, so read-through and dedup are checked on every run), and
-a **rule-based audit of the gold labels**: German attributive adjectives must be
-inflected, so `Erneuerbare Energien` is one keyword and `digital Websites` is two.
-That audit exists because the labelling default (all-ones) is also the baseline
-being beaten, so a missed compound would silently flatter the baseline.
-
-The `network` set includes auth: a missing token, a wrong token, and a wrong token
-*of the correct length*, so the check cannot pass on length alone.
-
-## Data provenance
-
-- **Gold labels**: 120 rows drawn by seeded sample, hand-labelled. 34 of 51 joins
-  follow from the inflection rule; 17 rest on judgement (proper names, English
-  terms, numbers). One annotator, no second opinion — the honest limitation.
-- **Distant supervision**: delimiter-using rows with fields of 4+ tokens
-  **discarded**. Taking every comma-field as one keyword gives a 65.5% join rate
-  against a true 10.4%, which would train exactly the over-joining bias to avoid.
-  Off by default, since gold-only matches it.
-- **No leakage**: held-out values are excluded from distant supervision, and **no
-  multi-word keyword appears in both splits** — all 26 test compounds are unseen.
-
-## How it is wired into the pipeline
-
-Not in `process.py`, which is transforms-only, and not in `collect()`, which reads
-one export with no database:
-
-- **`keywords_extracted`**, last in `PUBLISHED_FIELDS`. Raw `keywords` is published
-  unchanged beside it. Absent from `collect()`, like the history columns: nothing in
-  a single export can supply it.
-- **`schema.ORIGIN`** marks every published column `upstream`, `derived` or
-  `inferred`, and is surfaced by `describe()` and as `fdb:origin` on every column of
-  the DCAT table schema, with the minted term defined in `dcat/def/fdb.ttl`. A CSV
-  cannot show that one of its columns is a model's reading of another.
-- **`history.segment_keywords`** calls `TaggerClient` after a load and merges the
-  results into a `keyword_segments` table, keyed on `md5(keywords)`. Merged, not
-  scd2'd: a segmentation is a function of the string, so it has no history. Skipped
-  when `FDB_TAGGER_URL`/`FDB_TAGGER_TOKEN` are unset — recording the export must not
-  depend on a model service being up.
-- **`publish()`** reads that table and `process()` does a dict lookup, as it already
-  does for `documents`. Inference is not bit-reproducible, so publishing twice from
-  one history has to read a materialised result rather than recompute it. An
-  unsegmented value publishes as null, never as a guess.
-- **The span invariant** is a frame-level pandera check over `keywords` and
-  `keywords_extracted`: every keyword is a contiguous span of the raw string and the
-  spans cover it exactly, so invention, omission, reordering and editing fail the
-  publish. Boundary placement is what stays unverifiable, and what the held-out score
-  measures.
-
-Still open: label ~500 rows. The current estimate rests on 50 held-out rows
-containing 107 keywords; the effect (+0.089) is far larger than the seed spread
-(±0.007), but the multi-token subset is thin — which is why the published metadata
-states the score and the sample rather than claiming the column is correct.
-
-One known loss worth fixing cheaply: `scraper._clean` collapses whitespace runs,
-and in ~26 rows a double space *is* the author's separator. Feeding the
-**uncollapsed** value to the tagger would hand it a free feature.
+- **Prose rows are unmeasured.** Excluded from labelling, so no number here covers them.
+- **The second sample cannot be scored.** It was selected with the model's own
+  probabilities. A round wanting a bigger *test* set has to draw it randomly.
+- **One seed.** 0.968 is seed 0; `::verify` runs 0, 1, 2 (spread ±0.002).

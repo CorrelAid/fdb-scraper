@@ -67,9 +67,10 @@ import polars as pl
 
 from fdb_scraper.contract import check_export
 from fdb_scraper.links import DOC_FIELDS, resolve
+from fdb_scraper.parser import EXPORT_SCHEMA
 from fdb_scraper.process import add_identifiers
 from fdb_scraper.schema import HISTORY_COLUMNS, TIMESTAMP, USEABLE_FIELDS
-from fdb_scraper.scraper import EXPORT_SCHEMA, export, scrape
+from fdb_scraper.scraper import export, scrape
 
 PIPELINE_NAME = "fdb"
 DATASET_NAME = "foerderdatenbank"
@@ -143,7 +144,7 @@ def _hints(schema: dict) -> dict[str, dict]:
     null throughout a load. For a table whose job is to be a faithful record of
     the export that is a bug: the stored shape would depend on the run, and a
     field that happened to be empty one week would vanish from the history. The
-    hints are generated from :data:`fdb_scraper.scraper.EXPORT_SCHEMA`, so a new
+    hints are generated from :data:`fdb_scraper.parser.EXPORT_SCHEMA`, so a new
     export field is covered without an edit here.
     """
     return {name: {"data_type": _dlt_type(dtype)} for name, dtype in schema.items()}
@@ -276,6 +277,12 @@ def tagger_configured() -> bool:
         # Which checkpoint produced the row, so a re-segmentation can be told from
         # a stale one when the model is retrained.
         "model": {"data_type": "text"},
+        # What produced it, precisely: code, lexicon and checkpoint together. A row
+        # whose revision is not the one the endpoint now serves is re-sent by
+        # :func:`segment_keywords`, so improving the segmenter reaches the published
+        # column without anyone remembering to clear this table. Nullable, because
+        # rows written before the revision existed have none.
+        "revision": {"data_type": "text", "nullable": True},
     },
     max_table_nesting=0,
 )
@@ -324,13 +331,45 @@ def segments(pipe=None) -> dict[str, list[str]]:
     }
 
 
-def segment_keywords(pipe=None, *, client=None) -> dict:
-    """Segment every stored ``keywords`` value that has no segmentation yet.
+def stored_revisions(pipe=None) -> dict[str, str | None]:
+    """``keywords`` -> the segmenter revision that produced its stored terms.
 
-    Idempotent and cheap to repeat: the values already in ``keyword_segments`` are
-    skipped here, and the client's own sqlite cache dedupes again beneath that, so a
-    rerun after a fixed export costs one query. Only genuinely new strings reach the
-    endpoint -- a weekly export brings a handful.
+    ``None`` for rows written before revisions were recorded, which makes them stale
+    by definition -- exactly right, since those are the rows produced by the code
+    that got the agency names wrong.
+    """
+    pipe = pipe or dlt_pipeline()
+    try:
+        with pipe.sql_client() as client:
+            with client.execute_query(
+                f"SELECT keywords, revision "
+                f"FROM {client.make_qualified_table_name(KEYWORD_TABLE)}"
+            ) as cursor:
+                return dict(cursor.fetchall())
+    except Exception:
+        # The table, or the column, does not exist yet. Same reasoning as segments().
+        return {}
+
+
+def segment_keywords(pipe=None, *, client=None) -> dict:
+    """Segment every stored ``keywords`` value whose segmentation is missing or stale.
+
+    Idempotent and cheap to repeat: a value already segmented **by the revision the
+    endpoint currently serves** is skipped here, and the client's own sqlite cache
+    dedupes again beneath that, so a rerun after a fixed export costs one query and
+    one round trip. Only genuinely new strings reach the endpoint -- a weekly export
+    brings a handful.
+
+    Staleness is checked rather than assumed because the alternative failed in
+    practice. When function-word glue was added to the decoder, every one of the 2340
+    stored rows was still keyed only on its string, so the improved segmentation
+    reached nothing: the table answered "already done" and the endpoint was never
+    asked. A revision mismatch now re-sends the row, which means shipping a better
+    segmenter is a deploy, not a deploy plus a remembered ``DELETE``.
+
+    The cost is one request per run even when nothing has changed -- the revision is
+    the endpoint's to report, since the checkpoint lives on a Volume the pipeline
+    never reads. A wrong published column is worth more than that request.
 
     Args:
         pipe: An existing pipeline. Built from the environment otherwise.
@@ -338,15 +377,13 @@ def segment_keywords(pipe=None, *, client=None) -> dict:
             ``FDB_TAGGER_TOKEN`` otherwise.
 
     Returns:
-        ``values`` distinct strings in the history, ``segmented`` newly sent to the
-        endpoint, ``stored`` in the table afterwards.
+        ``values`` distinct strings in the history, ``segmented`` sent to the
+        endpoint, ``resegmented`` of those that were already stored under an older
+        revision, ``stored`` in the table afterwards.
     """
     pipe = pipe or dlt_pipeline()
     values = stored_keywords(pipe)
-    known = set(segments(pipe))
-    missing = [v for v in values if v not in known]
-    if not missing:
-        return {"values": len(values), "segmented": 0, "stored": len(known)}
+    known = stored_revisions(pipe)
 
     segment_client = _segment_client_module()
     owned = client is None
@@ -359,18 +396,32 @@ def segment_keywords(pipe=None, *, client=None) -> dict:
             cache=segment_client.Cache(cache_path) if cache_path else None
         )
     try:
-        results = client.segment(missing)
+        revision = client.revision()
+        missing = [v for v in values if known.get(v) != revision]
+        stale = sum(1 for v in missing if v in known)
+        results = client.segment(missing) if missing else []
     finally:
         if owned:
             client.close()
 
+    if not missing:
+        return {
+            "values": len(values),
+            "segmented": 0,
+            "resegmented": 0,
+            "stored": len(known),
+        }
+
     pipe.run(
         keyword_segments([
             {
+                # Keyed on the string alone, so a new revision replaces the answer
+                # instead of adding a second row for the same value.
                 "md5": segment_client.fingerprint(keywords),
                 "keywords": keywords,
                 "terms": result["terms"],
                 "model": result.get("model"),
+                "revision": revision,
             }
             for keywords, result in zip(missing, results)
         ])
@@ -378,7 +429,8 @@ def segment_keywords(pipe=None, *, client=None) -> dict:
     return {
         "values": len(values),
         "segmented": len(missing),
-        "stored": len(known) + len(missing),
+        "resegmented": stale,
+        "stored": len(known) + len(missing) - stale,
     }
 
 
@@ -619,7 +671,7 @@ def _retype(df: pl.DataFrame) -> pl.DataFrame:
     row of every load comes back as ``Null``, since there was never a value to read
     a type from -- seven of them in the test fixture.
 
-    Both are repaired against :data:`fdb_scraper.scraper.EXPORT_SCHEMA` rather than
+    Both are repaired against :data:`fdb_scraper.parser.EXPORT_SCHEMA` rather than
     left to inference, so what this module hands over matches
     :func:`fdb_scraper.scrape` whatever a particular load happened to contain.
     Storage stays a detail of this module.

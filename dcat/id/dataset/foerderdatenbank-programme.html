@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Förderprogramme aus der Förderdatenbank des Bundes</title>
+<link rel="alternate" type="text/turtle" href="https://fdb.cdl.correlaid.org/id/dataset/foerderdatenbank-programme">
+<link rel="alternate" type="application/ld+json" href="https://fdb.cdl.correlaid.org/id/dataset/foerderdatenbank-programme.jsonld">
+<style>
+  /* Colours, fonts and spacing are the CorrelAid CDL design tokens
+     (@correlaid/cdl-design). Copied as literals rather than imported: this page
+     is a static file served next to the RDF, with no build step and no request
+     to a stylesheet the site would then have to keep serving. The brand faces
+     are licensed and not hosted here, so each stack falls back on its own. */
+  :root {
+    --bg: #8bb8ff; --fg: #86185f; --accent: #86184f; --surface: #ffffff;
+    --sans: "Inter", -apple-system, "Segoe UI", sans-serif;
+    --heading: "PP Fraktion Sans", -apple-system, "Segoe UI", sans-serif;
+    --mono: "PP Fraktion Mono", ui-monospace, "Source Code Pro", monospace;
+  }
+  body { font-family: var(--sans); background: var(--bg); color: var(--fg);
+    max-width: 42rem; margin: 0 auto; padding: 2rem 1rem; line-height: 1.6; }
+  h1, h2 { font-family: var(--heading); letter-spacing: -0.01em; line-height: 1.15; }
+  h1 { font-size: 1.9rem; }
+  h2 { font-size: 1.4rem; margin-top: 2rem; }
+  dl { display: grid; grid-template-columns: max-content 1fr; gap: 0.35rem 1.5rem; }
+  dt { font-weight: 700; }
+  dd { margin: 0; }
+  .desc { white-space: pre-wrap; }
+  code { font-family: var(--mono); background: var(--surface); padding: 0.1em 0.3em;
+    border-radius: 0.25rem; }
+  a { color: var(--accent); text-decoration-thickness: 1.5px; }
+  hr { border: 0; border-top: 1.5px solid var(--accent); margin: 2rem 0; }
+  table { border-collapse: collapse; }
+  th, td { text-align: left; padding: 0.4rem 0.8rem 0.4rem 0; vertical-align: top; }
+</style>
+</head>
+<body>
+<h1>Förderprogramme aus der Förderdatenbank des Bundes</h1>
+<div class="desc"><div class="desc">Alle Förderprogramme der Förderdatenbank des Bundes (Bund, Länder und EU), ein Datensatz pro Programm mit 50 Feldern.
+
+Die Bundesregierung bietet mit der Förderdatenbank eine Suchmaschine für Förderungen an, veröffentlicht den zugrundeliegenden Datensatz aber nicht als Open Data im normativen Sinne. 
+Grundlage ist der XML-Programmexport der Förderdatenbank.
+
+Der Export beinhaltet immer nur den heutigen Stand. Dieser Datensatz führt daher eine Historie: jedes Programm trägt, wann es zuerst erfasst wurde (``on_website_from``), wann sich sein Inhalt zuletzt geändert hat (``dct:modified``) und alle bisherigen Änderungszeitpunkte (``previous_update_dates``). Programme, die aus der Förderdatenbank verschwinden, bleiben mit ihrem letzten bekannten Inhalt und ``deleted = true`` enthalten. Der Datensatz umfasst damit mehr Programme als der Export und wächst über die Zeit.
+
+Eine Spalte ist modellbasiert und nicht Teil der Quelle: ``keywords_extracted`` enthält die Stichwörter, die ein finetuned Sprachmodell aus der Rohspalte ``keywords`` herausliest. Upstream sind sie durch Leerzeichen verbunden und in 87,7 % der Fälle nicht trennbar. Jedes Stichwort ist nachweislich ein zusammenhängender Abschnitt des Originalstrings, geprüft bei jeder Veröffentlichung; die Grenzziehung selbst ist eine Modellentscheidung (F1 0,967 auf einer Handstichprobe). ``keywords`` bleibt unverändert daneben stehen. Das Tabellenschema kennzeichnet jede Spalte mit ``fdb:origin`` als ``upstream``, ``derived`` oder ``inferred``.</div><div class="desc">All funding programmes in the German federal funding database (Förderdatenbank; federal, state and EU programmes), one record per programme with 50 fields.
+
+The federal government provides the Förderdatenbank as a search engine for funding programmes, but does not publish the underlying dataset as Open Data in the normative sense.
+
+The basis is the Förderdatenbank&#x27;s XML programme export.
+
+The export only ever contains today&#x27;s state. This dataset therefore maintains a history: each programme carries when it was first recorded (``on_website_from``), when its content last changed (``dct:modified``) and all previous change timestamps (``previous_update_dates``). Programmes that disappear from the Förderdatenbank are retained with their last known content and ``deleted = true``. The dataset thus covers more programmes than the export and grows over time.
+
+One column is model-produced and not part of the source: ``keywords_extracted`` holds the keywords a finetuned language model reads out of the raw ``keywords`` column. Upstream they are joined with spaces and carry no separator at all in 87.7% of cases. Every keyword is verifiably a contiguous span of the original string, checked on every publish; where the boundaries fall is the model&#x27;s judgement (F1 0.967 on a hand-labelled sample). ``keywords`` is published unchanged beside it. The table schema marks every column with ``fdb:origin`` as ``upstream``, ``derived`` or ``inferred``.</div></div>
+<h2>Distributions</h2>
+<table><thead><tr><th>Title</th><th>Format</th><th>Size</th><th>Download</th></tr></thead><tbody><tr><td>Förderprogramme als CSV-Datei</td><td></td><td></td><td><a href=https://fdb.cdl.correlaid.org/data/programme.csv>https://fdb.cdl.correlaid.org/data/programme.csv</a></td></tr></tbody></table>
+<h2>Metadata</h2>
+<dl><dt>Modified</dt><dd>2026-08-03T00:00:00+00:00</dd><dt>License</dt><dd><code>http://dcat-ap.de/def/licenses/cc-by-nd/4.0</code></dd><dt>Conforms to</dt><dd><a href=https://fdb.cdl.correlaid.org/table-schema.json>https://fdb.cdl.correlaid.org/table-schema.json</a></dd><dt>Landing page</dt><dd><a href=https://github.com/CorrelAid/fdb_scraper>https://github.com/CorrelAid/fdb_scraper</a></dd><dt>Themes</dt><dd><code>ECON</code>, <code>GOVE</code></dd><dt>Keywords</dt><dd><code>Förderung</code>, <code>Förderprogramme</code>, <code>Förderdatenbank</code>, <code>Fördermittel</code></dd></dl>
+<hr>
+<p><small>
+Representations: <a href="https://fdb.cdl.correlaid.org/id/dataset/foerderdatenbank-programme">Turtle</a> &middot;
+<a href="https://fdb.cdl.correlaid.org/id/dataset/foerderdatenbank-programme.jsonld">JSON-LD</a> &middot;
+<a href="https://fdb.cdl.correlaid.org/id/dataset/foerderdatenbank-programme.ttl">.ttl</a>.
+</small></p>
+</body>
+</html>
