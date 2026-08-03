@@ -6,6 +6,8 @@ Downloads the [Förderdatenbank](https://www.foerderdatenbank.de) programme expo
 Replaces the
 previous [scaper](https://github.com/CorrelAid/cdl_funding_scraper) we provided, as the upstream service added an xml export endpoint that is a bit more structured than html. Furthermore, the page now detects bots, leaving the xml endpoint as the only method for programmatic access
 
+The xml schema of the export is rather chaotic and we did not include some fields that had no values or no useable values in the final dataset. Some fields still require processing or information extraction to be usable, but this was out of scope for this project. Feel free to open a PR.
+
 ## Data access
 
 | What | URL |
@@ -75,6 +77,3 @@ No configuration is needed to run locally: unset, the pipeline writes its histor
 | — | `gen_contract.py` | Which properties each document type carries and what container each declares, into `generated/contract_data.py` | an extracted export | a `ContractError` turned out to be a legitimate upstream change. Independent of the rest |
 | 3 | `build_dist.py` | The pipeline itself: load, process, validate, write the CSV and the metadata into a staging tree | — | every run; it produces the CSV that 4 measures |
 | 4 | `gen_dcat.py` | The committed `dcat/` — dataset document, minted vocabulary, CSVW table schema, each also as JSON-LD and HTML. A command line around `fdb_scraper.dcat`, which is what the pipeline and the tests import | `schema`/`semantics` + that CSV | a published column, URI or vocabulary changed |
-
-What gets published, and why each part is shaped the way it is, is documented in
-[src/fdb_scraper/dcat/\_\_init\_\_.py](src/fdb_scraper/dcat/__init__.py).
