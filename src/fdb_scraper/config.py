@@ -385,7 +385,7 @@ RECORD_COMMENT_DE = (
 ONTOLOGY_TITLE_DE = "Förderdatenbank -- minted Begriffe"
 ONTOLOGY_DESCRIPTION_DE = (
     "Begriffe für die Spalten der Förderprogramm-Tabelle, für die kein "
-    "etablierter Begriff passt. Generiert aus fdb_scraper.semantics."
+    "etablierter Begriff passt."
 )
 
 # What ``fdb:origin`` means. ``{inferred}`` is the inferred columns, filled in from
@@ -404,7 +404,7 @@ ORIGIN_COMMENT_EN = (
 
 TABLE_SCHEMA_DESCRIPTION_DE = (
     "Spaltenvertrag der CSV-Distribution, generiert aus dem "
-    "Pandera-Schema der Pipeline (fdb_scraper.dcat)."
+    "Pandera-Schema der Pipeline."
 )
 
 # --- Per-column notes --------------------------------------------------------

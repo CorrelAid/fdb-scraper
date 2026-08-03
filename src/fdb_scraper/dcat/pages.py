@@ -7,6 +7,11 @@ change to the graph is the only thing that has to stay in sync.
 
 Stdlib templating only: the project keeps dependencies tight (see pyproject), and
 the markup is small enough that f-strings beat a templating dependency.
+
+Chrome -- headings, table headers, row labels -- is German, because the document
+element says ``lang="de"`` and this is German public-sector data described against
+DCAT-AP.de. The prose from the graph is bilingual and carries its own ``lang``
+per element, so a reader gets English text marked as English inside a German page.
 """
 
 from __future__ import annotations
@@ -49,6 +54,8 @@ _HTML_HEAD = """\
   dt {{ font-weight: 700; }}
   dd {{ margin: 0; }}
   .desc {{ white-space: pre-wrap; }}
+  /* One .desc per language, so the second one needs the gap a paragraph has. */
+  .desc + .desc {{ margin-top: 1.5rem; }}
   code {{ font-family: var(--mono); background: var(--surface); padding: 0.1em 0.3em;
     border-radius: 0.25rem; }}
   a {{ color: var(--accent); text-decoration-thickness: 1.5px; }}
@@ -61,33 +68,59 @@ _HTML_HEAD = """\
 """
 
 
+# The links carry their extension. The bare identifier URI is not a third
+# representation to offer here: Caddy negotiates it, and a browser following it
+# sends Accept: text/html and lands back on this page (see Caddyfile) -- a link
+# labelled Turtle that returns HTML is worse than no link.
 _HTML_FOOT = """\
 <hr>
 <p><small>
-Representations: <a href="{href_root}">Turtle</a> &middot;
-<a href="{href_root}{ext_jsonld}">JSON-LD</a> &middot;
-<a href="{href_root}{ext_turtle}">.ttl</a>.
+{subject} als RDF: <a href="{href_root}{ext_turtle}">Turtle</a> &middot;
+<a href="{href_root}{ext_jsonld}">JSON-LD</a>.
 </small></p>
 </body>
 </html>
 """
 
 
-def _lit(graph: Graph, subject: URIRef, predicate: URIRef) -> str | None:
-    """First literal value of ``(subject, predicate)`` in ``graph``, or None.
+def _lit(graph: Graph, subject: URIRef, predicate: URIRef, prefer: str = "de") -> str | None:
+    """One literal value of ``(subject, predicate)`` in ``graph``, or None.
 
-    HTML-escaped. Used by the page renderers to pull DCAT metadata into the
-    landing pages without re-typing it in two places.
+    HTML-escaped. Where the graph carries the same property in several
+    languages, the ``prefer`` tag wins -- otherwise the page would pick
+    whichever literal rdflib happened to yield first and could render a German
+    title next to an English description. Falls back to any literal.
     """
-    for obj in graph.objects(subject, predicate):
-        if isinstance(obj, Literal):
-            return html.escape(str(obj))
-    return None
+    return next((text for _, text in _lit_langs(graph, subject, predicate, prefer)), None)
 
 
-def _lit_list(graph: Graph, subject: URIRef, predicate: URIRef) -> list[str]:
-    """All literal values of ``(subject, predicate)``, HTML-escaped."""
-    return [html.escape(str(o)) for o in graph.objects(subject, predicate) if isinstance(o, Literal)]
+def _lit_langs(
+    graph: Graph, subject: URIRef, predicate: URIRef, prefer: str = "de"
+) -> list[tuple[str, str]]:
+    """``(language tag, HTML-escaped value)`` pairs, ``prefer`` first.
+
+    The graph tags its literals (``@de``, ``@en``); the pages have to carry that
+    through as ``lang`` on the element holding the text, or a browser, screen
+    reader or translator reads the English paragraphs as German because the
+    document element says so. Untagged literals get an empty tag, which callers
+    render as no attribute.
+    """
+    pairs = [
+        (str(o.language or ""), html.escape(str(o)))
+        for o in graph.objects(subject, predicate)
+        if isinstance(o, Literal)
+    ]
+    return sorted(pairs, key=lambda pair: (pair[0] != prefer, pair[0]))
+
+
+def _bytes_de(size: int) -> str:
+    """Byte count with the German thousands separator, e.g. ``1.234 Bytes``."""
+    return f"{size:,} Bytes".replace(",", ".")
+
+
+def _lang_attr(lang: str) -> str:
+    """`` lang="xx"`` for a tagged literal, empty string for an untagged one."""
+    return f' lang="{html.escape(lang, quote=True)}"' if lang else ""
 
 
 def _iri(graph: Graph, subject: URIRef, predicate: URIRef) -> str | None:
@@ -108,8 +141,8 @@ def render_dataset_html(graph: Graph) -> str:
     """
     dataset = URIRef(DATASET)
     title = _lit(graph, dataset, DCT.title) or DATASET
-    descriptions = _lit_list(graph, dataset, DCT.description)
-    keywords = _lit_list(graph, dataset, DCAT.keyword)
+    descriptions = _lit_langs(graph, dataset, DCT.description)
+    keywords = _lit_langs(graph, dataset, DCAT.keyword)
     themes = [html.escape(str(o)) for o in graph.objects(dataset, DCAT.theme)]
     landing = _iri(graph, dataset, DCAT.landingPage)
     # The licence hangs off the distribution, not the dataset: the table is what is
@@ -130,38 +163,38 @@ def render_dataset_html(graph: Graph) -> str:
     # right shape for the day a JSON distribution lands.
     dist_rows = []
     for dist in graph.objects(dataset, DCAT.distribution):
-        d_title = _lit(graph, dist, DCT.title) or ""
+        d_lang, d_title = next(iter(_lit_langs(graph, dist, DCT.title)), ("", ""))
         d_url = _iri(graph, dist, DCAT.downloadURL) or _iri(graph, dist, DCAT.accessURL) or ""
         d_format = _iri(graph, dist, DCT.format) or ""
         d_size = _lit(graph, dist, DCAT.byteSize)
         dist_rows.append(
-            f"<tr><td>{d_title}</td><td>{d_format}</td>"
-            f"<td>{('{:,} bytes'.format(int(d_size)) if d_size else '')}</td>"
+            f"<tr><td{_lang_attr(d_lang)}>{d_title}</td><td>{d_format}</td>"
+            f"<td>{(_bytes_de(int(d_size)) if d_size else '')}</td>"
             f"<td><a href={html.escape(d_url, quote=True)}>{html.escape(d_url)}</a></td></tr>"
         )
 
-    desc_html = "".join(f"<div class=\"desc\">{d}</div>" for d in descriptions)
-    kw_html = ", ".join(f"<code>{k}</code>" for k in keywords)
+    desc_html = "".join(f"<div class=\"desc\"{_lang_attr(lang)}>{d}</div>" for lang, d in descriptions)
+    kw_html = ", ".join(f"<code{_lang_attr(lang)}>{k}</code>" for lang, k in keywords)
     themes_html = ", ".join(f"<code>{t.rsplit('/', 1)[-1]}</code>" for t in themes)
 
     return (
         _HTML_HEAD.format(lang="de", title=title, href_root=DATASET, href_ext="", href_ext_jsonld=".jsonld")
         + f"<h1>{title}</h1>\n"
-        + f"<div class=\"desc\">{desc_html}</div>\n"
-        + (f"<h2>Distributions</h2>\n<table><thead><tr><th>Title</th><th>Format</th><th>Size</th><th>Download</th></tr></thead>"
+        + f"{desc_html}\n"
+        + (f"<h2>Distributionen</h2>\n<table><thead><tr><th>Titel</th><th>Format</th><th>Größe</th><th>Download</th></tr></thead>"
            f"<tbody>{''.join(dist_rows)}</tbody></table>\n" if dist_rows else "")
-        + "<h2>Metadata</h2>\n"
+        + "<h2>Metadaten</h2>\n"
         + "<dl>"
-        + (f"<dt>Modified</dt><dd>{modified}</dd>" if modified else "")
-        + (f"<dt>License</dt><dd><code>{license_iri}</code></dd>" if license_iri else "")
-        + (f"<dt>Conforms to</dt><dd><a href={html.escape(conformsto, quote=True)}>{html.escape(conformsto)}</a></dd>"
+        + (f"<dt>Zuletzt geändert</dt><dd>{modified}</dd>" if modified else "")
+        + (f"<dt>Lizenz</dt><dd><code>{license_iri}</code></dd>" if license_iri else "")
+        + (f"<dt>Konform zu</dt><dd><a href={html.escape(conformsto, quote=True)}>{html.escape(conformsto)}</a></dd>"
            if conformsto else "")
-        + (f"<dt>Landing page</dt><dd><a href={html.escape(landing, quote=True)}>{html.escape(landing)}</a></dd>"
+        + (f"<dt>Landingpage</dt><dd><a href={html.escape(landing, quote=True)}>{html.escape(landing)}</a></dd>"
            if landing else "")
-        + (f"<dt>Themes</dt><dd>{themes_html}</dd>" if themes_html else "")
-        + (f"<dt>Keywords</dt><dd>{kw_html}</dd>" if kw_html else "")
+        + (f"<dt>Themen</dt><dd>{themes_html}</dd>" if themes_html else "")
+        + (f"<dt>Schlagwörter</dt><dd>{kw_html}</dd>" if kw_html else "")
         + "</dl>\n"
-        + _HTML_FOOT.format(href_root=DATASET, ext_turtle=".ttl", ext_jsonld=".jsonld")
+        + _HTML_FOOT.format(subject="Dieser Datensatz", href_root=DATASET, ext_turtle=".ttl", ext_jsonld=".jsonld")
     )
 
 
@@ -174,32 +207,40 @@ def render_vocabulary_html(graph: Graph) -> str:
     """
     ontology = URIRef(VOCAB.rstrip("#"))
     title = _lit(graph, ontology, DCT.title) or VOCAB
-    description = _lit(graph, ontology, DCT.description) or ""
+    desc_lang, description = next(iter(_lit_langs(graph, ontology, DCT.description)), ("", ""))
 
+    # Term comments are written in English (see graphs.py); the labels are the
+    # column names and carry no language. Both are read back with their tag
+    # rather than assumed, so the cell says what the graph says.
     rows = []
     for term, _, _ in graph.triples((None, RDF.type, RDF.Property)):
         label = _lit(graph, term, RDFS.label) or term.rsplit("#", 1)[-1]
-        comment = _lit(graph, term, RDFS.comment) or ""
+        c_lang, comment = next(iter(_lit_langs(graph, term, RDFS.comment, prefer="en")), ("", ""))
         origin = _lit(graph, term, FDB.origin) or ""
         rows.append(
-            f"<tr><td><code>{label}</code></td><td>{comment}</td><td><code>{origin}</code></td></tr>"
+            f"<tr><td><code>{label}</code></td><td{_lang_attr(c_lang)}>{comment}</td>"
+            f"<td><code>{origin}</code></td></tr>"
         )
 
     class_rows = []
     for cls, _, _ in graph.triples((None, RDF.type, RDFS.Class)):
         label = _lit(graph, cls, RDFS.label) or cls.rsplit("#", 1)[-1]
-        comment = _lit(graph, cls, RDFS.comment) or ""
-        class_rows.append(f"<tr><td><code>{label}</code></td><td>{comment}</td></tr>")
+        c_lang, comment = next(iter(_lit_langs(graph, cls, RDFS.comment, prefer="en")), ("", ""))
+        class_rows.append(
+            f"<tr><td><code>{label}</code></td><td{_lang_attr(c_lang)}>{comment}</td></tr>"
+        )
 
     return (
         _HTML_HEAD.format(lang="de", title=title, href_root=VOCAB.rstrip("#"), href_ext="", href_ext_jsonld=".jsonld")
         + f"<h1>{title}</h1>\n"
-        + (f"<div class=\"desc\">{description}</div>\n" if description else "")
-        + ("<h2>Classes</h2>\n<table><thead><tr><th>Term</th><th>Comment</th></tr></thead>"
+        + (f"<div class=\"desc\"{_lang_attr(desc_lang)}>{description}</div>\n" if description else "")
+        + ("<h2>Klassen</h2>\n<table><thead><tr><th>Term</th><th>Kommentar</th></tr></thead>"
            f"<tbody>{''.join(class_rows)}</tbody></table>\n" if class_rows else "")
-        + ("<h2>Properties</h2>\n<table><thead><tr><th>Term</th><th>Comment</th><th>Origin</th></tr></thead>"
+        + ("<h2>Eigenschaften</h2>\n<table><thead><tr><th>Term</th><th>Kommentar</th><th>Herkunft</th></tr></thead>"
            f"<tbody>{''.join(rows)}</tbody></table>\n" if rows else "")
-        + _HTML_FOOT.format(href_root=VOCAB.rstrip("#"), ext_turtle=".ttl", ext_jsonld=".jsonld")
+        + _HTML_FOOT.format(
+            subject="Dieses Vokabular", href_root=VOCAB.rstrip("#"), ext_turtle=".ttl", ext_jsonld=".jsonld"
+        )
     )
 
 
@@ -212,12 +253,14 @@ def render_index_html(graph: Graph) -> str:
     """
     dataset = URIRef(DATASET)
     title = _lit(graph, dataset, DCT.title) or "Förderdatenbank"
-    descriptions = _lit_list(graph, dataset, DCT.description)
-    # First paragraph only -- the long descriptions live on the dataset page.
-    short_desc = ""
-    for desc in descriptions:
+    descriptions = _lit_langs(graph, dataset, DCT.description)
+    # First paragraph of the German description only -- the full text in every
+    # language lives on the dataset page. de-first ordering comes from _lit_langs,
+    # so this cannot silently flip to the English one.
+    short_lang, short_desc = "", ""
+    for lang, desc in descriptions:
         if "\n" in desc:
-            short_desc = desc.split("\n", 1)[0]
+            short_lang, short_desc = lang, desc.split("\n", 1)[0]
             break
 
     # Both links come out of the graph rather than being written here: the download
@@ -256,39 +299,41 @@ def render_index_html(graph: Graph) -> str:
         who = _link(pub_home, pub_name) if pub_home else pub_name
         if pub_mbox:
             who += " &middot; " + _link(pub_mbox, pub_mbox.removeprefix("mailto:"))
-        rows.append(("Published by", who))
+        rows.append(("Veröffentlicht von", who))
     if source:
         where = _link(source, "Förderdatenbank des Bundes")
         if derived:
-            where += f" ({_link(derived, 'export')})"
-        rows.append(("Source", where))
+            where += f" ({_link(derived, 'Export')})"
+        rows.append(("Quelle", where))
     if license_iri:
         terms = f"<code>{license_iri}</code>"
         if attribution:
-            terms += f"<br>Attribution: {attribution}"
-        rows.append(("Licence", terms))
+            terms += f"<br>Namensnennung: {attribution}"
+        rows.append(("Lizenz", terms))
     if modified:
         when = modified
         if frequency:
             when += " &middot; " + frequency.rsplit("/", 1)[-1].lower()
-        rows.append(("Updated", when))
+        rows.append(("Aktualisiert", when))
 
     about = "".join(f"<dt>{label}</dt><dd>{value}</dd>" for label, value in rows)
 
     return (
         _HTML_HEAD.format(lang="de", title=title, href_root=DATASET, href_ext="", href_ext_jsonld=".jsonld")
         + f"<h1>{title}</h1>\n"
-        + (f"<p>{short_desc}</p>\n" if short_desc else "")
-        + "<h2>Get the data</h2>\n<ul>"
+        + (f"<p{_lang_attr(short_lang)}>{short_desc}</p>\n" if short_desc else "")
+        + "<h2>Daten</h2>\n<ul>"
         + "".join(
-            f"<li><a href=\"{url}\">{url.rsplit('/', 1)[-1]}</a> &mdash; the table "
+            f"<li><a href=\"{url}\">{url.rsplit('/', 1)[-1]}</a> &mdash; die Tabelle "
             f"({html.escape(_lit(graph, dataset, DCT.modified) or '')})</li>"
             for url in downloads
         )
-        + f"<li><a href=\"{DATASET}\">Dataset description</a> &mdash; DCAT body, also as <a href=\"{DATASET}.ttl\">Turtle</a> or <a href=\"{DATASET}.jsonld\">JSON-LD</a></li>"
-        + (f"<li><a href=\"{schema_url}\">Table schema</a> &mdash; the per-column contract</li>" if schema_url else "")
-        + f"<li><a href=\"{VOCAB.rstrip('#')}\">Vocabulary</a> &mdash; terms minted for columns with no foreign equivalent</li>"
+        # The RDF serialisations are in the footer; naming them twice on one short
+        # page just makes the list harder to scan.
+        + f"<li><a href=\"{DATASET}\">Datensatzbeschreibung</a> &mdash; die DCAT-Metadaten</li>"
+        + (f"<li><a href=\"{schema_url}\">Tabellenschema</a> &mdash; der Vertrag je Spalte</li>" if schema_url else "")
+        + f"<li><a href=\"{VOCAB.rstrip('#')}\">Vokabular</a> &mdash; die Terme für Spalten ohne existierendes Äquivalent</li>"
         "</ul>\n"
-        + (f"<h2>About</h2>\n<dl>{about}</dl>\n" if about else "")
-        + _HTML_FOOT.format(href_root=DATASET, ext_turtle=".ttl", ext_jsonld=".jsonld")
+        + (f"<h2>Über den Datensatz</h2>\n<dl>{about}</dl>\n" if about else "")
+        + _HTML_FOOT.format(subject="Dieser Datensatz", href_root=DATASET, ext_turtle=".ttl", ext_jsonld=".jsonld")
     )

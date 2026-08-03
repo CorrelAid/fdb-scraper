@@ -14,6 +14,7 @@ committed artefact nobody regenerated.
 
 from __future__ import annotations
 
+import html
 import json
 from datetime import datetime, timezone
 
@@ -390,12 +391,49 @@ def test_the_dataset_page_shows_the_distribution_and_its_size() -> None:
     # The title the metadata states, not a copy of it: what it says is an editorial
     # decision, that it reaches the page is what this test is about.
     assert f"<title>{DATASET_TITLE['de']}</title>" in page
-    assert "1,234 bytes" in page
+    assert "1.234 Bytes" in page
     assert DISTRIBUTIONS[0]["file"] in page
     # The licence, which hangs off the distribution rather than the dataset.
     assert LICENCE_URI in page
     # The .ttl and .jsonld of the same resource, so a reader can get the RDF.
     assert f"{DATASET}.jsonld" in page
+
+
+def test_the_rdf_links_carry_their_extension() -> None:
+    """A link labelled Turtle has to return Turtle.
+
+    Caddy negotiates the bare identifier URI on Accept, and a browser asks for
+    text/html -- so a footer link to the bare URI would hand the reader the page
+    they are already on. Only the explicit .ttl and .jsonld are offered.
+    """
+    page = render_dataset_html(build_dataset(MODIFIED, {}))
+    footer = page.rsplit("<hr>", 1)[1]
+    assert f'href="{DATASET}.ttl"' in footer
+    assert f'href="{DATASET}.jsonld"' in footer
+    assert f'href="{DATASET}"' not in footer
+
+
+def test_each_description_on_the_dataset_page_states_its_own_language() -> None:
+    """The document element says de; the English description is not German.
+
+    The graph tags every description (``@de``, ``@en``); the page has to carry the
+    tag onto the element holding the text, or a screen reader or translator takes
+    the whole document for the language in <html lang>.
+    """
+    page = render_dataset_html(build_dataset(MODIFIED, {}))
+    for lang, text in DESCRIPTION.items():
+        block = f'<div class="desc" lang="{lang}">'
+        assert block in page
+        # And it is that language's text inside that block, not just the attribute.
+        first_line = html.escape(text.format(fields=len(PUBLISHED_FIELDS))).split("\n", 1)[0]
+        assert page.split(block, 1)[1].startswith(first_line)
+
+
+def test_the_index_page_leads_with_the_german_description(dataset_graph: Graph) -> None:
+    """Not whichever literal rdflib yielded first."""
+    page = render_index_html(dataset_graph)
+    assert '<p lang="de">' in page
+    assert html.escape(DESCRIPTION["de"].format(fields=len(PUBLISHED_FIELDS)).split("\n", 1)[0]) in page
 
 
 def test_the_vocabulary_page_lists_every_term_the_document_defines(

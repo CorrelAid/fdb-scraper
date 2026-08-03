@@ -27,6 +27,8 @@
   dt { font-weight: 700; }
   dd { margin: 0; }
   .desc { white-space: pre-wrap; }
+  /* One .desc per language, so the second one needs the gap a paragraph has. */
+  .desc + .desc { margin-top: 1.5rem; }
   code { font-family: var(--mono); background: var(--surface); padding: 0.1em 0.3em;
     border-radius: 0.25rem; }
   a { color: var(--accent); text-decoration-thickness: 1.5px; }
@@ -37,16 +39,15 @@
 </head>
 <body>
 <h1>Förderprogramme aus der Förderdatenbank des Bundes</h1>
-<p>Alle Förderprogramme der Förderdatenbank des Bundes (Bund, Länder und EU), ein Datensatz pro Programm mit 50 Feldern.</p>
-<h2>Get the data</h2>
-<ul><li><a href="https://fdb.cdl.correlaid.org/data/programme.csv">programme.csv</a> &mdash; the table (2026-08-03T00:00:00+00:00)</li><li><a href="https://fdb.cdl.correlaid.org/id/dataset/foerderdatenbank-programme">Dataset description</a> &mdash; DCAT body, also as <a href="https://fdb.cdl.correlaid.org/id/dataset/foerderdatenbank-programme.ttl">Turtle</a> or <a href="https://fdb.cdl.correlaid.org/id/dataset/foerderdatenbank-programme.jsonld">JSON-LD</a></li><li><a href="https://fdb.cdl.correlaid.org/table-schema.json">Table schema</a> &mdash; the per-column contract</li><li><a href="https://fdb.cdl.correlaid.org/def/fdb">Vocabulary</a> &mdash; terms minted for columns with no foreign equivalent</li></ul>
-<h2>About</h2>
-<dl><dt>Published by</dt><dd><a href="https://correlaid.org/">CorrelAid e.V.</a> &middot; <a href="mailto:info@correlaid.org">info@correlaid.org</a></dd><dt>Source</dt><dd><a href="https://www.foerderdatenbank.de/">Förderdatenbank des Bundes</a> (<a href="https://www.foerderdatenbank.de/FDB/WS/export">export</a>)</dd><dt>Licence</dt><dd><code>http://dcat-ap.de/def/licenses/cc-by-nd/4.0</code><br>Attribution: Bundesministerium für Wirtschaft und Energie</dd><dt>Updated</dt><dd>2026-08-03T00:00:00+00:00 &middot; weekly</dd></dl>
+<p lang="de">Alle Förderprogramme der Förderdatenbank des Bundes (Bund, Länder und EU), ein Datensatz pro Programm mit 50 Feldern.</p>
+<h2>Daten beziehen</h2>
+<ul><li><a href="https://fdb.cdl.correlaid.org/data/programme.csv">programme.csv</a> &mdash; die Tabelle (2026-08-03T00:00:00+00:00)</li><li><a href="https://fdb.cdl.correlaid.org/id/dataset/foerderdatenbank-programme">Datensatzbeschreibung</a> &mdash; die DCAT-Metadaten</li><li><a href="https://fdb.cdl.correlaid.org/table-schema.json">Tabellenschema</a> &mdash; der Vertrag je Spalte</li><li><a href="https://fdb.cdl.correlaid.org/def/fdb">Vokabular</a> &mdash; die Terme für Spalten ohne fremdes Äquivalent</li></ul>
+<h2>Über den Datensatz</h2>
+<dl><dt>Veröffentlicht von</dt><dd><a href="https://correlaid.org/">CorrelAid e.V.</a> &middot; <a href="mailto:info@correlaid.org">info@correlaid.org</a></dd><dt>Quelle</dt><dd><a href="https://www.foerderdatenbank.de/">Förderdatenbank des Bundes</a> (<a href="https://www.foerderdatenbank.de/FDB/WS/export">Export</a>)</dd><dt>Lizenz</dt><dd><code>http://dcat-ap.de/def/licenses/cc-by-nd/4.0</code><br>Namensnennung: Bundesministerium für Wirtschaft und Energie</dd><dt>Aktualisiert</dt><dd>2026-08-03T00:00:00+00:00 &middot; weekly</dd></dl>
 <hr>
 <p><small>
-Representations: <a href="https://fdb.cdl.correlaid.org/id/dataset/foerderdatenbank-programme">Turtle</a> &middot;
-<a href="https://fdb.cdl.correlaid.org/id/dataset/foerderdatenbank-programme.jsonld">JSON-LD</a> &middot;
-<a href="https://fdb.cdl.correlaid.org/id/dataset/foerderdatenbank-programme.ttl">.ttl</a>.
+Dieser Datensatz als RDF: <a href="https://fdb.cdl.correlaid.org/id/dataset/foerderdatenbank-programme.ttl">Turtle</a> &middot;
+<a href="https://fdb.cdl.correlaid.org/id/dataset/foerderdatenbank-programme.jsonld">JSON-LD</a>.
 </small></p>
 </body>
 </html>
