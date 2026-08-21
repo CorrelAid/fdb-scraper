@@ -34,8 +34,8 @@ the other reason for linking rather than replacing. Where a value could not be m
 honestly, it is left unmapped rather than approximated.
 
 The columns this project adds (`id_url`, `id_hash`, `on_website_from`,
-`last_updated`, `previous_update_dates`, `deleted`) are observations about the
-records, not content taken from the source.
+`last_updated`, `previous_update_dates`, `on_website_to`, `absent`) are observations
+about the records, not content taken from the source.
 
 ## Attributing a single row
 

@@ -93,9 +93,11 @@ def test_a_load_of_the_real_export_publishes(downloaded, tmp_path, monkeypatch) 
 
     df = publish(pipe=pipe)
     assert list(df.columns) == list(PUBLISHED_FIELDS)
-    assert not df["deleted"].any(), "a first load cannot have deleted anything"
+    assert not df["absent"].any(), "a first load cannot have any absent programmes"
     # Every programme is first seen in this load, so none has changed yet.
     assert df["last_updated"].null_count() == df.height
+    # And none have left the export yet
+    assert df["on_website_to"].null_count() == df.height
 
     raw, documents = snapshot(pipe)
     assert documents, "no linked documents were indexed"

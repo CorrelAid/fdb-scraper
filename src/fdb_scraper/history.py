@@ -613,11 +613,32 @@ def fold(versions: pl.DataFrame) -> pl.DataFrame:
         versions.group_by("id_hash")
         .agg(
             pl.col(frm).min().alias("on_website_from"),
-            pl.col(to).max().alias("last_updated"),
-            pl.col(to).drop_nulls().sort().alias("previous_update_dates"),
-            # A programme is gone when no version of it has an open window.
-            pl.col(to).is_null().any().not_().alias("deleted"),
+            # A programme is absent when no version of it has an open window.
+            pl.col(to).is_null().any().not_().alias("absent"),
+            # All on_website_to values, sorted, for deriving the other columns.
+            pl.col(to).drop_nulls().sort().alias("_all_to_dates"),
         )
+        .with_columns([
+            # on_website_to: For absent programs, the max (when it went absent);
+            # NULL for active programs.
+            pl.when(pl.col("absent"))
+              .then(pl.col("_all_to_dates").list.max())
+              .otherwise(None)
+              .alias("on_website_to"),
+            # previous_update_dates: For absent programs, all transitions except
+            # the final one (which is the absence, not a content change); for
+            # active programs, all transitions (which are all content changes).
+            pl.when(pl.col("absent"))
+              .then(pl.col("_all_to_dates").list.slice(0, pl.col("_all_to_dates").list.len() - 1))
+              .otherwise(pl.col("_all_to_dates"))
+              .alias("previous_update_dates"),
+        ])
+        .with_columns([
+            # last_updated: Most recent content change (max of previous_update_dates).
+            # NULL if the programme has never changed.
+            pl.col("previous_update_dates").list.max().alias("last_updated"),
+        ])
+        .drop("_all_to_dates")
         # Typed after aggregating, not inside it. On a first load nothing has been
         # retired, so the max is null throughout and every list is empty, which
         # polars types Null and List(Null) -- neither is what the schema declares.
@@ -625,6 +646,7 @@ def fold(versions: pl.DataFrame) -> pl.DataFrame:
         # each timestamp in a list of its own.
         .with_columns(
             pl.col("on_website_from").cast(TIMESTAMP),
+            pl.col("on_website_to").cast(TIMESTAMP),
             pl.col("last_updated").cast(TIMESTAMP),
             pl.col("previous_update_dates").cast(pl.List(TIMESTAMP)),
         )

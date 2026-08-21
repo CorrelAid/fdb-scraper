@@ -4,7 +4,7 @@ These run the real loader against a mutated copy of the export fixture, one load
 per generation, so what is asserted is dlt's scd2 behaviour on our data rather
 than a model of it. The claims that matter are the published ones: a programme
 that changed keeps its original first-seen date, one that left the export keeps
-its last known content, and one that came back stops being deleted without losing
+its last known content, and one that came back stops being absent without losing
 the record that it was.
 
 :func:`fdb_scraper.history.fold` is tested separately and without a database --
@@ -199,7 +199,8 @@ def test_a_changed_value_keeps_the_original_first_seen(export: Path, pipe) -> No
     )
     assert len(after["previous_update_dates"]) == 1, "the change was not recorded"
     assert after["last_updated"] == after["previous_update_dates"][0]
-    assert not after["deleted"]
+    assert not after["absent"]
+    assert after["on_website_to"] is None, "active programme has on_website_to set"
 
 
 def test_a_vanished_programme_keeps_its_last_known_content(export: Path, pipe) -> None:
@@ -213,16 +214,19 @@ def test_a_vanished_programme_keeps_its_last_known_content(export: Path, pipe) -
     frame, _ = snapshot(pipe)
     after = row(frame, url)
 
-    assert after["deleted"], "a programme absent from the export is not flagged"
-    assert after["title"] == before["title"], "content was lost on deletion"
+    assert after["absent"], "a programme absent from the export is not flagged"
+    assert after["title"] == before["title"], "content was lost on absence"
     assert after["on_website_from"] == before["on_website_from"]
-    assert after["last_updated"] is not None, "no record of when it left"
+    assert after["on_website_to"] is not None, "no record of when it left"
+    # last_updated tracks content changes, not absence, so it should remain null
+    # if the programme never changed before leaving
+    assert after["last_updated"] == before["last_updated"]
     # The point of keeping it: the row count does not drop when upstream removes
     # something, so a consumer can tell "withdrawn" from "never existed".
     assert len(frame) == 3
 
 
-def test_a_returning_programme_stops_being_deleted(export: Path, pipe) -> None:
+def test_a_returning_programme_stops_being_absent(export: Path, pipe) -> None:
     """Reappearing clears the flag without discarding the history of the gap."""
     url = url_of(export, SUBJECT)
     original = (export / SUBJECT).read_bytes()
@@ -230,13 +234,16 @@ def test_a_returning_programme_stops_being_deleted(export: Path, pipe) -> None:
     load(export, pipe=pipe)
     (export / SUBJECT).unlink()
     load(export, pipe=pipe)
-    assert row(snapshot(pipe)[0], url)["deleted"]
+    assert row(snapshot(pipe)[0], url)["absent"]
 
     (export / SUBJECT).write_bytes(original)
     load(export, pipe=pipe)
     after = row(snapshot(pipe)[0], url)
 
-    assert not after["deleted"], "the programme is back but still flagged deleted"
+    assert not after["absent"], "the programme is back but still flagged absent"
+    assert after["on_website_to"] is None, "programme is back but on_website_to still set"
+    # When a program returns, it creates a new version, so there IS a transition recorded.
+    # The point is that the gap itself (the period of absence) is tracked, not that it's invisible.
     assert len(after["previous_update_dates"]) == 1, (
         "the gap it spent off the website was forgotten"
     )
@@ -253,7 +260,8 @@ def test_a_new_programme_is_added_without_history(export: Path, pipe) -> None:
     after = row(frame, url_of(export, new))
 
     assert len(frame) == 4
-    assert not after["deleted"]
+    assert not after["absent"]
+    assert after["on_website_to"] is None
     assert after["previous_update_dates"] == [], "a new programme has no changes yet"
     assert after["last_updated"] is None
 
@@ -419,10 +427,11 @@ def test_fold_takes_first_seen_from_the_earliest_version() -> None:
     assert folded["on_website_from"] == day(1)
     assert folded["previous_update_dates"] == [day(2), day(3)]
     assert folded["last_updated"] == day(3)
-    assert not folded["deleted"]
+    assert not folded["absent"]
+    assert folded["on_website_to"] is None
 
 
-def test_fold_reports_a_programme_with_no_open_window_as_deleted() -> None:
+def test_fold_reports_a_programme_with_no_open_window_as_absent() -> None:
     day = lambda n: datetime(2026, 1, n, tzinfo=timezone.utc)  # noqa: E731
     frm, to = VALIDITY_COLUMNS
     folded = fold(
@@ -432,10 +441,14 @@ def test_fold_reports_a_programme_with_no_open_window_as_deleted() -> None:
         ])
     ).to_dicts()[0]
 
-    assert folded["deleted"]
+    assert folded["absent"]
     assert folded["title"] == "C2", "the last retired version's content is kept"
     assert folded["on_website_from"] == day(1)
-    assert folded["last_updated"] == day(4)
+    # last_updated is the last content change (day 2), not the absence (day 4)
+    assert folded["last_updated"] == day(2)
+    assert folded["on_website_to"] == day(4)
+    # previous_update_dates excludes the absence transition
+    assert folded["previous_update_dates"] == [day(2)]
 
 
 # --- the inferred column's materialised input ---------------------------------

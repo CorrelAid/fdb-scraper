@@ -80,7 +80,7 @@ def build(
         print("ingest: skipped, publishing what is already stored")
 
     df = publish(db=db)
-    live = df.height - df["deleted"].sum()
+    live = df.height - df["absent"].sum()
     print(f"publish: {df.height} programmes ({live} live), {df.width} columns, validated")
     # The inferred column's coverage, printed rather than checked: a value the
     # segmenter has not seen publishes as null, which is legitimate but worth seeing.

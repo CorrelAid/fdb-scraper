@@ -186,8 +186,9 @@ EXTERNAL = {
     # rights rather than the credit line.
     "license_info": "dcatapde:licenseAttributionByText",
     # When the export's content for this programme last changed. dct:modified is
-    # about the resource, which is what this records -- unlike on_website_from and
-    # deleted, which are facts about our observation of it and get minted terms.
+    # about the resource, which is what this records -- unlike on_website_from,
+    # on_website_to, and absent, which are facts about our observation of it and
+    # get minted terms.
     "last_updated": "dct:modified",
     # Contacts. The flat address terms below are the legacy vCard ones carried
     # into the 2006 namespace; the structured vcard:hasAddress form cannot be
@@ -279,10 +280,11 @@ Grundlage ist der XML-Programmexport der Förderdatenbank.
 Der Export beinhaltet immer nur den heutigen Stand. Dieser Datensatz führt daher eine \
 Historie: jedes Programm trägt, wann es zuerst erfasst wurde \
 (``on_website_from``), wann sich sein Inhalt zuletzt geändert hat \
-(``dct:modified``) und alle bisherigen Änderungszeitpunkte \
-(``previous_update_dates``). Programme, die aus der Förderdatenbank \
+(``dct:modified``), alle bisherigen Änderungszeitpunkte \
+(``previous_update_dates``) und wann es den Export verlassen hat \
+(``on_website_to``). Programme, die aus der Förderdatenbank \
 verschwinden, bleiben mit ihrem letzten bekannten Inhalt und \
-``deleted = true`` enthalten. Der Datensatz umfasst damit mehr Programme als \
+``absent = true`` enthalten. Der Datensatz umfasst damit mehr Programme als \
 der Export und wächst über die Zeit.
 
 Eine Spalte ist modellbasiert und nicht Teil der Quelle: ``keywords_extracted`` \
@@ -312,10 +314,11 @@ The basis is the Förderdatenbank's XML programme export.
 
 The export only ever contains today's state. This dataset therefore maintains \
 a history: each programme carries when it was first recorded \
-(``on_website_from``), when its content last changed (``dct:modified``) and \
-all previous change timestamps (``previous_update_dates``). Programmes that \
-disappear from the Förderdatenbank are retained with their last known content \
-and ``deleted = true``. The dataset thus covers more programmes than the \
+(``on_website_from``), when its content last changed (``dct:modified``), \
+all previous change timestamps (``previous_update_dates``) and when it left \
+the export (``on_website_to``). Programmes that disappear from the \
+Förderdatenbank are retained with their last known content and \
+``absent = true``. The dataset thus covers more programmes than the \
 export and grows over time.
 
 One column is model-produced and not part of the source: ``keywords_extracted`` \
@@ -464,21 +467,29 @@ MEANING_NOTES = {
         "is visible and a programme older than that reads as first seen then"
     ),
     "last_updated": (
-        "run in which this programme's export content last changed, or -- for a "
-        "deleted one -- the run in which it left the export. Observed by comparing "
-        "loads, because the export states no modification date of its own. Null for "
-        "a programme that has not changed since it was first seen"
+        "run in which this programme's export content last changed. Observed by "
+        "comparing loads, because the export states no modification date of its own. "
+        "Null for a programme that has not changed since it was first seen. For "
+        "absent programmes, this is the last content change, not the absence date "
+        "(which is on_website_to)"
     ),
     "previous_update_dates": (
-        "one timestamp per superseded version, ascending: the run in which that "
-        "version stopped being the current one. Empty for a programme that has "
-        "never changed; its length is therefore the number of changes observed"
+        "one timestamp per content change, ascending: the run in which a new version "
+        "superseded the previous one. Empty for a programme that has never changed; "
+        "its length is therefore the number of content changes observed. For absent "
+        "programmes, excludes the final transition (the absence), containing only "
+        "actual content changes"
     ),
-    "deleted": (
+    "on_website_to": (
+        "run in which this programme left the export. Null for programmes still "
+        "present. Observed by comparing loads. For absent programmes, this may be "
+        "much later than the last content change (last_updated)"
+    ),
+    "absent": (
         "true when no version of this programme is current any more: it was in an "
         "earlier export and is absent from the latest one. The row is kept, "
         "carrying the values of its last seen version, so the dataset outlives "
-        "what upstream removed -- last_updated then says when that happened. "
+        "what upstream removed -- on_website_to then says when that happened. "
         "Derived from our load history, not stated by the source, and absence is "
         "all it means: a programme may be gone because it ended, because it was "
         "reorganised, or because upstream restructured the export. A programme that "

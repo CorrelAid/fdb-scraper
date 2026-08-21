@@ -148,7 +148,7 @@ def test_a_pattern_column_carries_the_regex_the_schema_enforces() -> None:
 
 
 def test_the_boolean_column_is_a_boolean() -> None:
-    assert datatype_of("deleted") == "boolean"
+    assert datatype_of("absent") == "boolean"
 
 
 # --- The column contract as a whole -----------------------------------------
