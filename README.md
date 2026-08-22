@@ -32,6 +32,54 @@ the standard code.
 
 See `notebooks/exploration.ipynb` for an example on how to load and use the data.
 
+The column contract above is the reference for what every column means and what is
+checked. The same table renders locally:
+
+```python
+from fdb_scraper.schema import describe
+print(describe())          # dtype, nullability, checks and origin per column
+```
+
+`fdb:origin` marks each column `upstream`, `derived` or `inferred`, which is the one
+thing the values cannot tell you themselves.
+
+### History columns are ISO weeks
+
+The export ships only its current state, so this dataset adds five columns of its
+own: `on_website_from`, `last_updated`, `previous_update_dates`, `on_website_to` and
+`absent`.
+
+The four dates are **ISO weeks** (`2026-W34`), not timestamps. They are observed by
+comparing one scheduled load with the one before it, so the week between two loads is
+the resolution we actually have — a timestamp would claim a precision the source
+never states. The week named is the interval a change fell in, not the load that
+spotted it: a Monday load reports what changed during the week before it.
+
+```
+on_website_from        2026-W32
+last_updated           2026-W34
+previous_update_dates  ["2026-W33","2026-W34"]
+on_website_to          null
+absent                 false
+```
+
+Two consequences worth knowing before using them:
+
+- `len(previous_update_dates)` is the number of *weeks* in which a change was seen,
+  not the number of changes. One week is a single comparison, so two changes inside
+  it are indistinguishable from one.
+- `on_website_from == 2026-W32` means "present at the first load", not "appeared that
+  week" — that load was a backfill of everything then on the site, and nothing before
+  it is visible.
+
+Only the scheduled weekly loads are used, so an extra manual scrape never changes
+what is published. See [Scheduling](#scheduling).
+
+> **Changed in [3b861b4](../../commit/3b861b4).** These four columns previously
+> shipped microsecond timestamps (`2026-08-17T03:00:21.750769+0000`), and `absent`
+> was called `deleted` with no `on_website_to`. Code that parses them as dates needs
+> updating.
+
 ## Pipeline
 
 
