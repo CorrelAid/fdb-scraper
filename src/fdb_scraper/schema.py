@@ -34,7 +34,6 @@ from fdb_scraper.config import (
     INFERRED_COLUMNS,
     ISSUE_EPOCH,
     LICENCE_LABEL,
-    LOAD_EPOCH,
     OPEN_LINK_FIELDS,
     PIVOTS,
     RENAMES,
@@ -68,10 +67,18 @@ def pivot_paths(target: str) -> tuple[str, ...]:
     )
 
 
-# The timestamp dtype the history columns carry. Named because the aggregates that
-# derive them have to be cast to it explicitly: on a first load nothing has been
-# retired yet, so the aggregates come out Null and List(Null).
+# The timestamp dtype the scd2 validity columns carry, and which the history
+# columns are derived from before being reduced to weeks. Named because the
+# aggregates that derive them have to be cast to it explicitly: on a first load
+# nothing has been retired yet, so the aggregates come out Null and List(Null).
 TIMESTAMP = pl.Datetime(time_unit="us", time_zone="UTC")
+
+# The history columns are published as ISO-8601 weeks, e.g. "2026-W34", not as
+# timestamps. A load only reports that something differs from the load before it,
+# so the interval between two loads -- one week, at the weekly schedule -- is the
+# resolution we actually observe; a timestamp would claim microsecond precision
+# for a week-wide window. Zero-padded, so lexicographic order is chronological.
+ISO_WEEK_PATTERN = r"^\d{4}-W\d{2}$"
 
 
 def _is_span_partition(keywords: str | None, extracted: list[str] | None) -> bool:
@@ -267,39 +274,43 @@ COLUMNS: dict[str, pa.Column] = {
     # scd2 table by :func:`fdb_scraper.history.fold`, which is why they are absent
     # from a plain :func:`fdb_scraper.collect` -- see EXPORT_FIELDS.
     "on_website_from": pa.Column(
-        TIMESTAMP,
+        pl.String,
         nullable=False,
-        checks=pa.Check.in_range(LOAD_EPOCH, FAR_FUTURE),
+        checks=pa.Check.str_matches(ISO_WEEK_PATTERN),
     ),
     # Null until the programme changes for the first time: there is no
     # modification date for something that has only ever had one version.
     # For absent programmes, this is the most recent content change, not the
     # absence date (which is on_website_to).
     "last_updated": pa.Column(
-        TIMESTAMP,
+        pl.String,
         nullable=True,
-        checks=pa.Check.in_range(LOAD_EPOCH, FAR_FUTURE),
+        checks=pa.Check.str_matches(ISO_WEEK_PATTERN),
     ),
     # Empty rather than null for a programme that has never changed, so a
     # consumer can count changes without a null check. For absent programmes,
     # excludes the final on_website_to (the absence date), containing only
     # actual content changes.
+    #
+    # Its length is the number of *weeks* in which a change was observed, not the
+    # number of changes: two changes in one week are a single comparison between
+    # that week's load and the next, so they are indistinguishable from one.
     "previous_update_dates": pa.Column(
-        pl.List(TIMESTAMP),
+        pl.List(pl.String),
         nullable=False,
         checks=_list_elements(
-            pl.element().is_between(LOAD_EPOCH, FAR_FUTURE),
+            pl.element().str.contains(ISO_WEEK_PATTERN),
             name="previous_update_dates_plausible",
-            description="every recorded content change within the life of this dataset",
+            description="every week in which a content change was observed",
         ),
     ),
     # When the programme left the export. Null for programmes still present.
     # For absent programmes, this is when the programme disappeared, which may
     # be much later than the last content change (last_updated).
     "on_website_to": pa.Column(
-        TIMESTAMP,
+        pl.String,
         nullable=True,
-        checks=pa.Check.in_range(LOAD_EPOCH, FAR_FUTURE),
+        checks=pa.Check.str_matches(ISO_WEEK_PATTERN),
     ),
     # True once the programme has left the export. Its values are the last ones
     # published rather than nulls, so an absent programme stays readable.

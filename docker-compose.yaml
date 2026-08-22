@@ -52,6 +52,13 @@ services:
   #   container: pipeline
   #   command:   python scripts/build_dist.py --out /srv/public
   #   frequency: 0 3 * * 1
+  #
+  # That frequency is not only an operational choice: the published history is
+  # derived from the loads that match it, so `history.REGULAR_WEEKDAY` and
+  # `history.REGULAR_HOUR` have to agree with it. Changing the schedule in
+  # Coolify without changing them relabels every date in the dataset. Coolify's
+  # containers run UTC, so this fires at 03:00 UTC -- 05:00 Berlin -- and does
+  # not move with DST.
   pipeline:
     build: .
     restart: unless-stopped

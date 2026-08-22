@@ -126,7 +126,8 @@ def test_the_published_description_of_a_list_column_carries_its_encoding(
 
 def test_a_list_column_still_ranges_over_its_member_type() -> None:
     """``rdfs:range`` is per value, so it is where the member type does belong."""
-    assert range_of("previous_update_dates") == XSD.dateTime
+    # ISO weeks ("2026-W34"), so string: the members are not xsd:dateTime.
+    assert range_of("previous_update_dates") == XSD.string
     assert range_of("funding_type") == XSD.string
     # A list of structs has no XSD type at all; no range beats a wrong one.
     assert range_of("further_links") is None
@@ -134,8 +135,8 @@ def test_a_list_column_still_ranges_over_its_member_type() -> None:
 
 def test_a_datetime_column_carries_the_range_the_schema_checks() -> None:
     """pandera's ``in_range`` is the only statement of plausible dates; CSVW can hold it."""
-    datatype = datatype_of("on_website_from")
-    check = next(c for c in COLUMNS["on_website_from"].checks if c.name == "in_range")
+    datatype = datatype_of("date_of_issue")
+    check = next(c for c in COLUMNS["date_of_issue"].checks if c.name == "in_range")
     assert datatype["base"] == "dateTime"
     assert datatype["minimum"] == check._check_kwargs["min_value"].isoformat()
     assert datatype["maximum"] == check._check_kwargs["max_value"].isoformat()

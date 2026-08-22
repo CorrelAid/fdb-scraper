@@ -48,6 +48,31 @@ We additionally do some non-determinstic segmenting for keywords with a finetune
 
 In the future we might add more information extraction to this pipeline, but non-deterministic methods will always be declared as such. It would for example make sense to extract deadlines and provide them in a structured way. Currently, the deadline field is mostly not filled and not very structured.
 
+## Scheduling
+
+The load runs weekly, as a Coolify Scheduled Task: `0 3 * * 1` — Monday 03:00
+**UTC**. Coolify's containers run UTC, so this does not follow the host's
+`Europe/Berlin` clock (it fires at 05:00 local in summer) and does not shift with
+DST.
+
+That schedule is not only operational. Published dates are ISO weeks derived
+from the loads matching this slot, so the cadence is part of the data contract
+and is written down in three places:
+
+| Where | What |
+| --- | --- |
+| Coolify → resource → Scheduled Tasks | the authority: what actually runs |
+| [docker-compose.yaml](docker-compose.yaml) | documents it beside the service |
+| `REGULAR_WEEKDAY` / `REGULAR_HOUR` in [src/fdb_scraper/history.py](src/fdb_scraper/history.py) | what the publish step matches loads against |
+
+**Changing the schedule means changing all three.** If they drift apart, loads
+stop matching the slot and every date in the dataset is relabelled. A publish
+prints `no load at the scheduled slot` for any week it had to fall back on; more
+than the occasional one means the constants are stale.
+
+Manual runs are fine and do not corrupt anything — they are simply ignored when
+the history is derived, so that every published week means the same thing.
+
 ## Parsing the XML yourself
 
 If you want the XML step, copy it. It lives on its own in [src/fdb_scraper/parser.py](src/fdb_scraper/parser.py) and needs nothing but `polars` and the standard library. `parse_programmes("data/foerderprogramme_export")` is the whole entry point: give it any directory holding a `BMWI` tree and it returns the same 65-column frame.

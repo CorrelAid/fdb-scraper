@@ -14,6 +14,16 @@ fdb:Foerderprogramm
     rdfs:isDefinedBy <https://fdb.cdl.correlaid.org/def/fdb> ;
 .
 
+fdb:absent
+    a rdf:Property ;
+    rdfs:label "absent" ;
+    rdfs:comment "true when no version of this programme is current any more: it was in an earlier export and is absent from the latest one. The row is kept, carrying the values of its last seen version, so the dataset outlives what upstream removed -- on_website_to then says when that happened. Derived from our load history, not stated by the source, and absence is all it means: a programme may be gone because it ended, because it was reorganised, or because upstream restructured the export. A programme that reappears goes back to false"@en ;
+    rdfs:domain fdb:Foerderprogramm ;
+    rdfs:isDefinedBy <https://fdb.cdl.correlaid.org/def/fdb> ;
+    rdfs:range xsd:boolean ;
+    fdb:origin "derived" ;
+.
+
 fdb:applicantSector
     a rdf:Property ;
     rdfs:label "applicant_sector" ;
@@ -85,16 +95,6 @@ fdb:deadlines
     rdfs:isDefinedBy <https://fdb.cdl.correlaid.org/def/fdb> ;
     rdfs:range xsd:string ;
     fdb:origin "upstream" ;
-.
-
-fdb:deleted
-    a rdf:Property ;
-    rdfs:label "deleted" ;
-    rdfs:comment "true when no version of this programme is current any more: it was in an earlier export and is absent from the latest one. The row is kept, carrying the values of its last seen version, so the dataset outlives what upstream removed -- last_updated then says when that happened. Derived from our load history, not stated by the source, and absence is all it means: a programme may be gone because it ended, because it was reorganised, or because upstream restructured the export. A programme that reappears goes back to false"@en ;
-    rdfs:domain fdb:Foerderprogramm ;
-    rdfs:isDefinedBy <https://fdb.cdl.correlaid.org/def/fdb> ;
-    rdfs:range xsd:boolean ;
-    fdb:origin "derived" ;
 .
 
 fdb:eligibleApplicants
@@ -216,10 +216,20 @@ fdb:legalRequirements
 fdb:onWebsiteFrom
     a rdf:Property ;
     rdfs:label "on_website_from" ;
-    rdfs:comment "first run in which any version of this programme was present in the export. An observation of ours, not a date the source states: the export ships only its current state, so nothing before this dataset's first load is visible and a programme older than that reads as first seen then"@en ;
+    rdfs:comment "ISO week (e.g. 2026-W34) in which this programme was first present in the export. An observation of ours, not a date the source states: the export ships only its current state, so nothing before this dataset's first load is visible and a programme older than that reads as first seen then. The week named is the one before the load that first saw it -- the week the appearance fell in. The first load, in 2026-W32, has no week before it and was a backfill of everything then on the site, so 2026-W32 here means 'present at first observation', not 'appeared that week'"@en ;
     rdfs:domain fdb:Foerderprogramm ;
     rdfs:isDefinedBy <https://fdb.cdl.correlaid.org/def/fdb> ;
-    rdfs:range xsd:dateTime ;
+    rdfs:range xsd:string ;
+    fdb:origin "derived" ;
+.
+
+fdb:onWebsiteTo
+    a rdf:Property ;
+    rdfs:label "on_website_to" ;
+    rdfs:comment "last ISO week in which this programme was still present in the export. Null for programmes still present. Observed by comparing loads, so the disappearance falls between this week and the next load. For absent programmes this may be much later than the last content change (last_updated)"@en ;
+    rdfs:domain fdb:Foerderprogramm ;
+    rdfs:isDefinedBy <https://fdb.cdl.correlaid.org/def/fdb> ;
+    rdfs:range xsd:string ;
     fdb:origin "derived" ;
 .
 
@@ -234,10 +244,10 @@ fdb:origin
 fdb:previousUpdateDates
     a rdf:Property ;
     rdfs:label "previous_update_dates" ;
-    rdfs:comment "one timestamp per superseded version, ascending: the run in which that version stopped being the current one. Empty for a programme that has never changed; its length is therefore the number of changes observed"@en ;
+    rdfs:comment "one ISO week per observed content change, ascending. Empty for a programme that has never changed. Its length is the number of weeks in which a change was seen, not the number of changes: a week is a single comparison between two loads, so two changes within one week are indistinguishable from one. For absent programmes, excludes the final transition (the absence), containing only actual content changes"@en ;
     rdfs:domain fdb:Foerderprogramm ;
     rdfs:isDefinedBy <https://fdb.cdl.correlaid.org/def/fdb> ;
-    rdfs:range xsd:dateTime ;
+    rdfs:range xsd:string ;
     fdb:origin "derived" ;
 .
 
@@ -308,8 +318,8 @@ fdb:unternehmensgroesse
 
 <https://fdb.cdl.correlaid.org/def/fdb>
     a owl:Ontology ;
-    dct:description "Begriffe für die Spalten der Förderprogramm-Tabelle, für die kein etablierter Begriff passt. Generiert aus fdb_scraper.semantics."@de ;
-    dct:modified "2026-08-03"^^xsd:date ;
+    dct:description "Begriffe für die Spalten der Förderprogramm-Tabelle, für die kein etablierter Begriff passt."@de ;
+    dct:modified "2026-08-22"^^xsd:date ;
     dct:publisher <https://fdb.cdl.correlaid.org/id/agent/correlaid> ;
     dct:source <https://www.foerderdatenbank.de/> ;
     dct:title "Förderdatenbank -- minted Begriffe"@de ;

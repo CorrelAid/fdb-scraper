@@ -36,7 +36,9 @@ from fdb_scraper.history import (
     count_live,
     dlt_pipeline,
     fold,
+    iso_week,
     load,
+    regular_checkpoints,
     segment_keywords,
     snapshot,
 )
@@ -73,7 +75,19 @@ DESTINATIONS = ("duckdb", "postgres")
 
 @pytest.fixture(params=DESTINATIONS)
 def pipe(request, tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
-    """A pipeline on its own empty database, with dlt's state kept out of the repo."""
+    """A pipeline on its own empty database, with dlt's state kept out of the repo.
+
+    Every load counts as a scheduled one. A test loads several times within the
+    same second, which the real slot rule would collapse into a single weekly
+    checkpoint -- leaving no interval for a change to be observed across. The
+    weekly selection itself is covered by the ``regular_checkpoints`` tests; these
+    are about what the derivation makes of a sequence of loads.
+    """
+    monkeypatch.setattr(
+        history,
+        "regular_checkpoints",
+        lambda versions, loads=None: loads or history.all_load_times(versions),
+    )
     monkeypatch.setenv("DLT_DATA_DIR", str(tmp_path / "dlt"))
     # ``load`` segments new keywords values when the endpoint is configured, so a
     # developer with the tagger in their environment would otherwise have every test
@@ -407,48 +421,160 @@ def _versions(rows: list[dict]) -> pl.DataFrame:
     return pl.DataFrame(rows)
 
 
+# A load per week, so each change falls in a week of its own and the assertions
+# below read as one observation each. Mondays 03:00 UTC, the scheduled slot.
+def _monday(n: int) -> datetime:
+    return datetime(2026, 1, 5 + 7 * (n - 1), 3, tzinfo=timezone.utc)
+
+
 def test_fold_takes_first_seen_from_the_earliest_version() -> None:
     """A programme changed twice is as old as its first version, not its second.
 
     ``funding_crawler``'s query reached one retirement back, so anything that
     changed more than once was published as younger than it was.
     """
-    day = lambda n: datetime(2026, 1, n, tzinfo=timezone.utc)  # noqa: E731
     frm, to = VALIDITY_COLUMNS
     folded = fold(
         _versions([
-            {"id_hash": "b", "url": "u/b", "title": "B", frm: day(1), to: day(2)},
-            {"id_hash": "b", "url": "u/b", "title": "B2", frm: day(2), to: day(3)},
-            {"id_hash": "b", "url": "u/b", "title": "B3", frm: day(3), to: None},
+            {"id_hash": "b", "url": "u/b", "title": "B", frm: _monday(1), to: _monday(2)},
+            {"id_hash": "b", "url": "u/b", "title": "B2", frm: _monday(2), to: _monday(3)},
+            {"id_hash": "b", "url": "u/b", "title": "B3", frm: _monday(3), to: None},
         ])
     ).to_dicts()[0]
 
     assert folded["title"] == "B3", "the live version's content should win"
-    assert folded["on_website_from"] == day(1)
-    assert folded["previous_update_dates"] == [day(2), day(3)]
-    assert folded["last_updated"] == day(3)
+    # Weeks name the interval a change fell in, not the load that spotted it:
+    # the W03 load reports what changed during W02.
+    assert folded["on_website_from"] == "2026-W02"
+    assert folded["previous_update_dates"] == ["2026-W02", "2026-W03"]
+    assert folded["last_updated"] == "2026-W03"
     assert not folded["absent"]
     assert folded["on_website_to"] is None
 
 
 def test_fold_reports_a_programme_with_no_open_window_as_absent() -> None:
-    day = lambda n: datetime(2026, 1, n, tzinfo=timezone.utc)  # noqa: E731
     frm, to = VALIDITY_COLUMNS
     folded = fold(
         _versions([
-            {"id_hash": "c", "url": "u/c", "title": "C", frm: day(1), to: day(2)},
-            {"id_hash": "c", "url": "u/c", "title": "C2", frm: day(2), to: day(4)},
+            {"id_hash": "c", "url": "u/c", "title": "C", frm: _monday(1), to: _monday(2)},
+            {"id_hash": "c", "url": "u/c", "title": "C2", frm: _monday(2), to: _monday(4)},
         ])
     ).to_dicts()[0]
 
     assert folded["absent"]
     assert folded["title"] == "C2", "the last retired version's content is kept"
-    assert folded["on_website_from"] == day(1)
-    # last_updated is the last content change (day 2), not the absence (day 4)
-    assert folded["last_updated"] == day(2)
-    assert folded["on_website_to"] == day(4)
+    assert folded["on_website_from"] == "2026-W02"
+    # last_updated is the last content change, not the absence
+    assert folded["last_updated"] == "2026-W02"
+    # The last week it was still there. Nothing loaded in W04 -- the versions
+    # name no such load -- so W03 is the last week it was observed in, and the
+    # absence is only known by the W05 load.
+    assert folded["on_website_to"] == "2026-W03"
     # previous_update_dates excludes the absence transition
-    assert folded["previous_update_dates"] == [day(2)]
+    assert folded["previous_update_dates"] == ["2026-W02"]
+
+
+def test_iso_week_uses_the_iso_year_at_a_year_boundary() -> None:
+    """The days around New Year belong to the neighbouring year's ISO week.
+
+    With ``dt.year`` instead of ``dt.iso_year``, 2025-12-29 reads "2025-W01" --
+    which sorts before everything else in 2025 -- and 2027-01-03 reads
+    "2027-W53", a week that does not exist.
+    """
+    stamps = [
+        datetime(2025, 12, 29, tzinfo=timezone.utc),  # ISO 2026-W01
+        datetime(2026, 1, 1, tzinfo=timezone.utc),  # ISO 2026-W01
+        datetime(2027, 1, 3, tzinfo=timezone.utc),  # ISO 2026-W53
+    ]
+    weeks = (
+        pl.DataFrame({"t": stamps})
+        .select(week=iso_week(pl.col("t")))["week"]
+        .to_list()
+    )
+    assert weeks == ["2026-W01", "2026-W01", "2026-W53"]
+
+
+def test_a_manual_scrape_between_two_schedules_is_not_a_checkpoint() -> None:
+    """Published history is what the schedule alone would have seen."""
+    scheduled = [_monday(1), _monday(2)]
+    manual = datetime(2026, 1, 7, 14, 30, tzinfo=timezone.utc)  # Wednesday
+    frm, to = VALIDITY_COLUMNS
+    versions = _versions([
+        {"id_hash": "m", "url": "u/m", "title": "M", frm: scheduled[0], to: manual},
+        {"id_hash": "m", "url": "u/m", "title": "M2", frm: manual, to: scheduled[1]},
+        {"id_hash": "m", "url": "u/m", "title": "M3", frm: scheduled[1], to: None},
+    ])
+
+    assert regular_checkpoints(versions) == scheduled, "the manual run was kept"
+
+
+def test_two_changes_in_one_week_are_reported_as_one() -> None:
+    """A week is one observation: the schedule cannot see inside it."""
+    frm, to = VALIDITY_COLUMNS
+    midweek = datetime(2026, 1, 7, 14, 30, tzinfo=timezone.utc)
+    folded = fold(
+        _versions([
+            {"id_hash": "t", "url": "u/t", "title": "T", frm: _monday(1), to: midweek},
+            {"id_hash": "t", "url": "u/t", "title": "T2", frm: midweek, to: _monday(2)},
+            {"id_hash": "t", "url": "u/t", "title": "T3", frm: _monday(2), to: None},
+        ]),
+        [_monday(1), _monday(2)],
+    ).to_dicts()[0]
+
+    assert folded["title"] == "T3", "the newest content is still published"
+    assert folded["previous_update_dates"] == ["2026-W02"], (
+        "two changes in one week were counted twice"
+    )
+
+
+def test_a_programme_living_between_two_schedules_is_never_published() -> None:
+    """The schedule never saw it, so the dataset does not claim it existed."""
+    frm, to = VALIDITY_COLUMNS
+    appeared = datetime(2026, 1, 6, 9, 0, tzinfo=timezone.utc)
+    vanished = datetime(2026, 1, 8, 9, 0, tzinfo=timezone.utc)
+    folded = fold(
+        _versions([
+            {"id_hash": "keep", "url": "u/k", "title": "K", frm: _monday(1), to: None},
+            {"id_hash": "gone", "url": "u/g", "title": "G", frm: appeared, to: vanished},
+        ]),
+        [_monday(1), _monday(2)],
+    )
+
+    assert folded["url"].to_list() == ["u/k"], "a programme no load saw was published"
+
+
+def test_a_load_that_changed_nothing_is_still_a_load(export: Path, pipe) -> None:
+    """scd2 writes no row for it, so only ``_dlt_loads`` knows it ran.
+
+    Without that, a quiet week looks unscraped: its checkpoint would go to
+    whatever manual run did happen to change something, and the publish would
+    warn about a schedule that in fact ran on time.
+    """
+    load(export, pipe=pipe)
+    load(export, pipe=pipe)  # same export, so nothing to retire or insert
+
+    with pipe.sql_client() as client:
+        versions = pl.read_database(
+            f"SELECT * FROM {client.make_qualified_table_name('programmes')}",
+            connection=client.native_connection,
+            infer_schema_length=None,
+        )
+
+    assert len(history.all_load_times(versions)) == 1, "the versions saw one load"
+    assert len(history.load_times(pipe, versions)) == 2, "the second load is lost"
+
+
+def test_a_week_without_a_scheduled_load_falls_back_to_its_last(capsys) -> None:
+    """A missed schedule must not drop the week out of the history."""
+    stand_in = datetime(2026, 1, 14, 11, 0, tzinfo=timezone.utc)  # Wednesday, W03
+    frm, to = VALIDITY_COLUMNS
+    versions = _versions([
+        {"id_hash": "f", "url": "u/f", "title": "F", frm: _monday(1), to: stand_in},
+        {"id_hash": "f", "url": "u/f", "title": "F2", frm: stand_in, to: None},
+    ])
+
+    assert regular_checkpoints(versions) == [_monday(1), stand_in]
+    assert "no load at the scheduled slot" in capsys.readouterr().err
 
 
 # --- the inferred column's materialised input ---------------------------------

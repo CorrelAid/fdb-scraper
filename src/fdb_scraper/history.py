@@ -82,6 +82,24 @@ DEFAULT_DB = Path("data") / "fdb.duckdb"
 # consumer of the previous publication reads the same two columns.
 VALIDITY_COLUMNS = ["on_website_from", "on_website_to"]
 
+# The scheduled load, as a (weekday, hour) in UTC -- Monday 03:00, which is the
+# Coolify Scheduled Task "0 3 * * 1" recorded in docker-compose.yaml.
+#
+# HARDCODED, AND OUTSIDE THIS REPO. The schedule lives in Coolify (resource ->
+# Scheduled Tasks) and is duplicated here and in docker-compose.yaml. Published
+# history is derived from loads matching this slot, so a drift between Coolify
+# and this constant relabels the whole series. Change one, change all three.
+#
+# UTC, not local. The host is Europe/Berlin but Coolify's containers run UTC, so
+# the cron fires at 03:00 UTC (05:00 Berlin) and does not move with DST -- which
+# is what keeps a load from drifting across an ISO week boundary twice a year.
+REGULAR_WEEKDAY = 1  # polars dt.weekday(): Monday == 1
+REGULAR_HOUR = 3
+# The task starts on time but takes a moment to reach the database; observed
+# loads land ~20s past the hour. An hour either side still identifies the slot
+# uniquely at a weekly cadence, and absorbs a slow start without a false miss.
+SLOT_TOLERANCE_HOURS = 1
+
 SCD2 = {
     "disposition": "merge",
     "strategy": "scd2",
@@ -565,16 +583,253 @@ _LIST_FIELDS = tuple(
 )
 
 
+def iso_week(col: pl.Expr) -> pl.Expr:
+    """The ISO-8601 week a timestamp expression falls in, as ``2026-W34``.
+
+    ``dt.iso_year`` rather than ``dt.year``: the two disagree in the days around
+    New Year, where the ISO week belongs to the neighbouring year. With
+    ``dt.year`` 2025-12-29 (ISO 2026-W01) reads "2025-W01", which sorts before
+    everything else in 2025, and 2027-01-03 (ISO 2026-W53) reads "2027-W53",
+    a week that does not exist.
+    """
+    return (
+        pl.when(col.is_null())
+        .then(None)
+        .otherwise(
+            pl.format(
+                "{}-W{}",
+                col.dt.iso_year(),
+                col.dt.week().cast(pl.String).str.pad_start(2, "0"),
+            )
+        )
+    )
+
+
+def all_load_times(versions: pl.DataFrame) -> list[datetime]:
+    """Every load the versions themselves attest to, ascending.
+
+    Both validity columns: a load that only retired versions -- everything it saw
+    was unchanged, and something was gone -- opens no window, so it appears solely
+    as an ``on_website_to``. Missing it would hide the disappearance.
+
+    A load in which *nothing* changed leaves no trace here at all, which is what
+    :func:`load_times` reads ``_dlt_loads`` for. This is the fallback for a frame
+    with no database behind it.
+    """
+    frm, to = VALIDITY_COLUMNS
+    return (
+        pl.concat([
+            versions.select(pl.col(frm).alias("_load")),
+            versions.select(pl.col(to).alias("_load")),
+        ])
+        .drop_nulls()
+        .unique()
+        .sort("_load")["_load"]
+        .to_list()
+    )
+
+
+def load_times(pipe, versions: pl.DataFrame) -> list[datetime]:
+    """Every completed load, ascending, from dlt's own record of them.
+
+    ``_dlt_loads`` is the only place a load that changed nothing appears: scd2
+    writes no row for it, so it leaves no mark on either validity column. Reading
+    the versions alone would make such a week look unscraped, hand its checkpoint
+    to whatever manual run did happen to change something, and warn about a
+    schedule that in fact ran.
+
+    ``load_id`` is the unix timestamp dlt stamped the load with -- the same clock
+    that fills the validity columns, so the two line up exactly.
+    """
+    with pipe.sql_client() as client:
+        loads = pl.read_database(
+            f"SELECT load_id, status FROM "
+            f"{client.make_qualified_table_name('_dlt_loads')}",
+            connection=client.native_connection,
+            infer_schema_length=None,
+        )
+    stamps = sorted(
+        datetime.fromtimestamp(float(load_id), timezone.utc)
+        # status 0 is a completed load; anything else did not land.
+        for load_id, status in loads.filter(pl.col("status") == 0).iter_rows()
+    )
+    # A load dlt recorded but that predates this table's history would put a
+    # checkpoint before anything exists; the versions bound what can be observed.
+    attested = all_load_times(versions)
+    if attested:
+        stamps = [s for s in stamps if s >= attested[0]]
+    return stamps
+
+
+def regular_checkpoints(
+    versions: pl.DataFrame, loads: list[datetime] | None = None
+) -> list[datetime]:
+    """The scheduled loads, one per ISO week, ascending.
+
+    Published history is derived from these alone: a manual scrape run between
+    two scheduled ones is ignored rather than folded in. That keeps every
+    published interval exactly one week wide, so a change can be attributed to
+    the week it happened in instead of the week we happened to look. It also
+    makes a publish reproducible -- the output does not depend on whether
+    somebody ran an extra scrape -- and keeps a programme that appeared and
+    vanished between two Mondays out of a dataset that never saw it.
+
+    A week whose scheduled load is missing (the task failed and somebody ran it
+    by hand) falls back to that week's last load, so the week is still
+    represented. A run of those means :data:`REGULAR_WEEKDAY` /
+    :data:`REGULAR_HOUR` no longer match the Coolify schedule.
+    """
+    frm = VALIDITY_COLUMNS[0]
+    observed = (
+        pl.DataFrame(
+            {frm: all_load_times(versions) if loads is None else loads},
+            schema={frm: TIMESTAMP},
+        )
+        .with_columns(
+            _week=iso_week(pl.col(frm)),
+            _on_slot=(pl.col(frm).dt.weekday() == REGULAR_WEEKDAY)
+            & (
+                (pl.col(frm).dt.hour() - REGULAR_HOUR).abs() <= SLOT_TOLERANCE_HOURS
+            ),
+        )
+    )
+    if observed.is_empty():
+        return []
+
+    # The scheduled load where there is one, the week's last load otherwise. Both
+    # take the max, so a week with two on-slot loads (a re-run) still yields one.
+    chosen = (
+        observed.group_by("_week")
+        .agg(
+            pl.col(frm).filter(pl.col("_on_slot")).max().alias("_scheduled"),
+            pl.col(frm).max().alias("_fallback"),
+        )
+        .with_columns(pl.col("_scheduled").fill_null(pl.col("_fallback")))
+        .sort("_scheduled")
+    )
+    for week, scheduled, fallback in chosen.select(
+        "_week", "_scheduled", "_fallback"
+    ).iter_rows():
+        if scheduled == fallback and not observed.filter(
+            (pl.col("_week") == week) & pl.col("_on_slot")
+        ).height:
+            print(
+                f"{week}: no load at the scheduled slot "
+                f"(Mon {REGULAR_HOUR:02d}:00 UTC); using {fallback}. "
+                "If this repeats, REGULAR_WEEKDAY/REGULAR_HOUR no longer "
+                "match the Coolify schedule.",
+                file=sys.stderr,
+            )
+    return chosen["_scheduled"].to_list()
+
+
+def _history_at(versions: pl.DataFrame, checkpoints: list[datetime]) -> pl.DataFrame:
+    """The history columns as the given loads alone would have observed them.
+
+    Each version is expanded to the checkpoints its validity window covers, which
+    is what makes a scrape between two checkpoints invisible: its version covers
+    no checkpoint and contributes no row. A programme observed at no checkpoint at
+    all drops out here and is filtered from the published frame.
+    """
+    frm, to = VALIDITY_COLUMNS
+    grid = pl.DataFrame(
+        {"_checkpoint": checkpoints}, schema={"_checkpoint": TIMESTAMP}
+    )
+    # What a load observes happened between it and the load before it, so that
+    # interval -- one week at the schedule -- is what a published week names. A
+    # load can only ever say "this differs from last time"; naming the week it
+    # ran would put every change one week later than it happened.
+    #
+    # The first load has no predecessor and keeps its own week: nothing before it
+    # is visible at all, so what it reports is "present at first observation"
+    # rather than an interval. MEANING_NOTES says so for on_website_from, where
+    # that is the 2026-W32 backfill.
+    preceding = {c: p for c, p in zip(checkpoints[1:], checkpoints[:-1])}
+    preceding[checkpoints[0]] = checkpoints[0]
+    # The window is half-open: a version retired *at* a checkpoint was already
+    # gone when that load ran, which is what makes a retirement show up as an
+    # absence at the checkpoint rather than one checkpoint late.
+    seen = (
+        versions.join(grid, how="cross")
+        .filter(
+            (pl.col(frm) <= pl.col("_checkpoint"))
+            & (pl.col(to).is_null() | (pl.col("_checkpoint") < pl.col(to)))
+        )
+        .sort("id_hash", "_checkpoint")
+    )
+    return (
+        seen.group_by("id_hash")
+        .agg(
+            # The checkpoints this programme was present at, ascending.
+            pl.col("_checkpoint").alias("_seen"),
+            # A change is a checkpoint whose version is not the one before it.
+            # scd2 opens a fresh window per change, so the window start
+            # identifies the version without comparing every field -- and does
+            # so on any frame shaped like the table, not just a dlt one.
+            #
+            # sort_by rather than relying on the frame's order: the group's rows
+            # reach an aggregate in no guaranteed order, and shift(1) compares
+            # neighbours, so an unsorted group would invent or miss changes.
+            #
+            # fill_null(False) states what the first checkpoint should do rather
+            # than leaving it to three-valued logic: shift(1) makes its
+            # comparison null, which is not a change. It is the programme
+            # appearing, which on_website_from records.
+            pl.col("_checkpoint")
+            .sort_by("_checkpoint")
+            .filter(
+                (
+                    pl.col(frm).sort_by("_checkpoint")
+                    != pl.col(frm).sort_by("_checkpoint").shift(1)
+                ).fill_null(False)
+            )
+            .alias("_changed_at"),
+        )
+        .with_columns(
+            # Present at the last checkpoint means still on the website. Anything
+            # else left at some point, whatever it did before that.
+            absent=pl.col("_seen").list.max() < checkpoints[-1],
+        )
+        .with_columns(
+            # The week the appearance falls in: the interval ending at the load
+            # that first saw it.
+            on_website_from=iso_week(
+                pl.col("_seen").list.min().replace_strict(preceding)
+            ),
+            # Already the interval: the last load that saw it *is* the checkpoint
+            # preceding the one that found it gone, so the week it was last there
+            # is the week it disappeared in.
+            on_website_to=pl.when(pl.col("absent"))
+            .then(iso_week(pl.col("_seen").list.max()))
+            .otherwise(None),
+            # The appearance is not in _changed_at to begin with: shift(1) makes
+            # the first checkpoint's comparison null rather than true, and filter
+            # drops a null. So this is already the content changes alone, which
+            # is what on_website_from covers separately.
+            previous_update_dates=pl.col("_changed_at")
+            .list.eval(pl.element().replace_strict(preceding))
+            .list.eval(iso_week(pl.element())),
+        )
+        .with_columns(
+            last_updated=pl.col("previous_update_dates").list.max(),
+        )
+        .drop("_seen", "_changed_at")
+    )
+
+
 def snapshot(pipe=None) -> tuple[pl.DataFrame, dict[str, dict]]:
     """Every programme ever seen, with its history folded in.
 
     Not a live-rows filter. A programme that has left the export stays, carrying
-    the content of its last version and ``deleted = True`` -- the same shape
+    the content of its last version and ``absent = True`` -- the same shape
     ``funding_crawler``'s ``gen_query`` published, so the dataset outlives the
     export rather than forgetting whatever upstream removed.
 
     Reads what the last load recorded rather than downloading, so a publish can be
     rerun against the same input. That is the point of storing the raw fields.
+
+    History is reconstructed at the scheduled loads only -- see
+    :func:`regular_checkpoints` -- and published as ISO weeks.
     """
     pipe = pipe or dlt_pipeline()
     with pipe.sql_client() as client:
@@ -589,68 +844,42 @@ def snapshot(pipe=None) -> tuple[pl.DataFrame, dict[str, dict]]:
             connection=client.native_connection,
             infer_schema_length=None,
         )
-    return fold(versions), _index(docs)
+    checkpoints = regular_checkpoints(versions, load_times(pipe, versions))
+    return fold(versions, checkpoints), _index(docs)
 
 
-def fold(versions: pl.DataFrame) -> pl.DataFrame:
+def fold(versions: pl.DataFrame, checkpoints: list[datetime] | None = None) -> pl.DataFrame:
     """One row per ``id_hash`` from all of its versions, plus the history columns.
 
     Content comes from the live version where there is one and from the most
-    recently retired version otherwise, which is what makes a deleted programme
+    recently retired version otherwise, which is what makes an absent programme
     keep its last known values.
 
-    ``on_website_from`` is the *minimum* over every version -- when the programme
-    first appeared. scd2 restarts the validity window on each change, so the live
-    row's own value says only when the current version appeared;
-    ``funding_crawler`` reached one retirement back for this and so understated
-    the age of anything that changed more than once.
+    History is reconstructed at ``checkpoints`` -- the scheduled loads, from
+    :func:`regular_checkpoints` -- rather than from every version. At each one the
+    version in force is whichever window covers it, and a change is a checkpoint
+    whose version differs from the one before. Every published date is then the
+    ISO week the interval between two checkpoints covers, which is the week the
+    change happened in: a load only ever reports that something differs from the
+    load before it, so the week we looked is the week *after* the one that
+    changed.
+
+    ``on_website_from`` is the first checkpoint the programme was present at, not
+    the minimum over its versions. scd2 restarts the validity window on each
+    change, so the live row's own value says only when the current version
+    appeared; ``funding_crawler`` reached one retirement back for this and so
+    understated the age of anything that changed more than once.
+
+    Without ``checkpoints`` every distinct load is a checkpoint, which is what the
+    tests for the underlying derivation use.
 
     Pure, and separate from :func:`snapshot`, so the derivation is testable
     without a database.
     """
     frm, to = VALIDITY_COLUMNS
-    history = (
-        versions.group_by("id_hash")
-        .agg(
-            pl.col(frm).min().alias("on_website_from"),
-            # A programme is absent when no version of it has an open window.
-            pl.col(to).is_null().any().not_().alias("absent"),
-            # All on_website_to values, sorted, for deriving the other columns.
-            pl.col(to).drop_nulls().sort().alias("_all_to_dates"),
-        )
-        .with_columns([
-            # on_website_to: For absent programs, the max (when it went absent);
-            # NULL for active programs.
-            pl.when(pl.col("absent"))
-              .then(pl.col("_all_to_dates").list.max())
-              .otherwise(None)
-              .alias("on_website_to"),
-            # previous_update_dates: For absent programs, all transitions except
-            # the final one (which is the absence, not a content change); for
-            # active programs, all transitions (which are all content changes).
-            pl.when(pl.col("absent"))
-              .then(pl.col("_all_to_dates").list.slice(0, pl.col("_all_to_dates").list.len() - 1))
-              .otherwise(pl.col("_all_to_dates"))
-              .alias("previous_update_dates"),
-        ])
-        .with_columns([
-            # last_updated: Most recent content change (max of previous_update_dates).
-            # NULL if the programme has never changed.
-            pl.col("previous_update_dates").list.max().alias("last_updated"),
-        ])
-        .drop("_all_to_dates")
-        # Typed after aggregating, not inside it. On a first load nothing has been
-        # retired, so the max is null throughout and every list is empty, which
-        # polars types Null and List(Null) -- neither is what the schema declares.
-        # Casting inside agg would instead cast the element expression, wrapping
-        # each timestamp in a list of its own.
-        .with_columns(
-            pl.col("on_website_from").cast(TIMESTAMP),
-            pl.col("on_website_to").cast(TIMESTAMP),
-            pl.col("last_updated").cast(TIMESTAMP),
-            pl.col("previous_update_dates").cast(pl.List(TIMESTAMP)),
-        )
-    )
+    if checkpoints is None:
+        checkpoints = all_load_times(versions)
+    history = _history_at(versions, checkpoints)
     # nulls_last puts the live version at the end of its group, and the retired
     # ones in retirement order, so the last row per group is the live version if
     # there is one and the most recently retired otherwise.
@@ -663,7 +892,11 @@ def fold(versions: pl.DataFrame) -> pl.DataFrame:
         # the latest version's from-date in place of the minimum.
         .drop(VALIDITY_COLUMNS)
     )
-    return _restore(latest.join(history, on="id_hash", how="left"))
+    # An inner join, so a programme that no checkpoint observed -- it appeared and
+    # vanished between two scheduled loads -- drops out instead of being published
+    # with an empty history. The schedule never saw it, so the dataset does not
+    # claim it existed.
+    return _restore(latest.join(history, on="id_hash", how="inner"))
 
 
 def _dlt_columns(df: pl.DataFrame) -> list[str]:

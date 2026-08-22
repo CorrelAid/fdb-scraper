@@ -7,7 +7,7 @@
     }
   ],
   "dc:title": "Förderprogramme aus der Förderdatenbank des Bundes",
-  "dc:description": "Spaltenvertrag der CSV-Distribution, generiert aus dem Pandera-Schema der Pipeline (fdb_scraper.dcat).",
+  "dc:description": "Spaltenvertrag der CSV-Distribution, generiert aus dem Pandera-Schema der Pipeline.",
   "tableSchema": {
     "primaryKey": "id_hash",
     "aboutUrl": "https://fdb.cdl.correlaid.org/id/programme/{id_url}",
@@ -410,12 +410,11 @@
         "propertyUrl": "https://fdb.cdl.correlaid.org/def/fdb#onWebsiteFrom",
         "fdb:origin": "derived",
         "datatype": {
-          "base": "dateTime",
-          "minimum": "2025-01-01T00:00:00+00:00",
-          "maximum": "2100-01-01T00:00:00+00:00"
+          "base": "string",
+          "format": "^\\d{4}-W\\d{2}$"
         },
         "required": true,
-        "dc:description": "first run in which any version of this programme was present in the export. An observation of ours, not a date the source states: the export ships only its current state, so nothing before this dataset's first load is visible and a programme older than that reads as first seen then"
+        "dc:description": "ISO week (e.g. 2026-W34) in which this programme was first present in the export. An observation of ours, not a date the source states: the export ships only its current state, so nothing before this dataset's first load is visible and a programme older than that reads as first seen then. The week named is the one before the load that first saw it -- the week the appearance fell in. The first load, in 2026-W32, has no week before it and was a backfill of everything then on the site, so 2026-W32 here means 'present at first observation', not 'appeared that week'"
       },
       {
         "name": "last_updated",
@@ -423,12 +422,11 @@
         "propertyUrl": "http://purl.org/dc/terms/modified",
         "fdb:origin": "derived",
         "datatype": {
-          "base": "dateTime",
-          "minimum": "2025-01-01T00:00:00+00:00",
-          "maximum": "2100-01-01T00:00:00+00:00"
+          "base": "string",
+          "format": "^\\d{4}-W\\d{2}$"
         },
         "required": false,
-        "dc:description": "run in which this programme's export content last changed, or -- for a deleted one -- the run in which it left the export. Observed by comparing loads, because the export states no modification date of its own. Null for a programme that has not changed since it was first seen"
+        "dc:description": "ISO week (e.g. 2026-W34) in which this programme's export content last changed. Observed by comparing loads, because the export states no modification date of its own: the week named is the one whose end the following load found the change at, so it is the week the change fell in rather than the week we looked. Null for a programme that has not changed since it was first seen. For absent programmes, this is the last content change, not the absence week (which is on_website_to)"
       },
       {
         "name": "previous_update_dates",
@@ -437,16 +435,28 @@
         "fdb:origin": "derived",
         "datatype": "string",
         "required": true,
-        "dc:description": "one timestamp per superseded version, ascending: the run in which that version stopped being the current one. Empty for a programme that has never changed; its length is therefore the number of changes observed; zero or more values per row, JSON-encoded in the cell as an array of xsd:dateTime strings"
+        "dc:description": "one ISO week per observed content change, ascending. Empty for a programme that has never changed. Its length is the number of weeks in which a change was seen, not the number of changes: a week is a single comparison between two loads, so two changes within one week are indistinguishable from one. For absent programmes, excludes the final transition (the absence), containing only actual content changes; zero or more values per row, JSON-encoded in the cell as an array of strings"
       },
       {
-        "name": "deleted",
-        "titles": "deleted",
-        "propertyUrl": "https://fdb.cdl.correlaid.org/def/fdb#deleted",
+        "name": "on_website_to",
+        "titles": "on_website_to",
+        "propertyUrl": "https://fdb.cdl.correlaid.org/def/fdb#onWebsiteTo",
+        "fdb:origin": "derived",
+        "datatype": {
+          "base": "string",
+          "format": "^\\d{4}-W\\d{2}$"
+        },
+        "required": false,
+        "dc:description": "last ISO week in which this programme was still present in the export. Null for programmes still present. Observed by comparing loads, so the disappearance falls between this week and the next load. For absent programmes this may be much later than the last content change (last_updated)"
+      },
+      {
+        "name": "absent",
+        "titles": "absent",
+        "propertyUrl": "https://fdb.cdl.correlaid.org/def/fdb#absent",
         "fdb:origin": "derived",
         "datatype": "boolean",
         "required": true,
-        "dc:description": "true when no version of this programme is current any more: it was in an earlier export and is absent from the latest one. The row is kept, carrying the values of its last seen version, so the dataset outlives what upstream removed -- last_updated then says when that happened. Derived from our load history, not stated by the source, and absence is all it means: a programme may be gone because it ended, because it was reorganised, or because upstream restructured the export. A programme that reappears goes back to false"
+        "dc:description": "true when no version of this programme is current any more: it was in an earlier export and is absent from the latest one. The row is kept, carrying the values of its last seen version, so the dataset outlives what upstream removed -- on_website_to then says when that happened. Derived from our load history, not stated by the source, and absence is all it means: a programme may be gone because it ended, because it was reorganised, or because upstream restructured the export. A programme that reappears goes back to false"
       },
       {
         "name": "keywords_extracted",

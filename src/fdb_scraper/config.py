@@ -287,6 +287,15 @@ verschwinden, bleiben mit ihrem letzten bekannten Inhalt und \
 ``absent = true`` enthalten. Der Datensatz umfasst damit mehr Programme als \
 der Export und wächst über die Zeit.
 
+Diese Historie wird wöchentlich erhoben und als ISO-Kalenderwoche \
+(z. B. 2026-W34) angegeben. Ein Lauf kann immer nur feststellen, dass sich \
+etwas gegenüber dem vorherigen Lauf geändert hat, also ist die Woche zwischen \
+zwei planmäßigen Läufen die tatsächliche Auflösung; ein Zeitstempel würde eine \
+Genauigkeit vortäuschen, die die Quelle nicht hergibt. Grundlage sind \
+ausschließlich die planmäßigen wöchentlichen Läufe: ein zusätzlicher Lauf \
+zwischendurch fließt nicht in die veröffentlichte Historie ein, damit jede \
+Angabe dieselbe Bedeutung hat.
+
 Eine Spalte ist modellbasiert und nicht Teil der Quelle: ``keywords_extracted`` \
 enthält die Stichwörter, die ein finetuned Sprachmodell aus der \
 Rohspalte ``keywords`` herausliest. Upstream sind sie durch Leerzeichen \
@@ -320,6 +329,13 @@ the export (``on_website_to``). Programmes that disappear from the \
 Förderdatenbank are retained with their last known content and \
 ``absent = true``. The dataset thus covers more programmes than the \
 export and grows over time.
+
+This history is observed weekly and stated as an ISO week (e.g. 2026-W34). A \
+run can only ever establish that something differs from the run before it, so \
+the week between two scheduled runs is the resolution actually observed; a \
+timestamp would claim a precision the source does not support. Only the \
+scheduled weekly runs are used: an extra run in between does not enter the \
+published history, so that every value carries the same meaning.
 
 One column is model-produced and not part of the source: ``keywords_extracted`` \
 holds the keywords a finetuned language model reads out of the raw ``keywords`` \
@@ -461,29 +477,38 @@ MEANING_NOTES = {
         "identifier of its own: it is stable exactly as long as the source URL is"
     ),
     "on_website_from": (
-        "first run in which any version of this programme was present in the "
+        "ISO week (e.g. 2026-W34) in which this programme was first present in the "
         "export. An observation of ours, not a date the source states: the export "
         "ships only its current state, so nothing before this dataset's first load "
-        "is visible and a programme older than that reads as first seen then"
+        "is visible and a programme older than that reads as first seen then. The "
+        "week named is the one before the load that first saw it -- the week the "
+        "appearance fell in. The first load, in 2026-W32, has no week before it and "
+        "was a backfill of everything then on the site, so 2026-W32 here means "
+        "\'present at first observation\', not \'appeared that week\'"
     ),
     "last_updated": (
-        "run in which this programme's export content last changed. Observed by "
-        "comparing loads, because the export states no modification date of its own. "
-        "Null for a programme that has not changed since it was first seen. For "
-        "absent programmes, this is the last content change, not the absence date "
-        "(which is on_website_to)"
+        "ISO week (e.g. 2026-W34) in which this programme\'s export content last "
+        "changed. Observed by comparing loads, because the export states no "
+        "modification date of its own: the week named is the one whose end the "
+        "following load found the change at, so it is the week the change fell in "
+        "rather than the week we looked. Null for a programme that has not changed "
+        "since it was first seen. For absent programmes, this is the last content "
+        "change, not the absence week (which is on_website_to)"
     ),
     "previous_update_dates": (
-        "one timestamp per content change, ascending: the run in which a new version "
-        "superseded the previous one. Empty for a programme that has never changed; "
-        "its length is therefore the number of content changes observed. For absent "
-        "programmes, excludes the final transition (the absence), containing only "
-        "actual content changes"
+        "one ISO week per observed content change, ascending. Empty for a programme "
+        "that has never changed. Its length is the number of weeks in which a change "
+        "was seen, not the number of changes: a week is a single comparison between "
+        "two loads, so two changes within one week are indistinguishable from one. "
+        "For absent programmes, excludes the final transition (the absence), "
+        "containing only actual content changes"
     ),
     "on_website_to": (
-        "run in which this programme left the export. Null for programmes still "
-        "present. Observed by comparing loads. For absent programmes, this may be "
-        "much later than the last content change (last_updated)"
+        "last ISO week in which this programme was still present in the export. Null "
+        "for programmes still present. Observed by comparing loads, so the "
+        "disappearance falls between this week and the next load. For absent "
+        "programmes this may be much later than the last content change "
+        "(last_updated)"
     ),
     "absent": (
         "true when no version of this programme is current any more: it was in an "
